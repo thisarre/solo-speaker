@@ -58,7 +58,7 @@ export function AssistantPanel({
           type,
           audience,
           objective,
-          durationMinutes: parsedDuration,
+          targetDurationMin: parsedDuration,
           language
         },
         section: action === "outline" ? undefined : activeSection

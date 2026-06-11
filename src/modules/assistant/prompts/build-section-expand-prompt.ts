@@ -1,10 +1,11 @@
 import type { AssistantSectionContext, AssistantTalkContext } from "@/modules/assistant/types";
+import { talkTypeGuidance } from "@/modules/assistant/prompts/build-talk-outline-prompt";
 
 export function buildSectionExpandPrompt(talk: AssistantTalkContext, section: AssistantSectionContext) {
   return [
     "Tu aides à développer une section de talk sans changer son intention.",
     `Langue: ${talk.language === "FR" ? "français" : "anglais"}.`,
-    `Type de talk: ${talk.type}.`,
+    `Type de talk: ${talk.type}. ${talkTypeGuidance[talk.type]}`,
     `Titre du talk: ${talk.title || "Sans titre"}.`,
     `Audience: ${talk.audience || "Non précisée"}.`,
     `Objectif: ${talk.objective || "Non précisé"}.`,

@@ -70,7 +70,7 @@ function parseTalk(value: unknown): AssistantTalkContext | null {
 
   const type = cleanString(record.type) as TalkType;
   const language = cleanString(record.language) as "FR" | "EN";
-  const durationMinutes = Math.max(1, Math.min(180, Math.round(Number(record.durationMinutes) || 10)));
+  const targetDurationMin = Math.max(1, Math.min(180, Math.round(Number(record.targetDurationMin ?? record.durationMinutes) || 10)));
 
   if (!talkTypes.has(type) || !languages.has(language)) {
     return null;
@@ -81,7 +81,7 @@ function parseTalk(value: unknown): AssistantTalkContext | null {
     type,
     audience: cleanString(record.audience),
     objective: cleanString(record.objective),
-    durationMinutes,
+    targetDurationMin,
     language
   };
 }
@@ -266,40 +266,6 @@ async function getAuthenticatedUser(request: NextRequest): Promise<AssistantAuth
   return { user, reason: user ? "bearer" : "empty_bearer_user", supabase: user ? bearerSupabase : cookieSupabase };
 }
 
-function serializeResultForLog(response: AssistantGenerateResponse) {
-  if (!response.ok) return "";
-  if (response.result.kind === "outline") {
-    return response.result.sections.map((section) => `${section.heading}\n${section.body}`.trim()).join("\n\n");
-  }
-
-  return [response.result.heading, response.result.body].filter(Boolean).join("\n\n");
-}
-
-async function logGeneration(input: {
-  errorMessage?: string;
-  feature: AssistantAction;
-  model: string;
-  outputText: string;
-  status: "success" | "error";
-  supabase: SupabaseClient<Database>;
-  talkId: string;
-  userId: string;
-}) {
-  const { error } = await input.supabase.from("ai_generations").insert({
-    user_id: input.userId,
-    talk_id: input.talkId,
-    feature: input.feature,
-    model: input.model,
-    output_text: input.outputText,
-    status: input.status,
-    error_message: input.errorMessage ?? null
-  });
-
-  if (error) {
-    console.error("Unable to log AI generation", error.message);
-  }
-}
-
 export async function POST(request: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY;
 
@@ -391,16 +357,6 @@ export async function POST(request: NextRequest) {
   try {
     payload = (await response.json()) as OpenAIResponseBody;
   } catch {
-    await logGeneration({
-      errorMessage: "Réponse OpenAI illisible.",
-      feature: action,
-      model,
-      outputText: "",
-      status: "error",
-      supabase: auth.supabase,
-      talkId,
-      userId: auth.user.id
-    });
     return errorResponse("Réponse OpenAI illisible.", 502);
   }
 
@@ -413,45 +369,14 @@ export async function POST(request: NextRequest) {
           ? "Limite OpenAI atteinte. Réessaie dans un instant."
           : openAiMessage;
 
-    await logGeneration({
-      errorMessage: publicMessage,
-      feature: action,
-      model,
-      outputText: "",
-      status: "error",
-      supabase: auth.supabase,
-      talkId,
-      userId: auth.user.id
-    });
     return errorResponse(publicMessage, response.status);
   }
 
   const text = extractOutputText(payload);
   if (!text) {
-    await logGeneration({
-      errorMessage: "OpenAI n'a retourné aucun contenu.",
-      feature: action,
-      model,
-      outputText: "",
-      status: "error",
-      supabase: auth.supabase,
-      talkId,
-      userId: auth.user.id
-    });
     return errorResponse("OpenAI n'a retourné aucun contenu.", 502);
   }
 
   const result = parseModelResult(action, text);
-  await logGeneration({
-    errorMessage: result.ok ? undefined : result.error,
-    feature: action,
-    model,
-    outputText: result.ok ? serializeResultForLog(result) : text,
-    status: result.ok ? "success" : "error",
-    supabase: auth.supabase,
-    talkId,
-    userId: auth.user.id
-  });
-
   return NextResponse.json<AssistantGenerateResponse>(result, { status: result.ok ? 200 : 502 });
 }

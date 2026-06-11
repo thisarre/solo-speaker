@@ -3,42 +3,6 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
-      ai_generations: {
-        Row: {
-          id: string;
-          user_id: string;
-          talk_id: string;
-          feature: "outline" | "expand-section" | "oralize-section" | "shorten-section";
-          model: string;
-          output_text: string;
-          status: "success" | "error";
-          error_message: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          talk_id: string;
-          feature: "outline" | "expand-section" | "oralize-section" | "shorten-section";
-          model: string;
-          output_text?: string;
-          status: "success" | "error";
-          error_message?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          talk_id?: string;
-          feature?: "outline" | "expand-section" | "oralize-section" | "shorten-section";
-          model?: string;
-          output_text?: string;
-          status?: "success" | "error";
-          error_message?: string | null;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
       profiles: {
         Row: {
           id: string;

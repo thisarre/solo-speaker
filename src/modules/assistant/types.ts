@@ -1,13 +1,14 @@
 import type { TalkType } from "@/types/talk";
 
 export type AssistantAction = "outline" | "expand-section" | "oralize-section" | "shorten-section";
+export type AssistantFeature = AssistantAction;
 
 export type AssistantTalkContext = {
   title: string;
   type: TalkType;
   audience: string;
   objective: string;
-  durationMinutes: number;
+  targetDurationMin: number;
   language: "FR" | "EN";
 };
 
@@ -16,7 +17,7 @@ export type AssistantSectionContext = {
   body: string;
 };
 
-export type AssistantGenerateRequest = {
+export type AssistantRequest = {
   action: AssistantAction;
   talkId: string;
   talk: AssistantTalkContext;
@@ -39,7 +40,7 @@ export type AssistantGenerateResult =
       body: string;
     };
 
-export type AssistantGenerateResponse =
+export type AssistantResponse =
   | {
       ok: true;
       result: AssistantGenerateResult;
@@ -48,3 +49,6 @@ export type AssistantGenerateResponse =
       ok: false;
       error: string;
     };
+
+export type AssistantGenerateRequest = AssistantRequest;
+export type AssistantGenerateResponse = AssistantResponse;

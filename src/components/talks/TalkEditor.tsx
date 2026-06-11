@@ -19,7 +19,10 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { AutosaveStatus, type AutosaveState } from "@/components/talks/AutosaveStatus";
-import { AssistantPlaceholderPanel } from "@/modules/assistant/components/assistant-placeholder-panel";
+import { ExportPdfButton } from "@/components/talks/ExportPdfButton";
+import { AiPreviewDialog } from "@/modules/assistant/components/ai-preview-dialog";
+import { AssistantPanel } from "@/modules/assistant/components/assistant-panel";
+import type { AssistantGenerateResult, AssistantOutlineSection } from "@/modules/assistant/types";
 import { talkStatusLabels, talkTypeLabels, type Talk, type TalkSection, type TalkStatus, type TalkType } from "@/types/talk";
 
 type EditableSection = TalkSection & {
@@ -59,6 +62,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
   const [status, setStatus] = useState<AutosaveState>("idle");
   const [error, setError] = useState("");
   const [activeSectionId, setActiveSectionId] = useState(() => talk.sections[0]?.id ?? "");
+  const [aiResult, setAiResult] = useState<AssistantGenerateResult | null>(null);
   const [deleteTalkRequested, setDeleteTalkRequested] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<EditableSection | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -126,6 +130,85 @@ export function TalkEditor({ talk }: { talk: Talk }) {
       ...current,
       sections: current.sections.map((section) => (section.id === sectionId ? { ...section, ...values } : section))
     }));
+  }
+
+  function closeAiPreview() {
+    setAiResult(null);
+  }
+
+  function appendToActiveSection(result: Extract<AssistantGenerateResult, { kind: "section" }>) {
+    if (!activeSection) return;
+
+    const nextBody = [activeSection.body.trim(), result.body.trim()].filter(Boolean).join("\n\n");
+    updateSection(activeSection.id, {
+      heading: activeSection.heading || result.heading || "Sans titre",
+      body: nextBody
+    });
+    closeAiPreview();
+  }
+
+  function replaceActiveSection(result: Extract<AssistantGenerateResult, { kind: "section" }>) {
+    if (!activeSection) return;
+
+    updateSection(activeSection.id, {
+      heading: result.heading || activeSection.heading || "Sans titre",
+      body: result.body
+    });
+    closeAiPreview();
+  }
+
+  function insertOutlineSections(sections: AssistantOutlineSection[]) {
+    const tempSections = sections.map((section, index) => ({
+      id: `pending-ai-${Date.now()}-${index}`,
+      heading: section.heading || "Sans titre",
+      body: section.body,
+      position: draft.sections.length + index,
+      pending: true
+    }));
+
+    setDraft((current) => ({
+      ...current,
+      sections: [...current.sections, ...tempSections]
+    }));
+    setActiveSectionId(tempSections[0]?.id ?? activeSectionId);
+    closeAiPreview();
+
+    startTransition(async () => {
+      try {
+        const createdSections: EditableSection[] = [];
+
+        for (const section of sections) {
+          const created = await createTalkSection(talk.id);
+          await updateTalkSection({
+            id: created.id,
+            talkId: talk.id,
+            heading: section.heading,
+            body: section.body
+          });
+          createdSections.push({ ...created, heading: section.heading, body: section.body });
+        }
+
+        setDraft((current) => {
+          const pendingIds = new Set(tempSections.map((section) => section.id));
+          const existing = current.sections.filter((section) => !pendingIds.has(section.id));
+          const next = {
+            ...current,
+            sections: [...existing, ...createdSections].map((section, position) => ({ ...section, position }))
+          };
+          lastSavedRef.current = JSON.stringify(next);
+          return next;
+        });
+        setActiveSectionId(createdSections[0]?.id ?? activeSectionId);
+        setStatus("saved");
+      } catch (sectionError) {
+        setDraft((current) => ({
+          ...current,
+          sections: current.sections.filter((section) => !tempSections.some((pendingSection) => pendingSection.id === section.id))
+        }));
+        setStatus("error");
+        setError(sectionError instanceof Error ? sectionError.message : "Impossible d'insérer le plan généré.");
+      }
+    });
   }
 
   function addSection() {
@@ -229,6 +312,9 @@ export function TalkEditor({ talk }: { talk: Talk }) {
             <span>{formatDuration(totalSeconds)}</span>
           </div>
           <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
+          <div className="hidden sm:block">
+            <ExportPdfButton talkId={talk.id} title={draft.title} />
+          </div>
           <Link href={`/talks/${talk.id}/speak`}>
             <Button leftIcon={<Mic2 />} size="sm" type="button" variant="primary">Présenter</Button>
           </Link>
@@ -280,7 +366,16 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           <div className="mx-auto flex w-full max-w-[1180px] gap-5 px-5 pb-28 pt-7 md:px-8">
             <article className="min-w-0 flex-1">
               <div className="mb-5 xl:hidden">
-                <AssistantPlaceholderPanel activeSectionTitle={activeSection?.heading} />
+                <AssistantPanel
+                  activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
+                  audience={draft.audience}
+                  durationMinutes={durationMinutes}
+                  language={draft.language}
+                  onResult={setAiResult}
+                  talkId={talk.id}
+                  title={draft.title}
+                  type={draft.type}
+                />
               </div>
 
               <div className="mb-4 flex flex-wrap gap-2">
@@ -382,12 +477,35 @@ export function TalkEditor({ talk }: { talk: Talk }) {
 
             <aside className="hidden w-[286px] shrink-0 xl:block">
               <div className="sticky top-0">
-                <AssistantPlaceholderPanel activeSectionTitle={activeSection?.heading} />
+                <AssistantPanel
+                  activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
+                  audience={draft.audience}
+                  durationMinutes={durationMinutes}
+                  language={draft.language}
+                  onResult={setAiResult}
+                  talkId={talk.id}
+                  title={draft.title}
+                  type={draft.type}
+                />
               </div>
             </aside>
           </div>
         </main>
       </div>
+      {aiResult ? (
+        <AiPreviewDialog
+          onAppend={() => {
+            if (aiResult.kind === "outline") {
+              insertOutlineSections(aiResult.sections);
+            } else {
+              appendToActiveSection(aiResult);
+            }
+          }}
+          onClose={closeAiPreview}
+          onReplace={aiResult.kind === "section" ? () => replaceActiveSection(aiResult) : undefined}
+          result={aiResult}
+        />
+      ) : null}
       {deleteTalkRequested ? (
         <ConfirmDialog
           body="Cette action supprimera le talk et toutes ses sections. Elle ne peut pas être annulée."
