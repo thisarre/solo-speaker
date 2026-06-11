@@ -61,7 +61,8 @@ export function ExportPdfButton({ talkId, title }: ExportPdfButtonProps) {
   return (
     <div className="relative">
       <Button disabled={loading} leftIcon={<Download />} onClick={exportPdf} size="sm" type="button" variant="ghost">
-        {loading ? "Export..." : "Exporter PDF"}
+        <span className="hidden sm:inline">{loading ? "Export..." : "Exporter PDF"}</span>
+        <span className="sm:hidden">{loading ? "..." : "PDF"}</span>
       </Button>
       {error ? (
         <p className="absolute right-0 top-[calc(100%+6px)] z-20 m-0 w-56 rounded-[8px] border border-[color-mix(in_oklab,var(--danger)_32%,var(--line))] bg-background px-2.5 py-2 text-[12px] leading-5 text-[var(--danger)] shadow-studio">

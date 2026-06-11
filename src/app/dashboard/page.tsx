@@ -21,15 +21,15 @@ export default async function DashboardPage() {
           description="Vue calme de tes talks en cours, prête pour l'édition et la répétition."
           actions={
             <Link href="/talks/new">
-              <Button leftIcon={<Plus />} variant="primary">New talk</Button>
+              <Button leftIcon={<Plus />} variant="primary">Nouveau talk</Button>
             </Link>
           }
         />
         {currentTalk ? (
-          <Card className="mt-7 flex flex-wrap items-center gap-6 rounded-[14px] p-6 md:p-[26px]">
+          <Card className="mt-7 flex flex-wrap items-center gap-6 p-5 md:p-6">
             <div className="min-w-60 flex-1">
               <span className="rounded-md bg-accent-bg px-2 py-1 font-mono text-[10px] uppercase tracking-[.09em] text-accent-ink">
-                Resume {talkTypeLabels[currentTalk.type]}
+                Reprendre {talkTypeLabels[currentTalk.type]}
               </span>
               <h2 className="mb-1.5 mt-2.5 text-[19px] font-semibold tracking-[0]">{currentTalk.title}</h2>
               <div className="flex flex-wrap gap-3.5 font-mono text-[11px] text-faint">
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
                 <Button variant="primary">Éditer</Button>
               </Link>
               <Link href={`/talks/${currentTalk.id}/speak`}>
-                <Button leftIcon={<Mic2 />} variant="ghost">Speak</Button>
+                <Button leftIcon={<Mic2 />} variant="ghost">Présenter</Button>
               </Link>
             </div>
           </Card>
@@ -66,13 +66,13 @@ export default async function DashboardPage() {
               }
               icon={<Plus />}
               title="Aucun talk pour le moment"
-              description="Crée ton premier talk pour valider le flux Supabase de bout en bout."
+              description="Crée ton premier talk pour préparer, améliorer et présenter une prise de parole."
             />
           </div>
         )}
         <section className="mt-8">
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="m-0 text-sm font-semibold tracking-[0]">Recent talks</h2>
+            <h2 className="m-0 text-sm font-semibold tracking-[0]">Talks récents</h2>
             <Link className="flex items-center gap-1 text-[12.5px] text-mute hover:text-ink" href="/talks">
               Voir tout <ArrowRight className="size-3.5" />
             </Link>

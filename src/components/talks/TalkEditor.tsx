@@ -312,9 +312,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
             <span>{formatDuration(totalSeconds)}</span>
           </div>
           <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
-          <div className="hidden sm:block">
-            <ExportPdfButton talkId={talk.id} title={draft.title} />
-          </div>
+          <ExportPdfButton talkId={talk.id} title={draft.title} />
           <Link href={`/talks/${talk.id}/speak`}>
             <Button leftIcon={<Mic2 />} size="sm" type="button" variant="primary">Présenter</Button>
           </Link>

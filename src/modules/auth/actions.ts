@@ -12,6 +12,32 @@ function redirectWithError(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
+function authErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("invalid login credentials")) {
+    return "Email ou mot de passe incorrect.";
+  }
+
+  if (normalized.includes("already registered") || normalized.includes("already exists")) {
+    return "Un compte existe déjà avec cet email.";
+  }
+
+  if (normalized.includes("email not confirmed") || normalized.includes("not confirmed")) {
+    return "Confirme ton email avant de te connecter.";
+  }
+
+  if (normalized.includes("password")) {
+    return "Le mot de passe doit contenir au moins 6 caractères.";
+  }
+
+  if (normalized.includes("email")) {
+    return "Vérifie l'adresse email renseignée.";
+  }
+
+  return message || "Une erreur est survenue. Réessaie dans un instant.";
+}
+
 export async function signUp(formData: FormData) {
   const fullName = getString(formData, "name");
   const email = getString(formData, "email");
@@ -33,11 +59,11 @@ export async function signUp(formData: FormData) {
   });
 
   if (error) {
-    redirectWithError("/signup", error.message);
+    redirectWithError("/signup", authErrorMessage(error.message));
   }
 
   if (!data.session) {
-    redirect("/login?message=Compte créé. Vérifie ton email si la confirmation est activée.");
+    redirect(`/login?message=${encodeURIComponent("Compte créé. Vérifie ton email si la confirmation est activée.")}`);
   }
 
   redirect("/dashboard");
@@ -56,7 +82,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirectWithError("/login", error.message);
+    redirectWithError("/login", authErrorMessage(error.message));
   }
 
   redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
@@ -65,5 +91,5 @@ export async function login(formData: FormData) {
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect(`/login?message=${encodeURIComponent("Déconnexion effectuée.")}`);
 }

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BarChart3, FileText, Home, LogOut, Plus, Search, Settings } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { logout } from "@/modules/auth/actions";
 
 function getNavItems(talkCount: number) {
   return [
@@ -54,11 +53,14 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
           <p className="m-0 truncate text-[12.5px] font-medium">{userName}</p>
           <p className="m-0 truncate text-[11px] text-faint">Studio owner</p>
         </div>
-        <form action={logout} className="ml-auto hidden lg:block">
-          <button aria-label="Logout" className="flex size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink">
-            <LogOut className="size-4" />
-          </button>
-        </form>
+        <Link aria-label="Logout" className="ml-auto hidden size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink lg:flex" href="/logout">
+          <LogOut className="size-4" />
+        </Link>
+      </div>
+      <div className="mt-2 flex justify-center lg:hidden">
+        <Link aria-label="Logout" className="flex size-8 items-center justify-center rounded-[8px] text-faint transition hover:bg-surface hover:text-ink" href="/logout">
+          <LogOut className="size-4" />
+        </Link>
       </div>
     </aside>
   );
