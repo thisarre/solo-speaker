@@ -1,0 +1,11 @@
+export { SpeakingMode } from "./components/SpeakingMode";
+export { Teleprompter } from "./components/Teleprompter";
+export { SpeakingControls } from "./components/SpeakingControls";
+export { TalkContent } from "./components/TalkContent";
+export { buildSpeakingItems } from "./lib/buildSpeakingItems";
+export { estimateDuration, estimateTextDuration } from "./lib/estimateDuration";
+export { parseCues } from "./lib/parseCues";
+export { useAutoScroll } from "./hooks/useAutoScroll";
+export { useSpeakingKeyboard } from "./hooks/useSpeakingKeyboard";
+export { useSpeakingTimer } from "./hooks/useSpeakingTimer";
+export type { SpeakingCue, SpeakingItem, SpeakingModeProps, SpeakingSettings, SpeakingTextSegment } from "./types";

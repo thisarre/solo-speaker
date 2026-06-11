@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Solo Speaker — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;650;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="studio.css" />
+<link rel="stylesheet" href="proto.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="directions.jsx"></script>
+<script type="text/babel" src="proto-data.jsx"></script>
+<script type="text/babel" src="proto-core.jsx"></script>
+<script type="text/babel" src="proto-editor.jsx"></script>
+<script type="text/babel" src="proto-speaking.jsx"></script>
+<script type="text/babel">
+const { useTweaks, TweaksPanel, TweakSection, TweakRadio, TweakColor } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "Clair",
+  "accent": "#6E6CF7"
+}/*EDITMODE-END*/;
+
+const ACCENTS = {
+  "#6E6CF7": { light: ["#6E6CF7", "#5957E8", "#EFEFFE"], dark: ["#7B79FF", "#9D9BFF", "#1E1E36"] },
+  "#0D9488": { light: ["#0D9488", "#0B7E74", "#E2F3F1"], dark: ["#14B8A6", "#2DD4BF", "#13312E"] },
+  "#D97706": { light: ["#D97706", "#B45309", "#FCEED7"], dark: ["#F59E0B", "#FBBF24", "#3A2A10"] },
+};
+
+const LS_TALKS = "ss_proto_talks_v1";
+const LS_ROUTE = "ss_proto_route_v1";
+const LS_SESSION = "ss_proto_session_v1";
+
+function load(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key) || "null"); return v === null ? fallback : v; }
+  catch (e) { return fallback; }
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [logged, setLogged] = React.useState(() => load(LS_SESSION, false));
+  const [talks, setTalks] = React.useState(() => load(LS_TALKS, null) || SEED_TALKS.map((x, i) => ({ ...x, _ts: Date.now() - i * 1e6 })));
+  const [route, setRoute] = React.useState(() => load(LS_ROUTE, { view: "dashboard", talkId: null }));
+  const [dlg, setDlg] = React.useState(null);   // 'new' | {confirm:id}
+  const [toast, setToast] = React.useState(null);
+
+  React.useEffect(() => { try { localStorage.setItem(LS_TALKS, JSON.stringify(talks)); } catch (e) {} }, [talks]);
+  React.useEffect(() => { try { localStorage.setItem(LS_ROUTE, JSON.stringify(route)); } catch (e) {} }, [route]);
+  React.useEffect(() => { try { localStorage.setItem(LS_SESSION, JSON.stringify(logged)); } catch (e) {} }, [logged]);
+
+  const notify = (msg) => {
+    setToast(msg);
+    clearTimeout(notify._t); notify._t = setTimeout(() => setToast(null), 2600);
+  };
+
+  const byRecent = [...talks].sort((a, b) => (b._ts || 0) - (a._ts || 0));
+  const current = talks.find((x) => x.id === route.talkId);
+
+  /* export/demo navigation hook */
+  const talksRef = React.useRef(talks); talksRef.current = talks;
+  React.useEffect(() => {
+    window.__ssNav = (view, talkId, isLogged, dlgOpen) => {
+      document.documentElement.classList.add("export-mode");
+      setLogged(isLogged !== false);
+      const arr = [...talksRef.current].sort((a, b) => (b._ts || 0) - (a._ts || 0));
+      const id = talkId === "__first" ? (arr[0] && arr[0].id) : talkId;
+      setRoute({ view: view || "dashboard", talkId: id || null });
+      setDlg(dlgOpen || null);
+      setToast(null);
+    };
+  }, []);
+
+  const updateTalk = (next) => setTalks((arr) => arr.map((x) => (x.id === next.id ? { ...next, _ts: Date.now() } : x)));
+  const openTalk = (id) => setRoute({ view: "editor", talkId: id });
+  const speakTalk = (id) => setRoute({ view: "speaking", talkId: id });
+  const createTalk = ({ title, type, duration, audience }) => {
+    const talk = { id: uid(), title, type, status: "draft", audience, duration, lang: "FR",
+      updated: "à l'instant", _ts: Date.now(), sections: [{ id: uid(), heading: "Accroche", body: "" }] };
+    setTalks((arr) => [talk, ...arr]);
+    setDlg(null);
+    setRoute({ view: "editor", talkId: talk.id });
+    notify("Talk créé — générez le plan avec l'assistant");
+  };
+  const deleteTalk = (id) => {
+    setTalks((arr) => arr.filter((x) => x.id !== id));
+    if (route.talkId === id) setRoute({ view: "talks", talkId: null });
+    setDlg(null);
+    notify("Talk supprimé");
+  };
+
+  /* theme + accent */
+  const dark = t.theme === "Sombre";
+  const acc = (ACCENTS[t.accent] || ACCENTS["#6E6CF7"])[dark ? "dark" : "light"];
+  const vars = { "--accent": acc[0], "--accent-ink": acc[1], "--accent-bg": acc[2] };
+
+  let view = null;
+  if (!logged) {
+    view = <div className="scr"><Login onLogin={() => { setLogged(true); setRoute({ view: "dashboard", talkId: null }); }} /></div>;
+  } else if (route.view === "speaking" && current) {
+    view = <ProtoSpeaking talk={current} onExit={() => setRoute({ view: "editor", talkId: current.id })} />;
+  } else if (route.view === "editor" && current) {
+    view = <ProtoEditor talk={current} onChange={updateTalk}
+      onBack={() => setRoute({ view: "talks", talkId: null })}
+      onSpeak={() => speakTalk(current.id)} notify={notify} />;
+  } else {
+    view = (
+      <div className="scr">
+        <ProtoSidebar route={route.view} count={talks.length}
+          onNav={(v) => setRoute({ view: v, talkId: null })}
+          onLogout={() => setLogged(false)} />
+        {route.view === "talks"
+          ? <ProtoTalks talks={byRecent} onOpen={openTalk} onNew={() => setDlg("new")} onDelete={(id) => setDlg({ confirm: id })} />
+          : route.view === "account"
+            ? <ProtoAccount onLogout={() => setLogged(false)} />
+            : <ProtoDashboard talks={byRecent} onOpen={openTalk} onSpeak={speakTalk}
+                onNew={() => setDlg("new")} onNav={(v) => setRoute({ view: v, talkId: null })}
+                onDelete={(id) => setDlg({ confirm: id })} />}
+      </div>
+    );
+  }
+
+  const confirmTalk = dlg && dlg.confirm ? talks.find((x) => x.id === dlg.confirm) : null;
+
+  return (
+    <div className={"app " + (dark ? "th-dark" : "th-light")} style={vars}>
+      {view}
+      {dlg === "new" && <NewTalkDialog onClose={() => setDlg(null)} onCreate={createTalk} />}
+      {confirmTalk && <ConfirmDialog title={confirmTalk.title} onClose={() => setDlg(null)} onConfirm={() => deleteTalk(confirmTalk.id)} />}
+      <Toast msg={toast} />
+      <TweaksPanel>
+        <TweakSection label="Thème" />
+        <TweakRadio label="Apparence" value={t.theme} options={["Clair", "Sombre"]} onChange={(v) => setTweak("theme", v)} />
+        <TweakSection label="Couleur" />
+        <TweakColor label="Accent" value={t.accent} options={["#6E6CF7", "#0D9488", "#D97706"]} onChange={(v) => setTweak("accent", v)} />
+      </TweaksPanel>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

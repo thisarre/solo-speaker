@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Solo Speaker — Proposition d'architecture & design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* Editorial Stage palette */
+    --paper:        oklch(0.987 0.006 85);
+    --paper-2:      oklch(0.965 0.008 82);
+    --surface:      #ffffff;
+    --ink:          oklch(0.24 0.012 60);
+    --ink-soft:     oklch(0.42 0.012 62);
+    --ink-mute:     oklch(0.58 0.010 64);
+    --ink-faint:    oklch(0.74 0.008 68);
+    --line:         oklch(0.905 0.009 72);
+    --line-strong:  oklch(0.84 0.012 70);
+    /* Spotlight accent (warm ochre/amber) */
+    --spot:         oklch(0.63 0.135 58);
+    --spot-deep:    oklch(0.52 0.12 52);
+    --spot-soft:    oklch(0.93 0.045 78);
+    --spot-tint:    oklch(0.965 0.022 82);
+    /* Stage (speaking mode dark) */
+    --stage:        oklch(0.17 0.006 60);
+    --stage-2:      oklch(0.225 0.008 62);
+    --stage-ink:    oklch(0.93 0.01 80);
+
+    --serif: "Spectral", Georgia, serif;
+    --sans:  "Hanken Grotesk", system-ui, sans-serif;
+    --mono:  "JetBrains Mono", ui-monospace, monospace;
+
+    --maxw: 880px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(120% 60% at 50% -10%, var(--spot-tint), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16.5px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 40px; }
+
+  /* ---------- Cover ---------- */
+  .cover{ padding:120px 0 56px; border-bottom:1px solid var(--line); }
+  .kicker{
+    font-family:var(--mono); font-size:12px; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--spot-deep); font-weight:500;
+    display:flex; align-items:center; gap:12px;
+  }
+  .kicker::before{ content:""; width:26px; height:1px; background:var(--spot); display:inline-block; }
+  h1.title{
+    font-family:var(--serif); font-weight:400; font-size:clamp(44px,7.4vw,76px);
+    line-height:1.02; letter-spacing:-.018em; margin:.32em 0 .18em;
+  }
+  h1.title em{ font-style:italic; color:var(--spot-deep); }
+  .lede{
+    font-family:var(--serif); font-weight:300; font-size:clamp(19px,2.4vw,23px);
+    line-height:1.5; color:var(--ink-soft); max-width:62ch; margin:.6em 0 0;
+  }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:38px;
+    font-family:var(--mono); font-size:12.5px; color:var(--ink-mute);
+  }
+  .meta-row b{ color:var(--ink); font-weight:500; }
+
+  /* ---------- TOC ---------- */
+  .toc{ padding:40px 0 8px; }
+  .toc ol{ list-style:none; counter-reset:t; margin:0; padding:0;
+    display:grid; grid-template-columns:1fr 1fr; gap:2px 40px; }
+  .toc li{ counter-increment:t; border-bottom:1px solid var(--line);
+    padding:13px 2px; display:flex; align-items:baseline; gap:14px; }
+  .toc li::before{ content:counter(t,decimal-leading-zero); font-family:var(--mono);
+    font-size:12px; color:var(--spot-deep); }
+  .toc a{ color:var(--ink); text-decoration:none; font-weight:500; }
+  .toc a:hover{ color:var(--spot-deep); }
+
+  /* ---------- Section scaffolding ---------- */
+  section.block{ padding:64px 0; border-top:1px solid var(--line); }
+  .sec-head{ display:flex; align-items:baseline; gap:18px; margin-bottom:26px; }
+  .sec-num{ font-family:var(--mono); font-size:13px; color:var(--spot-deep);
+    font-weight:500; padding-top:6px; }
+  h2{ font-family:var(--serif); font-weight:500; font-size:clamp(28px,4vw,38px);
+    line-height:1.08; letter-spacing:-.015em; margin:0; }
+  h3{ font-family:var(--sans); font-weight:600; font-size:16px; letter-spacing:-.005em;
+    margin:34px 0 12px; }
+  h3 .h3-mono{ font-family:var(--mono); font-size:12px; color:var(--ink-mute); font-weight:400; margin-left:8px; }
+  p{ margin:0 0 16px; max-width:70ch; }
+  p.intro{ font-size:18px; color:var(--ink-soft); max-width:66ch; }
+  strong{ font-weight:600; color:var(--ink); }
+  a.inl{ color:var(--spot-deep); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1px; }
+
+  ul.clean{ margin:0 0 16px; padding:0; list-style:none; max-width:72ch; }
+  ul.clean li{ padding:9px 0 9px 26px; position:relative; border-bottom:1px solid var(--line); }
+  ul.clean li::before{ content:""; position:absolute; left:4px; top:18px; width:7px; height:7px;
+    border-radius:2px; background:var(--spot); }
+  ul.clean li:last-child{ border-bottom:0; }
+  .lead-in{ font-weight:600; color:var(--ink); }
+
+  .note{ font-size:14px; color:var(--ink-mute); font-style:italic; font-family:var(--serif); }
+
+  /* ---------- Cards & callouts ---------- */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:22px 22px; }
+  .card h4{ margin:0 0 6px; font-size:14.5px; font-weight:600; display:flex; align-items:center; gap:9px; }
+  .card .dot{ width:9px; height:9px; border-radius:50%; background:var(--spot); flex:none; }
+  .card p{ margin:0; font-size:14px; color:var(--ink-soft); }
+  .card .tag{ font-family:var(--mono); font-size:11px; color:var(--ink-mute); text-transform:uppercase; letter-spacing:.1em; }
+
+  .callout{ background:var(--spot-tint); border:1px solid var(--spot-soft); border-radius:14px;
+    padding:18px 22px; margin:22px 0; }
+  .callout .label{ font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--spot-deep); font-weight:500; margin-bottom:6px; }
+  .callout p{ margin:0; font-size:14.5px; color:var(--ink-soft); }
+
+  .scope{ display:grid; grid-template-columns:1fr 1fr; gap:0 40px; margin:8px 0 4px; }
+  .scope .col h4{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    margin:0 0 10px; }
+  .scope .in h4{ color:var(--spot-deep); }
+  .scope .out h4{ color:var(--ink-mute); }
+  .scope ul{ margin:0; padding:0; list-style:none; }
+  .scope li{ padding:8px 0 8px 26px; position:relative; font-size:14.5px; border-bottom:1px solid var(--line); }
+  .scope .in li::before{ content:"+"; position:absolute; left:6px; color:var(--spot-deep); font-weight:700; }
+  .scope .out li{ color:var(--ink-mute); }
+  .scope .out li::before{ content:"–"; position:absolute; left:7px; color:var(--ink-faint); font-weight:700; }
+
+  /* ---------- Code / tree ---------- */
+  pre{ font-family:var(--mono); font-size:12.8px; line-height:1.72; background:var(--ink);
+    color:oklch(0.9 0.01 80); border-radius:14px; padding:24px 26px; overflow:auto; margin:18px 0; }
+  pre .c{ color:oklch(0.62 0.02 70); }            /* comment */
+  pre .d{ color:oklch(0.75 0.09 75); }            /* dir */
+  pre .k{ color:oklch(0.78 0.11 58); font-weight:500; } /* keyword */
+  pre .s{ color:oklch(0.78 0.08 150); }           /* string/type */
+  code.k{ font-family:var(--mono); font-size:.88em; background:var(--paper-2); border:1px solid var(--line);
+    border-radius:6px; padding:1px 6px; color:var(--ink); }
+
+  /* ---------- Pipeline / flow ---------- */
+  .flow{ display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin:20px 0; }
+  .flow .step{ flex:1 1 0; min-width:120px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:14px 16px; position:relative; }
+  .flow .arr{ display:flex; align-items:center; color:var(--ink-faint); padding:0 10px; font-size:18px; }
+  .flow .step .n{ font-family:var(--mono); font-size:11px; color:var(--spot-deep); }
+  .flow .step .t{ font-weight:600; font-size:14px; margin-top:3px; }
+  .flow .step .d{ font-size:12.5px; color:var(--ink-mute); margin-top:2px; }
+
+  /* ---------- Layers diagram ---------- */
+  .layers{ display:flex; flex-direction:column; gap:8px; margin:18px 0; }
+  .layer{ border:1px solid var(--line); border-radius:12px; padding:14px 18px; background:var(--surface);
+    display:flex; align-items:center; gap:16px; }
+  .layer .lname{ font-family:var(--mono); font-size:11.5px; color:var(--spot-deep); width:118px; flex:none;
+    text-transform:uppercase; letter-spacing:.08em; }
+  .layer .ldesc{ font-size:14px; color:var(--ink-soft); }
+  .layer.accent{ background:var(--spot-tint); border-color:var(--spot-soft); }
+
+  /* ---------- DB tables ---------- */
+  .tablecard{ background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .tablecard .tt{ background:var(--ink); color:var(--paper); font-family:var(--mono); font-size:13px;
+    padding:11px 18px; display:flex; align-items:center; gap:10px; }
+  .tablecard .tt .pk{ margin-left:auto; font-size:10.5px; color:var(--spot); letter-spacing:.08em; }
+  .tablecard table{ width:100%; border-collapse:collapse; }
+  .tablecard td{ padding:9px 18px; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:top; }
+  .tablecard tr:last-child td{ border-bottom:0; }
+  .tablecard .fname{ font-family:var(--mono); font-size:12.5px; color:var(--ink); width:40%; }
+  .tablecard .ftype{ font-family:var(--mono); font-size:11.5px; color:var(--spot-deep); width:30%; }
+  .tablecard .fnote{ font-size:12.5px; color:var(--ink-mute); }
+  .tablecard .key{ color:var(--spot-deep); font-weight:600; }
+  .rel{ text-align:center; font-family:var(--mono); font-size:12px; color:var(--ink-mute); padding:8px 0; }
+
+  /* ---------- Pages list ---------- */
+  .pages{ display:grid; gap:10px; }
+  .prow{ display:grid; grid-template-columns:200px 1fr; gap:18px; align-items:baseline;
+    border-bottom:1px solid var(--line); padding:13px 2px; }
+  .prow .route{ font-family:var(--mono); font-size:12.5px; color:var(--spot-deep); }
+  .prow .pdesc{ font-size:14px; color:var(--ink-soft); }
+  .prow .pdesc b{ color:var(--ink); }
+
+  /* ---------- Design system specimens ---------- */
+  .swatches{ display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin:8px 0 4px; }
+  .sw{ border:1px solid var(--line); border-radius:11px; overflow:hidden; background:var(--surface); }
+  .sw .chip{ height:64px; }
+  .sw .meta{ padding:8px 10px; }
+  .sw .nm{ font-size:12px; font-weight:600; }
+  .sw .hx{ font-family:var(--mono); font-size:10.5px; color:var(--ink-mute); }
+
+  .type-spec{ border:1px solid var(--line); border-radius:14px; background:var(--surface); padding:6px 24px; margin:10px 0; }
+  .ts-row{ display:flex; align-items:baseline; gap:22px; padding:16px 0; border-bottom:1px solid var(--line); }
+  .ts-row:last-child{ border-bottom:0; }
+  .ts-row .lab{ font-family:var(--mono); font-size:10.5px; color:var(--ink-mute); width:92px; flex:none;
+    text-transform:uppercase; letter-spacing:.08em; }
+  .ts-row .sample{ flex:1; }
+
+  /* component previews */
+  .btnrow{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .btn{ font-family:var(--sans); font-weight:600; font-size:14px; border-radius:10px; padding:11px 20px;
+    border:1px solid transparent; cursor:default; display:inline-flex; align-items:center; gap:8px; }
+  .btn-primary{ background:var(--ink); color:var(--paper); }
+  .btn-spot{ background:var(--spot); color:#fff; }
+  .btn-ghost{ background:transparent; color:var(--ink); border-color:var(--line-strong); }
+  .btn-quiet{ background:var(--paper-2); color:var(--ink-soft); }
+  .badge{ font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    padding:4px 10px; border-radius:999px; border:1px solid var(--line-strong); color:var(--ink-soft);
+    display:inline-flex; align-items:center; gap:6px; }
+  .badge.spot{ background:var(--spot-tint); border-color:var(--spot-soft); color:var(--spot-deep); }
+  .badge .d{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  /* talk card preview */
+  .talkcard{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px;
+    max-width:380px; transition:.2s; }
+  .talkcard .tc-type{ font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+    color:var(--spot-deep); }
+  .talkcard h4{ font-family:var(--serif); font-weight:500; font-size:23px; line-height:1.12; margin:8px 0 12px;
+    letter-spacing:-.01em; }
+  .talkcard .tc-meta{ display:flex; gap:16px; font-size:12.5px; color:var(--ink-mute); font-family:var(--mono); }
+  .talkcard .tc-foot{ display:flex; align-items:center; gap:10px; margin-top:18px; padding-top:16px;
+    border-top:1px solid var(--line); }
+
+  /* speaking mode preview */
+  .stage-preview{ background:var(--stage); border-radius:16px; padding:40px 44px; color:var(--stage-ink);
+    overflow:hidden; position:relative; }
+  .stage-preview .sp-top{ display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--mono); font-size:11px; color:oklch(0.6 0.01 80); letter-spacing:.1em; text-transform:uppercase; }
+  .stage-preview .sp-body{ font-family:var(--serif); font-weight:300; font-size:30px; line-height:1.5; margin:26px 0;
+    letter-spacing:-.005em; }
+  .stage-preview .sp-body .now{ color:#fff; }
+  .stage-preview .sp-body .next{ color:oklch(0.5 0.01 80); }
+  .stage-preview .sp-cue{ color:var(--spot); }
+  .stage-preview .sp-bar{ height:3px; background:oklch(0.3 0.01 60); border-radius:2px; overflow:hidden; }
+  .stage-preview .sp-bar i{ display:block; height:100%; width:42%; background:var(--spot); }
+
+  /* roadmap */
+  .road{ display:flex; flex-direction:column; gap:0; }
+  .milestone{ display:grid; grid-template-columns:54px 1fr; gap:20px; padding:18px 0; border-bottom:1px solid var(--line); }
+  .milestone:last-child{ border-bottom:0; }
+  .milestone .ms-n{ font-family:var(--serif); font-size:30px; color:var(--spot-deep); line-height:1; }
+  .milestone .ms-t{ font-weight:600; font-size:16px; margin:0 0 4px; }
+  .milestone .ms-d{ font-size:14px; color:var(--ink-soft); margin:0 0 8px; }
+  .milestone .ms-tags{ display:flex; flex-wrap:wrap; gap:6px; }
+  .milestone .ms-tags span{ font-family:var(--mono); font-size:11px; color:var(--ink-mute);
+    border:1px solid var(--line); border-radius:6px; padding:2px 8px; }
+  .milestone .ms-out{ font-family:var(--mono); font-size:11.5px; color:var(--spot-deep); margin-top:8px; }
+
+  footer{ border-top:1px solid var(--line); padding:48px 0 90px; color:var(--ink-mute); font-size:13px; }
+  footer .fnote{ font-family:var(--serif); font-style:italic; font-size:15px; color:var(--ink-soft); max-width:60ch; }
+
+  @media (max-width:720px){
+    .wrap{ padding:0 24px; }
+    .grid2,.grid3,.toc ol,.scope{ grid-template-columns:1fr; }
+    .swatches{ grid-template-columns:repeat(3,1fr); }
+    .prow{ grid-template-columns:1fr; gap:4px; }
+    .cover{ padding:72px 0 44px; }
+  }
+  @media print{
+    body{ background:#fff; }
+    section.block{ break-inside:avoid; }
+    pre{ background:#f4f2ee; color:#2a2722; border:1px solid #ddd; }
+    .stage-preview{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div class="wrap">
+    <div class="kicker">Proposition technique &amp; design · MVP V1</div>
+    <h1 class="title">Solo&nbsp;Speaker</h1>
+    <p class="lede">Une plateforme IA pour <em>préparer</em>, structurer et <em>prononcer</em> un Talk — sermon, conférence, training, pitch ou speech. Voici l'architecture cible, le modèle de données, les écrans et le design system initial.</p>
+    <div class="meta-row">
+      <span><b>Stack</b> · Next.js App Router · TypeScript · Tailwind · shadcn/ui · Supabase</span>
+      <span><b>Périmètre</b> · MVP V1 mono-utilisateur</span>
+      <span><b>Date</b> · Juin 2026</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ TOC ============ -->
+<div class="wrap toc">
+  <ol>
+    <li><a href="#archi">Architecture cible</a></li>
+    <li><a href="#folders">Structure des dossiers</a></li>
+    <li><a href="#db">Modèle de base de données</a></li>
+    <li><a href="#pages">Pages nécessaires</a></li>
+    <li><a href="#components">Composants UI principaux</a></li>
+    <li><a href="#ds">Design system initial</a></li>
+    <li><a href="#roadmap">Roadmap d'implémentation</a></li>
+    <li><a href="#migration">À récupérer de l'ancien projet</a></li>
+  </ol>
+</div>
+
+<!-- ============ 1. ARCHITECTURE ============ -->
+<section class="block" id="archi">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">01</div><h2>Architecture cible</h2></div>
+    <p class="intro">Une architecture <strong>modulaire, orientée features</strong>. Le cœur du produit (talks, éditeur, IA, speaking) vit dans des modules isolés ; l'App Router ne fait qu'assembler. Tout rendu data passe par les Server Components ; les Server Actions remplacent une couche API classique.</p>
+
+    <div class="layers">
+      <div class="layer"><div class="lname">Présentation</div><div class="ldesc"><b>App Router</b> — routes, layouts, Server Components pour le data-fetching, Client Components pour l'interactivité (éditeur, auto-scroll).</div></div>
+      <div class="layer accent"><div class="lname">Features</div><div class="ldesc"><b>Modules métier</b> — <code class="k">auth</code>, <code class="k">talks</code>, <code class="k">editor</code>, <code class="k">ai</code>, <code class="k">speaking</code>. Chacun expose composants, hooks, schémas (Zod) et accès données.</div></div>
+      <div class="layer"><div class="lname">Données</div><div class="ldesc"><b>Server Actions + Supabase</b> — mutations typées côté serveur, RLS comme garde-fou de sécurité, jamais de clé service exposée au client.</div></div>
+      <div class="layer"><div class="lname">IA</div><div class="ldesc"><b>Route Handler streaming</b> — un endpoint <code class="k">/api/ai/generate</code> côté serveur appelle le LLM ; le client consomme le flux. La clé reste serveur.</div></div>
+      <div class="layer"><div class="lname">Plateforme</div><div class="ldesc"><b>Supabase</b> — Auth (email + magic link), Postgres, RLS. Vercel pour l'hébergement.</div></div>
+    </div>
+
+    <h3>Principes directeurs</h3>
+    <ul class="clean">
+      <li><span class="lead-in">Server-first.</span> Lecture de données dans des Server Components, mutations via Server Actions. On n'ajoute un Client Component que là où l'interactivité l'exige.</li>
+      <li><span class="lead-in">Sécurité par RLS.</span> Chaque ligne porte un <code class="k">user_id</code> ; les policies Postgres garantissent qu'un utilisateur ne voit que ses Talks — même si une requête fuit.</li>
+      <li><span class="lead-in">L'IA est un service, pas une dépendance d'UI.</span> Isolée derrière une interface (<code class="k">generateOutline()</code>, <code class="k">expandSection()</code>) ⇒ on peut changer de modèle sans toucher aux écrans.</li>
+      <li><span class="lead-in">Modules autoportants.</span> Supprimer une feature = supprimer un dossier. Pas de couplage transversal caché.</li>
+    </ul>
+
+    <div class="callout">
+      <div class="label">Décision à valider</div>
+      <p>Fournisseur LLM pour la « Génération IA basique » : Claude (Anthropic) / OpenAI / Mistral. Je conçois l'interface <code class="k">AIProvider</code> pour rester agnostique, mais le choix conditionne les SDK et les variables d'environnement.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. FOLDERS ============ -->
+<section class="block" id="folders">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">02</div><h2>Structure des dossiers</h2></div>
+    <p class="intro">Découpage <strong>par feature</strong> sous <code class="k">src/</code>. Les routes restent minces ; toute la logique vit dans <code class="k">features/</code>.</p>
+<pre><span class="c"># Racine — convention src/, alias @/*</span>
+src/
+├─ <span class="d">app/</span>                          <span class="c"># App Router — assemblage uniquement</span>
+│  ├─ <span class="d">(marketing)/</span>               <span class="c"># landing publique (optionnel V1)</span>
+│  │  └─ page.tsx
+│  ├─ <span class="d">(auth)/</span>
+│  │  ├─ <span class="d">login/</span>page.tsx
+│  │  └─ <span class="d">signup/</span>page.tsx
+│  ├─ <span class="d">(app)/</span>                     <span class="c"># zone protégée (layout = garde auth)</span>
+│  │  ├─ layout.tsx                <span class="c"># sidebar + garde session</span>
+│  │  ├─ <span class="d">dashboard/</span>page.tsx
+│  │  └─ <span class="d">talks/</span>
+│  │     ├─ page.tsx               <span class="c"># liste des Talks</span>
+│  │     └─ <span class="d">[talkId]/</span>
+│  │        ├─ page.tsx            <span class="c"># éditeur</span>
+│  │        └─ <span class="d">speak/</span>page.tsx    <span class="c"># speaking mode (plein écran)</span>
+│  ├─ <span class="d">api/</span>
+│  │  └─ <span class="d">ai/</span><span class="d">generate/</span>route.ts   <span class="c"># LLM streaming (serveur)</span>
+│  ├─ layout.tsx                   <span class="c"># root: fonts, providers, &lt;body&gt;</span>
+│  └─ globals.css
+│
+├─ <span class="d">features/</span>                     <span class="c"># ◆ cœur métier modulaire</span>
+│  ├─ <span class="d">auth/</span>                      <span class="c"># actions login/logout, garde session</span>
+│  ├─ <span class="d">talks/</span>
+│  │  ├─ <span class="d">actions/</span>               <span class="c"># Server Actions: create/update/delete</span>
+│  │  ├─ <span class="d">components/</span>            <span class="c"># TalkCard, TalkList, NewTalkDialog</span>
+│  │  ├─ <span class="d">data/</span>                  <span class="c"># requêtes Supabase typées</span>
+│  │  └─ schema.ts                 <span class="c"># types + Zod (TalkType, Status…)</span>
+│  ├─ <span class="d">editor/</span>                   <span class="c"># éditeur de sections, autosave</span>
+│  ├─ <span class="d">ai/</span>                       <span class="c"># provider, prompts, hooks de stream</span>
+│  └─ <span class="d">speaking/</span>                 <span class="c"># auto-scroll, contrôles, plein écran</span>
+│
+├─ <span class="d">components/</span>
+│  ├─ <span class="d">ui/</span>                       <span class="c"># shadcn/ui (button, dialog, input…)</span>
+│  └─ <span class="d">layout/</span>                   <span class="c"># Sidebar, AppShell, PageHeader</span>
+│
+├─ <span class="d">lib/</span>
+│  ├─ <span class="d">supabase/</span>                 <span class="c"># client.ts (browser) · server.ts · middleware.ts</span>
+│  └─ utils.ts                     <span class="c"># cn(), helpers</span>
+│
+├─ <span class="d">hooks/</span>                        <span class="c"># hooks transverses</span>
+├─ <span class="d">types/</span>                        <span class="c"># types générés Supabase + globaux</span>
+└─ middleware.ts                   <span class="c"># refresh session + redirections auth</span></pre>
+    <p class="note">Règle simple : un écran importe depuis <code class="k">features/*</code> ; une feature n'importe jamais un écran. Les dépendances pointent toujours vers le bas.</p>
+  </div>
+</section>
+
+<!-- ============ 3. DATABASE ============ -->
+<section class="block" id="db">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">03</div><h2>Modèle de base de données minimal</h2></div>
+    <p class="intro">Trois tables suffisent pour la V1. Le contenu d'un Talk est découpé en <strong>sections ordonnées</strong> — c'est ce qui alimente l'éditeur ET le défilement du speaking mode.</p>
+
+    <div class="grid2" style="align-items:start; gap:16px;">
+      <div class="tablecard">
+        <div class="tt"><span>profiles</span><span class="pk">1 ⟷ auth.users</span></div>
+        <table>
+          <tr><td class="fname key">id</td><td class="ftype">uuid · PK</td><td class="fnote">= auth.users.id</td></tr>
+          <tr><td class="fname">full_name</td><td class="ftype">text</td><td class="fnote">nom affiché</td></tr>
+          <tr><td class="fname">role</td><td class="ftype">text</td><td class="fnote">pasteur · formateur · speaker…</td></tr>
+          <tr><td class="fname">created_at</td><td class="ftype">timestamptz</td><td class="fnote">défaut now()</td></tr>
+        </table>
+      </div>
+
+      <div class="tablecard">
+        <div class="tt"><span>talks</span><span class="pk">N → profiles</span></div>
+        <table>
+          <tr><td class="fname key">id</td><td class="ftype">uuid · PK</td><td class="fnote">gen_random_uuid()</td></tr>
+          <tr><td class="fname key">user_id</td><td class="ftype">uuid · FK</td><td class="fnote">propriétaire (RLS)</td></tr>
+          <tr><td class="fname">title</td><td class="ftype">text</td><td class="fnote">titre du Talk</td></tr>
+          <tr><td class="fname">type</td><td class="ftype">enum</td><td class="fnote">sermon · conference · training · pitch · speech</td></tr>
+          <tr><td class="fname">status</td><td class="ftype">enum</td><td class="fnote">draft · ready · archived</td></tr>
+          <tr><td class="fname">audience</td><td class="ftype">text</td><td class="fnote">public visé (brief IA)</td></tr>
+          <tr><td class="fname">duration_min</td><td class="ftype">int</td><td class="fnote">durée cible</td></tr>
+          <tr><td class="fname">language</td><td class="ftype">text</td><td class="fnote">fr · en…</td></tr>
+          <tr><td class="fname">created_at</td><td class="ftype">timestamptz</td><td class="fnote"></td></tr>
+          <tr><td class="fname">updated_at</td><td class="ftype">timestamptz</td><td class="fnote">trigger auto</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="rel">talks.id ── 1 ⟶ N ── talk_sections.talk_id</div>
+
+    <div class="tablecard" style="max-width:520px;">
+      <div class="tt"><span>talk_sections</span><span class="pk">N → talks</span></div>
+      <table>
+        <tr><td class="fname key">id</td><td class="ftype">uuid · PK</td><td class="fnote"></td></tr>
+        <tr><td class="fname key">talk_id</td><td class="ftype">uuid · FK</td><td class="fnote">cascade delete</td></tr>
+        <tr><td class="fname">position</td><td class="ftype">int</td><td class="fnote">ordre dans le Talk</td></tr>
+        <tr><td class="fname">heading</td><td class="ftype">text</td><td class="fnote">titre de section (intro, point 1…)</td></tr>
+        <tr><td class="fname">body</td><td class="ftype">text</td><td class="fnote">contenu prononcé / notes</td></tr>
+        <tr><td class="fname">est_duration_sec</td><td class="ftype">int</td><td class="fnote">estimation pour le rythme</td></tr>
+      </table>
+    </div>
+
+    <div class="callout">
+      <div class="label">Sécurité — Row Level Security</div>
+      <p>RLS activé sur les 3 tables. Policy type : <code class="k">user_id = auth.uid()</code> pour <code class="k">talks</code>, et <code class="k">talk_id IN (select id from talks where user_id = auth.uid())</code> pour <code class="k">talk_sections</code>. Un trigger insère une ligne <code class="k">profiles</code> à chaque signup.</p>
+    </div>
+    <p class="note">Volontairement écarté de la V1 : versionnage des Talks, table <code class="k">ai_generations</code> (historique des prompts), tags/dossiers. Faciles à ajouter plus tard sans casser ce socle.</p>
+  </div>
+</section>
+
+<!-- ============ 4. PAGES ============ -->
+<section class="block" id="pages">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">04</div><h2>Pages nécessaires</h2></div>
+    <p class="intro">Sept écrans pour couvrir tout le parcours, de la connexion à la prise de parole.</p>
+    <div class="pages">
+      <div class="prow"><div class="route">/login · /signup</div><div class="pdesc"><b>Authentification.</b> Email + mot de passe et/ou magic link Supabase. Design épuré, pleine page, centré.</div></div>
+      <div class="prow"><div class="route">/dashboard</div><div class="pdesc"><b>Tableau de bord.</b> Accueil après login : « Reprendre » le dernier Talk, bouton « Nouveau Talk », aperçu des Talks récents.</div></div>
+      <div class="prow"><div class="route">/talks</div><div class="pdesc"><b>Liste des Talks.</b> Grille de cartes, filtre par type/statut, recherche, état vide soigné.</div></div>
+      <div class="prow"><div class="route">/talks/new</div><div class="pdesc"><b>Création (dialog ou page).</b> Titre, type, public, durée cible, langue → crée un brouillon puis ouvre l'éditeur.</div></div>
+      <div class="prow"><div class="route">/talks/[id]</div><div class="pdesc"><b>Éditeur.</b> Sections ordonnées, autosave, panneau IA latéral (générer un plan, développer une section). Bouton « Présenter ».</div></div>
+      <div class="prow"><div class="route">/talks/[id]/speak</div><div class="pdesc"><b>Speaking Mode.</b> Plein écran, fond sombre, gros texte, <b>auto-scroll</b> à vitesse réglable, play/pause, minuteur, progression.</div></div>
+      <div class="prow"><div class="route">/account</div><div class="pdesc"><b>Compte (léger).</b> Nom, rôle, langue par défaut, déconnexion. Minimal en V1.</div></div>
+    </div>
+
+    <h3>Parcours principal <span class="h3-mono">le « happy path »</span></h3>
+    <div class="flow">
+      <div class="step"><div class="n">01</div><div class="t">Login</div><div class="d">Supabase Auth</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="n">02</div><div class="t">Dashboard</div><div class="d">Nouveau Talk</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="n">03</div><div class="t">Brief</div><div class="d">type · public · durée</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="n">04</div><div class="t">Éditeur + IA</div><div class="d">plan &amp; rédaction</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="n">05</div><div class="t">Speaking</div><div class="d">auto-scroll</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. COMPONENTS ============ -->
+<section class="block" id="components">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">05</div><h2>Composants UI principaux</h2></div>
+    <p class="intro">Au-dessus des primitives shadcn/ui (button, input, dialog, dropdown, toast…), une dizaine de composants composés portent l'identité du produit.</p>
+    <div class="grid3">
+      <div class="card"><span class="tag">Layout</span><h4><span class="dot"></span>AppShell</h4><p>Sidebar + zone de contenu. Navigation : Dashboard, Talks, Compte.</p></div>
+      <div class="card"><span class="tag">Talks</span><h4><span class="dot"></span>TalkCard</h4><p>Carte d'un Talk : type, titre serif, durée, statut, dernière édition.</p></div>
+      <div class="card"><span class="tag">Talks</span><h4><span class="dot"></span>NewTalkDialog</h4><p>Formulaire de brief (type, public, durée, langue).</p></div>
+      <div class="card"><span class="tag">Talks</span><h4><span class="dot"></span>TalkTypeBadge</h4><p>Pastille typée (sermon, pitch…) avec libellé monospace.</p></div>
+      <div class="card"><span class="tag">Editor</span><h4><span class="dot"></span>SectionEditor</h4><p>Bloc section : titre + corps, réordonnable, autosave.</p></div>
+      <div class="card"><span class="tag">Editor</span><h4><span class="dot"></span>AIPanel</h4><p>Panneau latéral : générer un plan, développer/raccourcir une section (streaming).</p></div>
+      <div class="card"><span class="tag">Editor</span><h4><span class="dot"></span>EditorToolbar</h4><p>Statut autosave, durée estimée, bouton « Présenter ».</p></div>
+      <div class="card"><span class="tag">Speaking</span><h4><span class="dot"></span>Teleprompter</h4><p>Texte plein écran, auto-scroll, surlignage de la ligne courante.</p></div>
+      <div class="card"><span class="tag">Speaking</span><h4><span class="dot"></span>SpeakingControls</h4><p>Play/pause, vitesse, taille de police, minuteur, sortie.</p></div>
+      <div class="card"><span class="tag">Commun</span><h4><span class="dot"></span>EmptyState</h4><p>États vides soignés (aucun Talk, recherche sans résultat).</p></div>
+      <div class="card"><span class="tag">Commun</span><h4><span class="dot"></span>PageHeader</h4><p>Titre + sous-titre + actions, cohérent partout.</p></div>
+      <div class="card"><span class="tag">Commun</span><h4><span class="dot"></span>ConfirmDialog</h4><p>Garde sur les actions destructives (supprimer un Talk).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. DESIGN SYSTEM ============ -->
+<section class="block" id="ds">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">06</div><h2>Design system initial</h2></div>
+    <p class="intro">Direction <strong>« Editorial Stage »</strong> : papier ivoire chaud, encre profonde, un seul accent ocre « projecteur ». Un serif éditorial pour la voix (titres de Talk), une grotesque nette pour l'interface. Premium, sobre, sans bruit.</p>
+
+    <h3>Palette</h3>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--paper)"></div><div class="meta"><div class="nm">Paper</div><div class="hx">fond appli</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--surface); box-shadow:inset 0 0 0 1px var(--line)"></div><div class="meta"><div class="nm">Surface</div><div class="hx">cartes</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--ink)"></div><div class="meta"><div class="nm">Ink</div><div class="hx">texte / boutons</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--ink-mute)"></div><div class="meta"><div class="nm">Ink mute</div><div class="hx">texte secondaire</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--spot)"></div><div class="meta"><div class="nm">Spotlight</div><div class="hx">accent</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--stage)"></div><div class="meta"><div class="nm">Stage</div><div class="hx">speaking mode</div></div></div>
+    </div>
+    <p class="note">Couleurs définies en <code class="k">oklch</code> pour une harmonie perceptive et un passage clair → sombre maîtrisé. Sémantiques (succès, alerte) dérivées au besoin sans casser la chaleur de la base.</p>
+
+    <h3>Typographie</h3>
+    <div class="type-spec">
+      <div class="ts-row"><div class="lab">Display</div><div class="sample" style="font-family:var(--serif); font-weight:400; font-size:38px; line-height:1.05; letter-spacing:-.015em;">Le poids d'un mot bien placé <span style="font-style:italic; color:var(--spot-deep)">Spectral</span></div></div>
+      <div class="ts-row"><div class="lab">Titre UI</div><div class="sample" style="font-family:var(--sans); font-weight:600; font-size:22px;">Mes Talks — Hanken Grotesk SemiBold</div></div>
+      <div class="ts-row"><div class="lab">Corps</div><div class="sample" style="font-family:var(--sans); font-size:16px; color:var(--ink-soft);">Texte d'interface et de lecture. Hanken Grotesk Regular, calé pour la densité et le confort.</div></div>
+      <div class="ts-row"><div class="lab">Mono</div><div class="sample" style="font-family:var(--mono); font-size:14px; color:var(--ink-mute);">SERMON · 18 MIN · JetBrains Mono — méta &amp; labels</div></div>
+    </div>
+
+    <h3>Boutons &amp; pastilles</h3>
+    <div class="btnrow" style="margin-bottom:14px;">
+      <span class="btn btn-primary">Nouveau Talk</span>
+      <span class="btn btn-spot">Générer avec l'IA</span>
+      <span class="btn btn-ghost">Annuler</span>
+      <span class="btn btn-quiet">Brouillon</span>
+    </div>
+    <div class="btnrow">
+      <span class="badge spot"><span class="d"></span>Sermon</span>
+      <span class="badge">Conférence</span>
+      <span class="badge">Training</span>
+      <span class="badge">Pitch</span>
+      <span class="badge">Speech</span>
+    </div>
+
+    <h3>Aperçu — TalkCard &amp; Speaking Mode</h3>
+    <div class="grid2" style="align-items:start; gap:18px; margin-top:8px;">
+      <div class="talkcard">
+        <div class="tc-type">Conférence</div>
+        <h4>L'art de capter une salle en 90 secondes</h4>
+        <div class="tc-meta"><span>18 min</span><span>6 sections</span><span>FR</span></div>
+        <div class="tc-foot">
+          <span class="badge spot"><span class="d"></span>Prêt</span>
+          <span style="margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--ink-mute)">éd. il y a 2 j</span>
+        </div>
+      </div>
+      <div class="stage-preview">
+        <div class="sp-top"><span>Speaking mode</span><span>04:12 / 18:00</span></div>
+        <div class="sp-body">
+          <span class="now">Posez la question avant de donner la réponse.</span>
+          <span class="next"> Laissez le silence travailler pour vous — <span class="sp-cue">[pause]</span> — puis enchaînez sur l'histoire de Marc…</span>
+        </div>
+        <div class="sp-bar"><i></i></div>
+      </div>
+    </div>
+
+    <h3>Principes d'usage</h3>
+    <ul class="clean">
+      <li><span class="lead-in">Le serif sert la voix.</span> Réservé aux titres de Talk et au texte du teleprompter — là où l'on lit « à haute voix ». Le reste est en grotesque.</li>
+      <li><span class="lead-in">Un seul accent.</span> L'ocre « projecteur » signale l'action principale et l'IA. Jamais décoratif.</li>
+      <li><span class="lead-in">Le sombre est un mode, pas un thème.</span> Le fond « Stage » est dédié au speaking mode (lisibilité scène) ; l'appli reste sur papier ivoire.</li>
+      <li><span class="lead-in">Rayons &amp; espace.</span> Coins 10–16px, hairlines à 1px, beaucoup de blanc. Densité maîtrisée, zéro ombre lourde.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 7. ROADMAP ============ -->
+<section class="block" id="roadmap">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">07</div><h2>Roadmap d'implémentation</h2></div>
+    <p class="intro">Petites étapes livrables, chacune testable de bout en bout. On ne passe à la suivante qu'une fois la précédente fonctionnelle.</p>
+    <div class="road">
+      <div class="milestone"><div class="ms-n">0</div><div><div class="ms-t">Socle projet</div><div class="ms-d">Next.js + TS + Tailwind + shadcn/ui. Layout racine, fonts, tokens de design, <code class="k">cn()</code>.</div><div class="ms-tags"><span>scaffold</span><span>design tokens</span></div><div class="ms-out">→ Une page stylée qui tourne.</div></div></div>
+      <div class="milestone"><div class="ms-n">1</div><div><div class="ms-t">Auth Supabase</div><div class="ms-d">Clients browser/server, middleware de session, pages login/signup, garde sur <code class="k">(app)</code>.</div><div class="ms-tags"><span>supabase auth</span><span>middleware</span></div><div class="ms-out">→ Se connecter / déconnecter, routes protégées.</div></div></div>
+      <div class="milestone"><div class="ms-n">2</div><div><div class="ms-t">Schéma DB + RLS</div><div class="ms-d">Migrations des 3 tables, enums, policies, trigger profile, types générés.</div><div class="ms-tags"><span>postgres</span><span>rls</span><span>types</span></div><div class="ms-out">→ Base sécurisée et typée.</div></div></div>
+      <div class="milestone"><div class="ms-n">3</div><div><div class="ms-t">Dashboard + AppShell</div><div class="ms-d">Sidebar, PageHeader, écran d'accueil, état vide.</div><div class="ms-tags"><span>layout</span><span>navigation</span></div><div class="ms-out">→ Coquille de l'appli navigable.</div></div></div>
+      <div class="milestone"><div class="ms-n">4</div><div><div class="ms-t">Création &amp; liste de Talks</div><div class="ms-d">NewTalkDialog, Server Actions CRUD, TalkCard, /talks avec filtres.</div><div class="ms-tags"><span>server actions</span><span>crud</span></div><div class="ms-out">→ Créer, lister, supprimer un Talk.</div></div></div>
+      <div class="milestone"><div class="ms-n">5</div><div><div class="ms-t">Éditeur simple + autosave</div><div class="ms-d">SectionEditor, réordonnancement, sauvegarde en base (débattue + optimiste).</div><div class="ms-tags"><span>editor</span><span>autosave</span></div><div class="ms-out">→ Rédiger un Talk, persistance fiable.</div></div></div>
+      <div class="milestone"><div class="ms-n">6</div><div><div class="ms-t">Génération IA basique</div><div class="ms-d">Route handler streaming, AIPanel : générer un plan depuis le brief, développer une section.</div><div class="ms-tags"><span>llm</span><span>streaming</span></div><div class="ms-out">→ L'IA propose plan &amp; contenu.</div></div></div>
+      <div class="milestone"><div class="ms-n">7</div><div><div class="ms-t">Speaking Mode + auto-scroll</div><div class="ms-d">Teleprompter plein écran, vitesse/police réglables, minuteur, progression, persistance de la position.</div><div class="ms-tags"><span>teleprompter</span><span>auto-scroll</span></div><div class="ms-out">→ Prononcer le Talk de bout en bout.</div></div></div>
+      <div class="milestone"><div class="ms-n">8</div><div><div class="ms-t">Finition &amp; polish</div><div class="ms-d">États vides, toasts, ConfirmDialog, responsive, page Compte, vérification RLS.</div><div class="ms-tags"><span>qa</span><span>polish</span></div><div class="ms-out">→ MVP V1 prêt à montrer.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. MIGRATION ============ -->
+<section class="block" id="migration">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-num">08</div><h2>À récupérer (ou non) de l'ancien projet</h2></div>
+    <div class="callout">
+      <div class="label">Bloquant pour être précis</div>
+      <p>L'« ancien projet » n'est pas attaché ici. Lie-le (codebase, repo, ou capture d'écran via le menu Import) et je transforme la grille ci-dessous en liste exacte fichier par fichier. En attendant, voici le principe.</p>
+    </div>
+    <div class="scope">
+      <div class="col in">
+        <h4>À récupérer</h4>
+        <ul>
+          <li>Config Supabase (URL, schéma, migrations encore valides)</li>
+          <li>Prompts IA qui fonctionnent déjà bien</li>
+          <li>Logique métier éprouvée (estimation de durée, parsing de plan)</li>
+          <li>Contenus / Talks réels pour tester avec de vraies données</li>
+          <li>Tokens de marque s'ils existent (logo, couleur signature)</li>
+        </ul>
+      </div>
+      <div class="col out">
+        <h4>À laisser</h4>
+        <ul>
+          <li>Tout code lié aux features hors V1 (workspace, Stripe, RAG, analytics, PWA)</li>
+          <li>Ancienne structure de dossiers si non modulaire</li>
+          <li>Dépendances UI obsolètes / composants ad hoc</li>
+          <li>Tables DB des features écartées</li>
+          <li>Dette technique &amp; contournements — on repart propre</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">Approche recommandée : <strong>nouveau dépôt propre</strong> bâti sur cette architecture, dans lequel on <em>réimporte</em> sélectivement ce qui a de la valeur — plutôt qu'un refactor de l'existant.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="fnote">Cette proposition est volontairement cadrée sur le MVP V1 : mono-utilisateur, sans workspace, Stripe, RAG, analytics ni PWA. Chaque écart est listé pour qu'on décide ensemble avant de coder.</p>
+    <p style="margin-top:20px; font-family:var(--mono); font-size:11.5px; letter-spacing:.06em;">SOLO SPEAKER · PROPOSITION V1 · EDITORIAL STAGE</p>
+  </div>
+</footer>
+
+</body>
+</html>
