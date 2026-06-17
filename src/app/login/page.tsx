@@ -26,7 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <Logo />
         </div>
         <h1 className="m-0 text-center text-[21px] font-semibold tracking-[0]">Retour au studio</h1>
-        <p className="mb-6 mt-1 text-center text-[13.5px] text-mute">Connecte-toi pour reprendre tes talks.</p>
+        <p className="mb-6 mt-1 text-center text-[13.5px] text-mute">Connectez-vous pour reprendre vos prises de parole.</p>
         {params.error ? <Alert className="mb-4">{params.error}</Alert> : null}
         {params.message ? <p className="mb-4 rounded-[8px] border border-line bg-surface px-3 py-2 text-[12.5px] leading-5 text-mute">{params.message}</p> : null}
         <form action={login} className="grid gap-3.5">

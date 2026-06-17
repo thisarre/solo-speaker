@@ -2,19 +2,34 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { buildSpeakingItems } from "../lib/buildSpeakingItems";
 import { estimateDuration } from "../lib/estimateDuration";
 import { formatTime } from "../lib/formatTime";
 import { useAutoScroll } from "../hooks/useAutoScroll";
 import { useSpeakingKeyboard } from "../hooks/useSpeakingKeyboard";
 import { useSpeakingTimer } from "../hooks/useSpeakingTimer";
+import { useVoiceFollow } from "../voice/use-voice-follow";
+import { useVoiceActivity } from "../voice/use-voice-activity";
+import { getVoiceFollowScrollTop } from "../voice/scroll-controller";
+import { getVoicePacedScrollSpeed } from "../voice/voice-paced-scroll";
 import { SpeakingControls } from "./SpeakingControls";
 import { Teleprompter } from "./Teleprompter";
-import type { SpeakingItem, SpeakingModeProps } from "../types";
+import type { ReadingPosition, SpeakingItem, SpeakingModeProps } from "../types";
+import {
+  readPrompterFontSizePreference,
+  readPrompterSpeedPreference,
+  readPrompterThemePreference
+} from "@/modules/settings/studio-preferences";
 
-const speeds = [0.75, 1, 1.25, 1.5, 1.75];
+const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4];
 const fontSizes = [32, 40, 48, 56];
+const readingPositions: ReadingPosition[] = ["high", "center", "low"];
+const readingPositionRatios: Record<ReadingPosition, number> = {
+  high: 0.32,
+  center: 0.42,
+  low: 0.52
+};
 
 function nearestIndex<T>(items: T[], value: T) {
   const index = items.indexOf(value);
@@ -28,11 +43,17 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLElement | null>>({});
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speedIndex, setSpeedIndex] = useState(1);
-  const [fontSizeIndex, setFontSizeIndex] = useState(1);
+  const [speedIndex, setSpeedIndex] = useState(() => nearestIndex(speeds, readPrompterSpeedPreference()));
+  const [fontSizeIndex, setFontSizeIndex] = useState(() => nearestIndex(fontSizes, readPrompterFontSizePreference()));
+  const [readingPosition, setReadingPosition] = useState<ReadingPosition>("center");
+  const [theme, setTheme] = useState<"dark" | "light">(() => readPrompterThemePreference());
+  const [voiceFollowActive, setVoiceFollowActive] = useState(false);
+  const [voiceScrollSource, setVoiceScrollSource] = useState<"auto-scroll" | "manual" | "transcript-sync" | "voice-paced">("auto-scroll");
   const { elapsedSeconds, reset } = useSpeakingTimer(isPlaying);
   const speed = speeds[speedIndex];
   const fontSize = fontSizes[fontSizeIndex];
+  const readingAnchorRatio = readingPositionRatios[readingPosition];
+  const classicAutoScrollEnabled = isPlaying && !voiceFollowActive;
 
   const handleExit = useCallback(() => {
     router.push(`/talks/${talk.id}`);
@@ -40,15 +61,33 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
 
   const stopPlaying = useCallback(() => setIsPlaying(false), []);
 
-  const { currentIndex, progress, recompute, jumpSection, virtualOffset } = useAutoScroll({
+  const { currentIndex, progress, recompute, jumpSection } = useAutoScroll({
     containerRef,
     itemRefs,
     items,
-    isPlaying,
+    isPlaying: classicAutoScrollEnabled,
     speed,
-    fontSize,
+    readingAnchorRatio,
+    voiceFollowActive,
     onEnd: stopPlaying
   });
+  const voiceFollow = useVoiceFollow(items, talk.language, currentIndex);
+  const voiceActivity = useVoiceActivity(voiceFollowActive, voiceFollow.state.lastDeltaAt);
+  const followStateRef = useRef<{
+    confidence: number;
+    followedItemId: string | null;
+    followedText: string;
+    matchedItemId: string | null;
+    matchedText: string;
+  }>({
+    confidence: 0,
+    followedItemId: null,
+    followedText: "",
+    matchedItemId: null,
+    matchedText: ""
+  });
+  const desiredScrollRef = useRef<number | null>(null);
+  const appliedScrollRef = useRef<number | null>(null);
 
   const togglePlay = useCallback(() => setIsPlaying((current) => !current), []);
   const previousSection = useCallback(() => jumpSection(-1), [jumpSection]);
@@ -57,6 +96,23 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const faster = useCallback(() => setSpeedIndex((index) => Math.min(speeds.length - 1, index + 1)), []);
   const smallerText = useCallback(() => setFontSizeIndex((index) => Math.max(0, index - 1)), []);
   const largerText = useCallback(() => setFontSizeIndex((index) => Math.min(fontSizes.length - 1, index + 1)), []);
+  const previousReadingPosition = useCallback(
+    () => setReadingPosition((position) => readingPositions[Math.max(0, readingPositions.indexOf(position) - 1)]),
+    []
+  );
+  const nextReadingPosition = useCallback(
+    () => setReadingPosition((position) => readingPositions[Math.min(readingPositions.length - 1, readingPositions.indexOf(position) + 1)]),
+    []
+  );
+  const toggleTheme = useCallback(() => setTheme((current) => (current === "dark" ? "light" : "dark")), []);
+  const toggleVoiceFollow = useCallback(() => {
+    setVoiceFollowActive((current) => !current);
+    voiceFollow.toggle();
+  }, [voiceFollow]);
+  const recalibrateVoiceFollow = useCallback(() => {
+    desiredScrollRef.current = containerRef.current?.scrollTop ?? null;
+    voiceFollow.recalibrate();
+  }, [voiceFollow]);
 
   useSpeakingKeyboard({
     onTogglePlay: togglePlay,
@@ -66,8 +122,102 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
     onFaster: faster,
     onSmallerText: smallerText,
     onLargerText: largerText,
-    onExit: handleExit
+    onExit: handleExit,
+    onToggleVoiceFollow: toggleVoiceFollow
   });
+
+  useEffect(() => {
+    followStateRef.current = {
+      confidence: voiceFollow.state.confidence,
+      followedItemId: voiceFollow.state.followedItemId,
+      followedText: voiceFollow.state.followedText,
+      matchedItemId: voiceFollow.state.matchedItemId,
+      matchedText: voiceFollow.state.matchedText
+    };
+  }, [voiceFollow.state.confidence, voiceFollow.state.followedItemId, voiceFollow.state.followedText, voiceFollow.state.matchedItemId, voiceFollow.state.matchedText]);
+
+  // Single owner of the scroll position while voice-follow is on. It eases the container toward one
+  // forward-only target: anchored on the matched text block when we have a confident match, and a
+  // gentle speaking-paced creep otherwise. Forward-only + single-loop kills both the
+  // freeze-at-block-end and the up/down oscillation between neighbouring blocks.
+  useEffect(() => {
+    if (!voiceFollowActive) {
+      desiredScrollRef.current = null;
+      appliedScrollRef.current = null;
+      const timeoutId = window.setTimeout(() => setVoiceScrollSource("auto-scroll"), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    desiredScrollRef.current = containerRef.current?.scrollTop ?? 0;
+    appliedScrollRef.current = containerRef.current?.scrollTop ?? 0;
+    let animationFrame = 0;
+    let last = performance.now();
+
+    function loop(now: number) {
+      const container = containerRef.current;
+      const deltaSeconds = (now - last) / 1000;
+      last = now;
+
+      if (container) {
+        // If the scroll moved without us (the reader grabbed it), yield and re-baseline so we don't
+        // yank them back to the auto-follow position.
+        if (appliedScrollRef.current !== null && Math.abs(container.scrollTop - appliedScrollRef.current) > 2) {
+          desiredScrollRef.current = container.scrollTop;
+        }
+
+        const maxScroll = Math.max(0, container.scrollHeight - container.clientHeight);
+        const { confidence, followedItemId, followedText, matchedItemId, matchedText } = followStateRef.current;
+        // Anchor on the precisely-locked block when we have it; otherwise engage on the raw best
+        // match as soon as it is reasonably confident, so the
+        // scroll doesn't wait for full lock-on at the start of every sentence (that was the lag).
+        const anchorItemId = followedItemId ?? (matchedItemId && confidence >= 0.6 ? matchedItemId : null);
+        const followElement = anchorItemId ? itemRefs.current[anchorItemId] : null;
+        const spokenText = followedItemId ? followedText : matchedText;
+        let desired = desiredScrollRef.current ?? container.scrollTop;
+
+        if (followElement) {
+          const followTarget = getVoiceFollowScrollTop({ container, element: followElement, readingAnchorRatio, spokenText });
+          // Only ever move the target forward: a transient re-match on the previous block must not
+          // drag the reader back up (that was the oscillation).
+          if (followTarget !== null && followTarget > desired) {
+            desired = followTarget;
+            setVoiceScrollSource("transcript-sync");
+          }
+        } else {
+          const basePxPerSecond = maxScroll / Math.max(1, totalSeconds);
+          const pxPerSecond = getVoicePacedScrollSpeed({
+            basePxPerSecond,
+            isAtEnd: container.scrollTop >= maxScroll - 1,
+            isPaused: !isPlaying,
+            userSpeedMultiplier: speed,
+            voiceStatus: voiceActivity.status
+          });
+          if (pxPerSecond > 0) {
+            desired += pxPerSecond * deltaSeconds;
+            setVoiceScrollSource("voice-paced");
+          }
+        }
+
+        desired = Math.min(maxScroll, Math.max(0, desired));
+        desiredScrollRef.current = desired;
+
+        const distance = desired - container.scrollTop;
+        if (distance > 0.5) {
+          const easedStep = distance * 0.08;
+          const maxStep = Math.max(1.4, fontSize * 5.2 * Math.max(0.85, speed * 0.75) * deltaSeconds);
+          container.scrollTop = container.scrollTop + Math.min(easedStep, maxStep);
+        }
+        appliedScrollRef.current = container.scrollTop;
+
+        recompute();
+      }
+
+      animationFrame = requestAnimationFrame(loop);
+    }
+
+    animationFrame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [fontSize, isPlaying, readingAnchorRatio, recompute, speed, totalSeconds, voiceActivity.status, voiceFollowActive]);
 
   useEffect(() => {
     const storageKey = `solo-speaker:speaking:${talk.id}`;
@@ -78,6 +228,8 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
         scrollTop?: number;
         speed?: number;
         fontSize?: number;
+        readingPosition?: ReadingPosition;
+        theme?: "dark" | "light";
       } | null;
 
       if (saved?.scrollTop && containerRef.current) {
@@ -91,6 +243,14 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
 
         if (saved?.fontSize) {
           setFontSizeIndex(nearestIndex(fontSizes, saved.fontSize));
+        }
+
+        if (saved?.readingPosition && readingPositions.includes(saved.readingPosition)) {
+          setReadingPosition(saved.readingPosition);
+        }
+
+        if (saved?.theme === "dark" || saved?.theme === "light") {
+          setTheme(saved.theme);
         }
       });
     } catch {
@@ -109,7 +269,9 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
           JSON.stringify({
             scrollTop: containerRef.current?.scrollTop ?? 0,
             speed,
-            fontSize
+            fontSize,
+            readingPosition,
+            theme
           })
         );
       } catch {
@@ -118,37 +280,78 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
     }, 700);
 
     return () => window.clearInterval(interval);
-  }, [fontSize, speed, talk.id]);
+  }, [fontSize, readingPosition, speed, talk.id, theme]);
 
   const currentItem: SpeakingItem | undefined = items[currentIndex];
   const currentSection = currentItem ? talk.sections[currentItem.sectionIndex] : talk.sections[0];
   const sectionLabel = items.length ? `Section ${(currentItem?.sectionIndex ?? 0) + 1} · ${talk.sections.length}` : "Aucune section";
+  const themeVars = useMemo<CSSProperties>(
+    () =>
+      theme === "light"
+        ? ({
+            "--speaking-bg": "#f7f4ec",
+            "--speaking-strong": "#111111",
+            "--speaking-muted": "#62646c",
+            "--speaking-soft": "#858078",
+            "--speaking-faint": "#c1bbb0",
+            "--speaking-line": "#ded8cc",
+            "--speaking-panel": "#fffcf5",
+            "--speaking-field": "#f1ece2",
+            "--speaking-shadow": "rgba(60, 50, 35, .16)",
+            "--speaking-button-hover": "#ebe5d8",
+            "--speaking-button-primary-bg": "#151515",
+            "--speaking-button-primary-text": "#ffffff"
+          } as CSSProperties)
+        : ({
+            "--speaking-bg": "#0a0b0d",
+            "--speaking-strong": "#ececf1",
+            "--speaking-muted": "#9092a0",
+            "--speaking-soft": "#6f7180",
+            "--speaking-faint": "#3c3d46",
+            "--speaking-line": "#23242b",
+            "--speaking-panel": "#141519",
+            "--speaking-field": "#101115",
+            "--speaking-shadow": "rgba(0, 0, 0, .5)",
+            "--speaking-button-hover": "#1e1f25",
+            "--speaking-button-primary-bg": "#ececf1",
+            "--speaking-button-primary-text": "#101114"
+          } as CSSProperties),
+    [theme]
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex h-screen overflow-hidden bg-[#0a0b0d] text-[#ececf1]" data-speaking-playing={isPlaying}>
+    <div
+      className="fixed inset-0 z-50 flex h-screen overflow-hidden bg-[var(--speaking-bg)] text-[var(--speaking-strong)]"
+      data-speaking-playing={isPlaying}
+      data-speaking-theme={theme}
+      style={themeVars}
+    >
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="relative flex h-[54px] shrink-0 items-center border-b border-[#1a1b20] px-6 font-mono text-[11px] uppercase tracking-[.08em] text-[#5f606b]">
-          <Link className="max-w-[30%] truncate transition hover:text-[#ececf1]" href={`/talks/${talk.id}`}>
+        <header className="grid h-[54px] shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-b border-[var(--speaking-line)] px-4 font-mono text-[10px] uppercase tracking-[.08em] text-[var(--speaking-soft)] sm:px-6 sm:text-[11px]">
+          <Link className="min-w-0 truncate transition hover:text-[var(--speaking-strong)]" href={`/talks/${talk.id}`}>
             {talk.title}
           </Link>
-          <div className="absolute left-1/2 flex -translate-x-1/2 items-baseline gap-2 whitespace-nowrap text-[15px] tracking-[.04em] text-[#ececf1]">
+          <div className="flex items-baseline justify-center gap-2 whitespace-nowrap text-[14px] tracking-[.04em] text-[var(--speaking-strong)] sm:text-[15px]">
             {formatTime(elapsedSeconds)}
-            <span className="text-[11px] text-[#5f606b]">/ {formatTime(totalSeconds)}</span>
+            <span className="text-[11px] text-[var(--speaking-soft)]">/ {formatTime(totalSeconds)}</span>
           </div>
-          <span className="ml-auto whitespace-nowrap">{sectionLabel}</span>
+          <span className="min-w-0 truncate text-right">{sectionLabel}</span>
         </header>
 
         <Teleprompter
           containerRef={containerRef}
           currentIndex={currentIndex}
           fontSize={fontSize}
+          followedItemId={voiceFollow.state.followedItemId}
+          followedText={voiceFollow.state.followedText}
           itemRefs={itemRefs}
           items={items}
           onScroll={recompute}
-          virtualOffset={virtualOffset}
+          readingAnchorRatio={readingAnchorRatio}
+          theme={theme}
         />
 
-        <div className="h-[3px] bg-[#1a1b20]">
+        <div className="h-[3px] bg-[var(--speaking-line)]">
           <div className="h-full bg-[#7b79ff] transition-[width]" style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%` }} />
         </div>
 
@@ -164,8 +367,18 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
           onSlower={slower}
           onSmallerText={smallerText}
           onTogglePlay={togglePlay}
+          onToggleVoiceFollow={toggleVoiceFollow}
+          onRecalibrateVoiceFollow={recalibrateVoiceFollow}
+          onToggleTheme={toggleTheme}
+          onVoiceProviderModeChange={voiceFollow.setProviderMode}
+          onNextReadingPosition={nextReadingPosition}
+          onPreviousReadingPosition={previousReadingPosition}
+          readingPosition={readingPosition}
           speed={speed}
+          theme={theme}
           totalSeconds={totalSeconds}
+          voiceFollow={{ ...voiceFollow.state, scrollSource: voiceScrollSource, voiceStatus: voiceActivity.status }}
+          voiceActivity={voiceActivity}
         />
 
         <button

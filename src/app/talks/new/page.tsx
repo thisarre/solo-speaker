@@ -19,7 +19,7 @@ export default async function NewTalkPage({ searchParams }: NewTalkPageProps) {
         <div className="mx-auto w-full max-w-[940px]">
           <PageHeader
             eyebrow="Create"
-            title="Nouveau talk"
+            title="Créer un talk"
             description="Crée un brouillon avec une première section éditable."
             actions={
               <Link href="/talks">

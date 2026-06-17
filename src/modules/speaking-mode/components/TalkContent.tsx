@@ -1,6 +1,6 @@
 import type { SpeakingTextSegment } from "../types";
 
-export function TalkContent({ segments }: { segments: SpeakingTextSegment[] }) {
+export function TalkContent({ segments }: { highlightText?: string; segments: SpeakingTextSegment[] }) {
   return (
     <>
       {segments.map((segment, index) =>

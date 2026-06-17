@@ -1,6 +1,12 @@
 import type { TalkType } from "@/types/talk";
 
-export type AssistantAction = "outline" | "expand-section" | "oralize-section" | "shorten-section";
+export type AssistantAction =
+  | "outline"
+  | "expand-section"
+  | "oralize-section"
+  | "shorten-section"
+  | "predict-next"
+  | "suggest-bible";
 export type AssistantFeature = AssistantAction;
 
 export type AssistantTalkContext = {
@@ -38,6 +44,16 @@ export type AssistantGenerateResult =
       kind: "section";
       heading: string;
       body: string;
+    }
+  | {
+      kind: "suggestion";
+      text: string;
+    }
+  | {
+      kind: "bible";
+      reference: string;
+      text: string;
+      reason: string;
     };
 
 export type AssistantResponse =

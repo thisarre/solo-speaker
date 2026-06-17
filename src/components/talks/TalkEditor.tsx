@@ -1,28 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
+  Bold,
+  BookOpen,
+  Bot,
+  BrainCircuit,
   Clock3,
+  CornerDownLeft,
+  Heading1,
+  Heading2,
+  Highlighter,
+  Italic,
   Mic2,
+  Pause,
   Plus,
+  Quote,
   Save,
-  Trash2
+  Text,
+  Trash2,
+  Wand2
 } from "lucide-react";
 import { deleteTalk, createTalkSection, deleteTalkSection, reorderTalkSections, updateTalk, updateTalkSection } from "@/modules/talks/actions";
-import { formatDuration, sectionSeconds } from "@/lib/utils";
+import { formatDuration, sectionSeconds, wordCount } from "@/lib/utils";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { AutosaveStatus, type AutosaveState } from "@/components/talks/AutosaveStatus";
 import { ExportPdfButton } from "@/components/talks/ExportPdfButton";
+import { generateAssistantContent } from "@/modules/assistant/actions";
 import { AiPreviewDialog } from "@/modules/assistant/components/ai-preview-dialog";
 import { AssistantPanel } from "@/modules/assistant/components/assistant-panel";
+import { isAssistantFeatureEnabled } from "@/modules/assistant/feature-registry";
+import { useAssistantFeatureSettings } from "@/modules/assistant/feature-settings";
 import type { AssistantGenerateResult, AssistantOutlineSection } from "@/modules/assistant/types";
+import { aiEnabledStorageKey, predictiveWritingStorageKey } from "@/modules/settings/studio-preferences";
+import { EditorLayoutSwitcher } from "@/modules/studio-layout/components/editor-layout-switcher";
+import { FocusModeToggle } from "@/modules/studio-layout/components/focus-mode-toggle";
+import { isEditorPanelVisible } from "@/modules/studio-layout/editor-layout-presets";
+import { useEditorLayout } from "@/modules/studio-layout/layout-storage";
 import { talkStatusLabels, talkTypeLabels, type Talk, type TalkSection, type TalkStatus, type TalkType } from "@/types/talk";
 
 type EditableSection = TalkSection & {
@@ -41,6 +62,7 @@ type TalkDraft = {
 const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
 const talkStatuses = Object.keys(talkStatusLabels) as TalkStatus[];
 const languages = ["FR", "EN"] as const;
+type BooleanStateAction = boolean | ((current: boolean) => boolean);
 
 function toDraft(talk: Talk): TalkDraft {
   return {
@@ -57,6 +79,56 @@ function estimateTotalSeconds(sections: TalkDraft["sections"]) {
   return sections.reduce((total, section) => total + sectionSeconds(section.heading, section.body), 0);
 }
 
+function predictionKeyForSection(section: EditableSection) {
+  return `${section.id}:${section.body.trim().slice(-520)}`;
+}
+
+function bibleSuggestionKeyForSection(section: EditableSection) {
+  const body = section.body.trim();
+  const sentences = body.match(/[^.!?\n]+[.!?]?/g) ?? [];
+  const lastSentence = sentences.at(-1)?.trim() ?? body;
+  return `${section.id}:${lastSentence.slice(-360)}`;
+}
+
+function getStoredBoolean(key: string, fallback: boolean) {
+  if (typeof window === "undefined") return fallback;
+  const value = window.localStorage.getItem(key);
+  return value === null ? fallback : value === "true";
+}
+
+function useStoredBoolean(key: string, fallback: boolean) {
+  const value = useSyncExternalStore(
+    (onStoreChange) => {
+      const eventName = `solo-speaker-storage:${key}`;
+      const handleStorage = (event: StorageEvent) => {
+        if (event.key === key) onStoreChange();
+      };
+
+      window.addEventListener("storage", handleStorage);
+      window.addEventListener(eventName, onStoreChange);
+
+      return () => {
+        window.removeEventListener("storage", handleStorage);
+        window.removeEventListener(eventName, onStoreChange);
+      };
+    },
+    () => getStoredBoolean(key, fallback),
+    () => fallback
+  );
+
+  const setValue = useCallback(
+    (next: BooleanStateAction) => {
+      const current = getStoredBoolean(key, fallback);
+      const resolved = typeof next === "function" ? next(current) : next;
+      window.localStorage.setItem(key, String(resolved));
+      window.dispatchEvent(new Event(`solo-speaker-storage:${key}`));
+    },
+    [fallback, key]
+  );
+
+  return [value, setValue] as const;
+}
+
 export function TalkEditor({ talk }: { talk: Talk }) {
   const [draft, setDraft] = useState<TalkDraft>(() => toDraft(talk));
   const [status, setStatus] = useState<AutosaveState>("idle");
@@ -65,13 +137,39 @@ export function TalkEditor({ talk }: { talk: Talk }) {
   const [aiResult, setAiResult] = useState<AssistantGenerateResult | null>(null);
   const [deleteTalkRequested, setDeleteTalkRequested] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<EditableSection | null>(null);
+  const [aiEnabled, setAiEnabled] = useStoredBoolean(aiEnabledStorageKey, true);
+  const [predictiveWritingEnabled, setPredictiveWritingEnabled] = useStoredBoolean(predictiveWritingStorageKey, false);
+  const [prediction, setPrediction] = useState("");
+  const [predictionContextKey, setPredictionContextKey] = useState("");
+  const [predictionError, setPredictionError] = useState("");
+  const [predictionLoading, setPredictionLoading] = useState(false);
+  const [bibleSuggestion, setBibleSuggestion] = useState<Extract<AssistantGenerateResult, { kind: "bible" }> | null>(null);
+  const [bibleSuggestionContextKey, setBibleSuggestionContextKey] = useState("");
+  const [bibleSuggestionError, setBibleSuggestionError] = useState("");
+  const [bibleSuggestionLoading, setBibleSuggestionLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const lastSavedRef = useRef(JSON.stringify(toDraft(talk)));
   const hydratedRef = useRef(false);
+  const lastPredictionKeyRef = useRef("");
+  const lastBibleSuggestionKeyRef = useRef("");
+  const sectionTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  const { layout: editorLayout, reset: resetEditorLayout, setFocusMode, setPreset } = useEditorLayout();
+  const { settings: assistantFeatureSettings } = useAssistantFeatureSettings();
 
   const totalSeconds = useMemo(() => estimateTotalSeconds(draft.sections), [draft.sections]);
   const durationMinutes = Math.max(1, Math.ceil(totalSeconds / 60));
   const activeSection = draft.sections.find((section) => section.id === activeSectionId) ?? draft.sections[0];
+  const focusModeEnabled = editorLayout.focusModeEnabled;
+  const showPanel = useCallback((panelId: Parameters<typeof isEditorPanelVisible>[1]) => isEditorPanelVisible(editorLayout, panelId), [editorLayout]);
+  const showSectionRail = showPanel("section-rail") && !focusModeEnabled;
+  const showAssistantPanel = showPanel("assistant-panel") && !focusModeEnabled;
+  const showMetadataBar = showPanel("metadata-bar") && !focusModeEnabled;
+  const showEditorToolbar = showPanel("editor-toolbar") || focusModeEnabled;
+  const showExportActions = showPanel("export-actions") && !focusModeEnabled;
+  const showSpeakingActions = showPanel("speaking-actions") || focusModeEnabled;
+  const showTalkHeader = showPanel("talk-header") || focusModeEnabled;
+  const showStatusBar = showPanel("status-bar") || focusModeEnabled;
+  const bibleSuggestionsEnabled = isAssistantFeatureEnabled("suggest-bible", draft.type, assistantFeatureSettings);
 
   useEffect(() => {
     if (!hydratedRef.current) {
@@ -125,11 +223,182 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     return () => window.clearTimeout(timeoutId);
   }, [draft, durationMinutes, talk.id]);
 
+  useEffect(() => {
+    if (!aiEnabled || !predictiveWritingEnabled || !activeSection || activeSection.pending) {
+      return;
+    }
+
+    const body = activeSection.body.trim();
+    if (body.length < 80) {
+      return;
+    }
+
+    const predictionKey = predictionKeyForSection(activeSection);
+    if (lastPredictionKeyRef.current === predictionKey) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      lastPredictionKeyRef.current = predictionKey;
+      setPrediction("");
+      setPredictionContextKey(predictionKey);
+      setPredictionError("");
+      setPredictionLoading(true);
+
+      try {
+        const result = await generateAssistantContent({
+          action: "predict-next",
+          talkId: talk.id,
+          talk: {
+            title: draft.title,
+            type: draft.type,
+            audience: draft.audience,
+            objective: "",
+            targetDurationMin: durationMinutes,
+            language: draft.language
+          },
+          section: {
+            heading: activeSection.heading,
+            body: activeSection.body
+          }
+        });
+
+        setPrediction(result.kind === "suggestion" ? result.text : "");
+        setPredictionContextKey(predictionKey);
+      } catch (assistantError) {
+        setPredictionError(assistantError instanceof Error ? assistantError.message : "Prédiction IA impossible.");
+      } finally {
+        setPredictionLoading(false);
+      }
+    }, 1100);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeSection, aiEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, predictiveWritingEnabled, talk.id]);
+
+  useEffect(() => {
+    if (!aiEnabled || !bibleSuggestionsEnabled || !activeSection || activeSection.pending) {
+      return;
+    }
+
+    const body = activeSection.body.trim();
+    if (body.length < 60) {
+      return;
+    }
+
+    const suggestionKey = bibleSuggestionKeyForSection(activeSection);
+    if (lastBibleSuggestionKeyRef.current === suggestionKey) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      lastBibleSuggestionKeyRef.current = suggestionKey;
+      setBibleSuggestion(null);
+      setBibleSuggestionContextKey(suggestionKey);
+      setBibleSuggestionError("");
+      setBibleSuggestionLoading(true);
+
+      try {
+        const result = await generateAssistantContent({
+          action: "suggest-bible",
+          talkId: talk.id,
+          talk: {
+            title: draft.title,
+            type: draft.type,
+            audience: draft.audience,
+            objective: "",
+            targetDurationMin: durationMinutes,
+            language: draft.language
+          },
+          section: {
+            heading: activeSection.heading,
+            body: activeSection.body
+          }
+        });
+
+        setBibleSuggestion(result.kind === "bible" ? result : null);
+        setBibleSuggestionContextKey(suggestionKey);
+      } catch (assistantError) {
+        setBibleSuggestionError(assistantError instanceof Error ? assistantError.message : "Suggestion biblique impossible.");
+      } finally {
+        setBibleSuggestionLoading(false);
+      }
+    }, 1500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeSection, aiEnabled, bibleSuggestionsEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, talk.id]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key === ".") {
+        event.preventDefault();
+        setFocusMode(!focusModeEnabled);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [focusModeEnabled, setFocusMode]);
+
   function updateSection(sectionId: string, values: Partial<EditableSection>) {
     setDraft((current) => ({
       ...current,
       sections: current.sections.map((section) => (section.id === sectionId ? { ...section, ...values } : section))
     }));
+  }
+
+  function insertIntoSection(section: EditableSection, text: string) {
+    const textarea = sectionTextareaRefs.current[section.id];
+    const currentBody = section.body ?? "";
+    const start = textarea?.selectionStart ?? currentBody.length;
+    const end = textarea?.selectionEnd ?? currentBody.length;
+    const nextBody = `${currentBody.slice(0, start)}${text}${currentBody.slice(end)}`;
+
+    updateSection(section.id, { body: nextBody });
+    setActiveSectionId(section.id);
+
+    window.requestAnimationFrame(() => {
+      const nextCursor = start + text.length;
+      textarea?.focus();
+      textarea?.setSelectionRange(nextCursor, nextCursor);
+    });
+  }
+
+  function formatSelectionInSection(section: EditableSection, before: string, after = before, placeholder = "texte") {
+    const textarea = sectionTextareaRefs.current[section.id];
+    const currentBody = section.body ?? "";
+    const start = textarea?.selectionStart ?? currentBody.length;
+    const end = textarea?.selectionEnd ?? currentBody.length;
+    const selectedText = currentBody.slice(start, end) || placeholder;
+    const nextBody = `${currentBody.slice(0, start)}${before}${selectedText}${after}${currentBody.slice(end)}`;
+    const selectionStart = start + before.length;
+    const selectionEnd = selectionStart + selectedText.length;
+
+    updateSection(section.id, { body: nextBody });
+    setActiveSectionId(section.id);
+
+    window.requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(selectionStart, selectionEnd);
+    });
+  }
+
+  function insertPrediction() {
+    if (!activeSection || !prediction) return;
+    const prefix = activeSection.body.trimEnd() === activeSection.body ? " " : "";
+    insertIntoSection(activeSection, `${prefix}${prediction}`);
+    setPrediction("");
+  }
+
+  function insertBibleReferenceInline() {
+    if (!activeSection || !bibleSuggestion) return;
+    insertIntoSection(activeSection, ` (${bibleSuggestion.reference})`);
+    setBibleSuggestion(null);
+  }
+
+  function insertFullBibleQuote() {
+    if (!activeSection || !bibleSuggestion) return;
+    insertIntoSection(activeSection, `\n\n_"${bibleSuggestion.text}"_ (${bibleSuggestion.reference})`);
+    setBibleSuggestion(null);
   }
 
   function closeAiPreview() {
@@ -154,6 +423,13 @@ export function TalkEditor({ talk }: { talk: Talk }) {
       heading: result.heading || activeSection.heading || "Sans titre",
       body: result.body
     });
+    closeAiPreview();
+  }
+
+  function insertBibleSuggestion(result: Extract<AssistantGenerateResult, { kind: "bible" }>) {
+    if (!activeSection) return;
+
+    insertIntoSection(activeSection, `\n\n${result.reference} - ${result.text}\n${result.reason}`);
     closeAiPreview();
   }
 
@@ -293,9 +569,51 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     });
   }
 
+  const mobileAssistantPanel = showAssistantPanel ? (
+    <details className="mb-5 rounded-[12px] border border-border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)] xl:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 marker:hidden">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-accent-muted text-accent-ink">
+          <Wand2 className="size-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[14px] font-semibold tracking-[0] text-foreground">Assistant IA</p>
+          <p className="m-0 mt-0.5 truncate text-[12.5px] text-muted">Plan, reformulation, oralisation.</p>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-[.08em] text-faint">ouvrir</span>
+      </summary>
+      <div className="border-t border-line2 p-3">
+        {aiEnabled ? (
+          <AssistantPanel
+            activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
+            audience={draft.audience}
+            className="border-0 bg-transparent p-0 shadow-none"
+            durationMinutes={durationMinutes}
+            language={draft.language}
+            onResult={setAiResult}
+            talkId={talk.id}
+            title={draft.title}
+            type={draft.type}
+          />
+        ) : (
+          <div className="flex items-start gap-3 rounded-[10px] bg-background p-3">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-panel text-faint">
+              <Bot className="size-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="m-0 text-[14px] font-semibold tracking-[0] text-foreground">Assistant IA désactivé</h2>
+              <p className="mt-1 text-[12.5px] leading-5 text-muted">L&apos;écriture reste entièrement manuelle.</p>
+            </div>
+            <Button onClick={() => setAiEnabled(true)} size="sm" type="button" variant="ghost">Activer</Button>
+          </div>
+        )}
+      </div>
+    </details>
+  ) : null;
+
   return (
-    <div className="flex h-screen min-w-0 flex-col bg-background text-foreground">
-      <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border bg-background px-4">
+    <div className={`flex h-screen min-w-0 flex-col bg-background text-foreground ${focusModeEnabled ? "fixed inset-0 z-40" : ""}`}>
+      {showTalkHeader ? (
+      <header className={`flex min-w-0 shrink-0 items-center gap-3 overflow-hidden border-b border-border bg-background px-4 ${focusModeEnabled ? "h-[56px]" : "h-[52px]"}`}>
         <Link href="/talks">
           <Button aria-label="Retour" size="icon" variant="quiet">
             <ArrowLeft className="size-4" />
@@ -306,24 +624,52 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           <span className="text-faint">/</span>
           <b className="truncate font-[550] text-foreground">{draft.title || "Sans titre"}</b>
         </div>
-        <div className="ml-auto flex items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-[8px] border border-border bg-surface px-2.5 py-1.5 font-mono text-[10.5px] text-faint md:flex">
+        <div className="ml-auto flex shrink-0 items-center justify-end gap-2 whitespace-nowrap">
+          <div className="hidden items-center gap-2 lg:flex">
+            <EditorLayoutSwitcher onReset={resetEditorLayout} onSelect={setPreset} value={editorLayout.preset} />
+            <FocusModeToggle enabled={focusModeEnabled} onToggle={() => setFocusMode(!focusModeEnabled)} />
+          </div>
+          <div className={`hidden items-center gap-2 rounded-[8px] border border-border bg-surface px-2.5 py-1.5 font-mono text-[10.5px] text-faint lg:flex ${showMetadataBar ? "" : "lg:hidden"}`}>
             <Clock3 className="size-3.5" />
             <span>{formatDuration(totalSeconds)}</span>
           </div>
-          <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
-          <ExportPdfButton talkId={talk.id} title={draft.title} />
-          <Link href={`/talks/${talk.id}/speak`}>
+          {showAssistantPanel ? (
+            <div className="hidden md:block">
+              <Button
+                aria-pressed={aiEnabled}
+                className={aiEnabled ? "" : "text-faint"}
+                leftIcon={<Bot />}
+                onClick={() => {
+                  setAiEnabled((current) => !current);
+                  setPrediction("");
+                  setPredictionError("");
+                  setBibleSuggestion(null);
+                  setBibleSuggestionError("");
+                }}
+                size="sm"
+                type="button"
+                variant={aiEnabled ? "ghost" : "quiet"}
+              >
+                {aiEnabled ? "IA active" : "IA off"}
+              </Button>
+            </div>
+          ) : null}
+          <div className="hidden sm:block">
+            <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
+          </div>
+          {showExportActions ? <ExportPdfButton talkId={talk.id} title={draft.title} /> : null}
+          {showSpeakingActions ? <Link href={`/talks/${talk.id}/speak`}>
             <Button leftIcon={<Mic2 />} size="sm" type="button" variant="primary">Présenter</Button>
-          </Link>
-          <Button aria-label="Supprimer" onClick={() => setDeleteTalkRequested(true)} size="icon" type="button" variant="quiet">
+          </Link> : null}
+          {!focusModeEnabled ? <Button aria-label="Supprimer" onClick={() => setDeleteTalkRequested(true)} size="icon" type="button" variant="quiet">
             <Trash2 className="size-4" />
-          </Button>
+          </Button> : null}
         </div>
       </header>
+      ) : null}
 
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-[220px] shrink-0 border-r border-border bg-background px-2.5 py-5 lg:block">
+        {showSectionRail ? <aside className="hidden w-[220px] shrink-0 border-r border-border bg-background px-2.5 py-5 lg:block">
           <div className="mb-2 flex items-center justify-between px-2.5">
             <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Plan</p>
             <span className="font-mono text-[10px] text-faint">{draft.sections.length}</span>
@@ -358,38 +704,25 @@ export function TalkEditor({ talk }: { talk: Talk }) {
               <span>{durationMinutes} min</span>
             </div>
           </div>
-        </aside>
+        </aside> : null}
 
         <main className="studio-scroll min-w-0 flex-1 overflow-y-auto bg-background">
-          <div className="mx-auto flex w-full max-w-[1180px] gap-5 px-5 pb-28 pt-7 md:px-8">
+          <div className={`mx-auto flex w-full gap-5 px-4 pb-32 pt-6 sm:px-5 md:px-8 md:pb-28 md:pt-7 ${focusModeEnabled ? "max-w-[860px]" : showAssistantPanel ? "max-w-[1180px]" : "max-w-[980px]"}`}>
             <article className="min-w-0 flex-1">
-              <div className="mb-5 xl:hidden">
-                <AssistantPanel
-                  activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
-                  audience={draft.audience}
-                  durationMinutes={durationMinutes}
-                  language={draft.language}
-                  onResult={setAiResult}
-                  talkId={talk.id}
-                  title={draft.title}
-                  type={draft.type}
-                />
-              </div>
-
-              <div className="mb-4 flex flex-wrap gap-2">
+              {showMetadataBar ? <div className="mb-4 flex flex-wrap gap-2">
                 <Badge tone="accent">{talkTypeLabels[draft.type]}</Badge>
                 <Badge>{durationMinutes} min</Badge>
                 {draft.audience ? <Badge>{draft.audience}</Badge> : null}
-              </div>
+              </div> : null}
 
-              <div className="mb-5 grid gap-3 rounded-[12px] border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(20,20,25,.03)]">
+              <div className={`mb-5 grid gap-3 rounded-[12px] border border-border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)] ${focusModeEnabled ? "p-3 md:p-4" : "p-3.5 sm:p-4"}`}>
                 <input
-                  className="studio-title-input w-full bg-transparent font-semibold leading-[1.15] tracking-[0] text-foreground outline-none placeholder:text-faint"
+                  className={`w-full bg-transparent font-semibold leading-[1.15] tracking-[0] text-foreground outline-none placeholder:text-faint ${focusModeEnabled ? "text-[24px]" : "studio-title-input"}`}
                   onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
                   placeholder="Titre du talk"
                   value={draft.title}
                 />
-                <div className="grid gap-2.5 md:grid-cols-[1fr_132px_132px_84px]">
+                {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[1fr_132px_132px_84px]">
                   <input
                     className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
                     onChange={(event) => setDraft((current) => ({ ...current, audience: event.target.value }))}
@@ -411,15 +744,57 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                       <option key={language} value={language}>{language}</option>
                     ))}
                   </select>
-                </div>
+                </div> : null}
+                {showEditorToolbar ? <div className="flex flex-wrap items-center gap-2 border-t border-line2 pt-3">
+                  {!showAssistantPanel && !focusModeEnabled ? (
+                    <Button leftIcon={<Wand2 />} onClick={() => setPreset("ai")} size="sm" type="button" variant="ghost">Mode IA</Button>
+                  ) : null}
+                  <button
+                    aria-pressed={aiEnabled}
+                    className={`inline-flex h-8 items-center gap-2 rounded-[8px] border px-2.5 text-[12px] font-[550] transition ${
+                      aiEnabled ? "border-accent bg-accent-muted text-accent-ink" : "border-border bg-background text-muted hover:text-foreground"
+                    }`}
+                    onClick={() => {
+                      setAiEnabled((current) => !current);
+                      setPrediction("");
+                      setPredictionError("");
+                      setBibleSuggestion(null);
+                      setBibleSuggestionError("");
+                    }}
+                    type="button"
+                  >
+                    <Bot className="size-3.5" />
+                    Assistant IA
+                  </button>
+                  <button
+                    aria-pressed={predictiveWritingEnabled}
+                    className={`inline-flex h-8 items-center gap-2 rounded-[8px] border px-2.5 text-[12px] font-[550] transition ${
+                      aiEnabled && predictiveWritingEnabled
+                        ? "border-accent bg-accent-muted text-accent-ink"
+                        : "border-border bg-background text-muted hover:text-foreground"
+                    }`}
+                    disabled={!aiEnabled}
+                    onClick={() => {
+                      setPredictiveWritingEnabled((current) => !current);
+                      setPrediction("");
+                      setPredictionError("");
+                    }}
+                    type="button"
+                  >
+                    <BrainCircuit className="size-3.5" />
+                    Prédiction pendant l&apos;écriture
+                  </button>
+                </div> : null}
                 {error ? <Alert>{error}</Alert> : null}
               </div>
+
+              {mobileAssistantPanel}
 
             {draft.sections.length ? (
               <div className="grid gap-3">
                 {draft.sections.map((section, index) => (
                   <section
-                    className={`rounded-[12px] border bg-surface p-4 shadow-[0_1px_2px_rgba(20,20,25,.03)] transition ${
+                    className={`rounded-[12px] border bg-surface p-3.5 shadow-[0_1px_2px_rgba(20,20,25,.03)] transition sm:p-4 ${
                       section.pending ? "opacity-70" : ""
                     } ${section.id === activeSection?.id ? "border-accent bg-[color-mix(in_oklab,var(--accent)_3%,var(--surface))]" : "border-border"
                     }`}
@@ -447,12 +822,135 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
+                    {showEditorToolbar ? <div className="mb-2 grid gap-1.5 rounded-[8px] border border-line2 bg-background px-2 py-1.5 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
+                      <div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
+                        <Button aria-label="Titre 1" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "# ", "", "Titre")} size="sm" title="Titre 1" type="button" variant="quiet">
+                          <Heading1 className="size-4" />
+                        </Button>
+                        <Button aria-label="Titre 2" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "## ", "", "Titre")} size="sm" title="Titre 2" type="button" variant="quiet">
+                          <Heading2 className="size-4" />
+                        </Button>
+                        <Button aria-label="Gras" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "**", "**")} size="sm" title="Gras" type="button" variant="quiet">
+                          <Bold className="size-4" />
+                        </Button>
+                        <Button aria-label="Italique" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "_", "_")} size="sm" title="Italique" type="button" variant="quiet">
+                          <Italic className="size-4" />
+                        </Button>
+                        <Button aria-label="Surligner" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "==", "==")} size="sm" title="Surligner" type="button" variant="quiet">
+                          <Highlighter className="size-4" />
+                        </Button>
+                        <Button aria-label="Texte plus grand" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "<big>", "</big>")} size="sm" title="Texte plus grand" type="button" variant="quiet">
+                          <Text className="size-4" />
+                        </Button>
+                        <Button aria-label="Texte plus petit" className="h-7 shrink-0 px-2 text-[10.5px]" onClick={() => formatSelectionInSection(section, "<small>", "</small>")} size="sm" title="Texte plus petit" type="button" variant="quiet">
+                          <Text className="size-3.5" />
+                        </Button>
+                        <span className="mx-1 h-4 w-px shrink-0 bg-line" />
+                        <Button
+                          className="h-7 shrink-0 px-2.5 text-[11.5px]"
+                          leftIcon={<Pause />}
+                          onClick={() => insertIntoSection(section, "[pause 2s]")}
+                          size="sm"
+                          title="Pause courte"
+                          type="button"
+                          variant="quiet"
+                        >
+                          2s
+                        </Button>
+                        <Button
+                          className="h-7 shrink-0 px-2.5 text-[11.5px]"
+                          leftIcon={<Pause />}
+                          onClick={() => insertIntoSection(section, "[pause 5s]")}
+                          size="sm"
+                          title="Pause longue"
+                          type="button"
+                          variant="quiet"
+                        >
+                          5s
+                        </Button>
+                        <Button
+                          className="h-7 shrink-0 px-2.5 text-[11.5px]"
+                          leftIcon={<CornerDownLeft />}
+                          onClick={() => insertIntoSection(section, "\n\n")}
+                          size="sm"
+                          title="Nouveau paragraphe"
+                          type="button"
+                          variant="quiet"
+                        >
+                          ¶
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2 border-t border-line2 pt-1.5 font-mono text-[10.5px] text-faint sm:border-t-0 sm:pt-0">
+                        <span>{wordCount(section.body)} mots</span>
+                        <span className="h-3 w-px bg-line" />
+                        <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
+                      </div>
+                    </div> : null}
                     <textarea
-                      className="studio-textarea min-h-36 w-full resize-y rounded-[9px] border border-border bg-background px-3 py-2.5 leading-7 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
+                      className={`studio-textarea w-full resize-y rounded-[9px] border border-border bg-background px-3 py-2.5 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)] ${focusModeEnabled ? "min-h-56 leading-8" : "min-h-36 leading-7"}`}
                       onChange={(event) => updateSection(section.id, { body: event.target.value })}
                       placeholder="Écris le contenu de cette section..."
+                      ref={(element) => {
+                        sectionTextareaRefs.current[section.id] = element;
+                      }}
                       value={section.body}
                     />
+                    {aiEnabled && predictiveWritingEnabled && section.id === activeSection?.id && section.body.trim().length >= 80 ? (
+                      <div className="mt-2 rounded-[8px] border border-line2 bg-background px-3 py-2">
+                        {prediction && predictionContextKey === predictionKeyForSection(section) ? (
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <p className="m-0 min-w-0 flex-1 text-[12.5px] leading-5 text-muted">
+                              <span className="font-[550] text-foreground">Suite proposée: </span>
+                              {prediction}
+                            </p>
+                            <Button onClick={insertPrediction} size="sm" type="button" variant="ghost">Insérer</Button>
+                          </div>
+                        ) : (
+                          <p className="m-0 text-[12px] leading-5 text-faint">
+                            {predictionLoading && predictionContextKey === predictionKeyForSection(section)
+                              ? "L'IA prépare une suite dans ton style..."
+                              : predictionError || "Continue à écrire: une proposition apparaîtra ici."}
+                          </p>
+                        )}
+                      </div>
+                    ) : null}
+                    {aiEnabled && bibleSuggestionsEnabled && section.id === activeSection?.id && section.body.trim().length >= 60 ? (
+                      <div className="mt-2 rounded-[8px] border border-[color-mix(in_oklab,var(--accent)_22%,var(--line))] bg-[color-mix(in_oklab,var(--accent)_5%,var(--bg))] px-3 py-2">
+                        {bibleSuggestion && bibleSuggestionContextKey === bibleSuggestionKeyForSection(section) ? (
+                          <div className="grid gap-2">
+                            <div className="flex items-start gap-2">
+                              <BookOpen className="mt-0.5 size-4 shrink-0 text-accent-ink" />
+                              <div className="min-w-0 flex-1">
+                                <p className="m-0 text-[12.5px] font-[550] leading-5 text-foreground">
+                                  {bibleSuggestion.reference}
+                                </p>
+                                <p className="m-0 mt-0.5 text-[12.5px] leading-5 text-muted">{bibleSuggestion.reason}</p>
+                              </div>
+                            </div>
+                            <p className="m-0 border-l-2 border-accent px-2 text-[12.5px] italic leading-5 text-muted">
+                              &quot;{bibleSuggestion.text}&quot;
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              <Button leftIcon={<BookOpen />} onClick={insertBibleReferenceInline} size="sm" type="button" variant="ghost">
+                                Ajouter ({bibleSuggestion.reference})
+                              </Button>
+                              <Button leftIcon={<Quote />} onClick={insertFullBibleQuote} size="sm" type="button" variant="ghost">
+                                Insérer le verset
+                              </Button>
+                              <Button onClick={() => setBibleSuggestion(null)} size="sm" type="button" variant="quiet">
+                                Ignorer
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="m-0 text-[12px] leading-5 text-faint">
+                            {bibleSuggestionLoading && bibleSuggestionContextKey === bibleSuggestionKeyForSection(section)
+                              ? "Recherche d'un lien biblique..."
+                              : bibleSuggestionError || "Une suggestion biblique apparaîtra si l'idée rejoint un verset."}
+                          </p>
+                        )}
+                      </div>
+                    ) : null}
                   </section>
                 ))}
               </div>
@@ -464,29 +962,45 @@ export function TalkEditor({ talk }: { talk: Talk }) {
               </div>
             )}
 
-            <div className="sticky bottom-4 mt-6 flex justify-end">
+            {showStatusBar ? <div className="sticky bottom-4 mt-6 flex justify-end">
               <div className="flex items-center gap-2 rounded-[10px] border border-border bg-surface px-3 py-2 shadow-studio">
                 <Save className="size-4 text-faint" />
                 <span className="font-mono text-[10.5px] text-faint">{durationMinutes} min</span>
                 <AutosaveStatus state={status} />
+                {focusModeEnabled ? <Button onClick={() => setFocusMode(false)} size="sm" type="button" variant="ghost">Quitter focus</Button> : null}
               </div>
-            </div>
+            </div> : null}
             </article>
 
-            <aside className="hidden w-[286px] shrink-0 xl:block">
+            {showAssistantPanel ? <aside className="hidden w-[286px] shrink-0 xl:block">
               <div className="sticky top-0">
-                <AssistantPanel
-                  activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
-                  audience={draft.audience}
-                  durationMinutes={durationMinutes}
-                  language={draft.language}
-                  onResult={setAiResult}
-                  talkId={talk.id}
-                  title={draft.title}
-                  type={draft.type}
-                />
+                {aiEnabled ? (
+                  <AssistantPanel
+                    activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
+                    audience={draft.audience}
+                    durationMinutes={durationMinutes}
+                    language={draft.language}
+                    onResult={setAiResult}
+                    talkId={talk.id}
+                    title={draft.title}
+                    type={draft.type}
+                  />
+                ) : (
+                  <div className="rounded-[12px] border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(20,20,25,.03)]">
+                    <div className="mb-4 flex items-start gap-3">
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-panel text-faint">
+                        <Bot className="size-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-foreground">Assistant IA désactivé</h2>
+                        <p className="mt-1 text-[12.5px] leading-5 text-muted">L&apos;écriture reste entièrement manuelle.</p>
+                      </div>
+                    </div>
+                    <Button leftIcon={<Bot />} onClick={() => setAiEnabled(true)} size="sm" type="button" variant="ghost">Réactiver l&apos;IA</Button>
+                  </div>
+                )}
               </div>
-            </aside>
+            </aside> : null}
           </div>
         </main>
       </div>
@@ -495,6 +1009,11 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           onAppend={() => {
             if (aiResult.kind === "outline") {
               insertOutlineSections(aiResult.sections);
+            } else if (aiResult.kind === "bible") {
+              insertBibleSuggestion(aiResult);
+            } else if (aiResult.kind === "suggestion") {
+              if (activeSection) insertIntoSection(activeSection, aiResult.text);
+              closeAiPreview();
             } else {
               appendToActiveSection(aiResult);
             }

@@ -5,14 +5,7 @@ import { parseCues } from "./parseCues";
 
 function splitIntoChunks(text: string) {
   const sentences = text.match(/[^.!?…]+[.!?…]+["'’»]?/g) ?? (text.trim() ? [text] : []);
-  const chunks: string[] = [];
-
-  for (let index = 0; index < sentences.length; index += 2) {
-    const chunk = sentences.slice(index, index + 2).join(" ").trim();
-    if (chunk) chunks.push(chunk);
-  }
-
-  return chunks;
+  return sentences.map((sentence) => sentence.trim()).filter(Boolean);
 }
 
 function makeItem(input: Omit<SpeakingItem, "segments" | "estimatedSeconds">): SpeakingItem {

@@ -9,7 +9,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-bg text-ink">
       <Sidebar talkCount={talkCount} userName={profile?.full_name ?? "Speaker"} />
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="min-w-0 flex-1 pb-[76px] md:pb-0">{children}</main>
     </div>
   );
 }

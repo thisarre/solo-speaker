@@ -11,6 +11,7 @@ type UseSpeakingKeyboardArgs = {
   onSmallerText: () => void;
   onLargerText: () => void;
   onExit: () => void;
+  onToggleVoiceFollow?: () => void;
 };
 
 export function useSpeakingKeyboard({
@@ -21,7 +22,8 @@ export function useSpeakingKeyboard({
   onFaster,
   onSmallerText,
   onLargerText,
-  onExit
+  onExit,
+  onToggleVoiceFollow
 }: UseSpeakingKeyboardArgs) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -44,10 +46,12 @@ export function useSpeakingKeyboard({
         onSmallerText();
       } else if (event.key === "]") {
         onLargerText();
+      } else if (event.key.toLowerCase() === "v") {
+        onToggleVoiceFollow?.();
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onExit, onFaster, onLargerText, onNextSection, onPreviousSection, onSlower, onSmallerText, onTogglePlay]);
+  }, [onExit, onFaster, onLargerText, onNextSection, onPreviousSection, onSlower, onSmallerText, onTogglePlay, onToggleVoiceFollow]);
 }

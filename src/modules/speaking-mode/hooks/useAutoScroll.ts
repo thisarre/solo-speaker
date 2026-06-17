@@ -1,6 +1,7 @@
 "use client";
 
-import { RefObject, useCallback, useEffect, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { canAutoScroll, nextScrollTop } from "../lib/auto-scroll-logic";
 import type { SpeakingItem } from "../types";
 
 type UseAutoScrollArgs = {
@@ -9,9 +10,15 @@ type UseAutoScrollArgs = {
   items: SpeakingItem[];
   isPlaying: boolean;
   speed: number;
-  fontSize: number;
   markerRatio?: number;
   onEnd?: () => void;
+  readingAnchorRatio?: number;
+  voiceFollowActive?: boolean;
+};
+
+type ScrollToItemOptions = {
+  align?: "anchor" | "center" | "marker";
+  smooth?: boolean;
 };
 
 function getScrollContainer(containerRef: RefObject<HTMLDivElement | null>) {
@@ -24,19 +31,26 @@ export function useAutoScroll({
   items,
   isPlaying,
   speed,
-  fontSize,
   markerRatio = 0.42,
-  onEnd
+  onEnd,
+  readingAnchorRatio = 0.42,
+  voiceFollowActive = false
 }: UseAutoScrollArgs) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [virtualOffset, setVirtualOffset] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const animationRef = useRef(0);
+  const scrollOffsetRef = useRef(0);
+
+  useEffect(() => {
+    scrollOffsetRef.current = scrollOffset;
+  }, [scrollOffset]);
 
   const recompute = useCallback(() => {
     const container = getScrollContainer(containerRef);
     if (!container) return;
 
-    const marker = container.getBoundingClientRect().top + container.clientHeight * markerRatio;
+    const marker = container.getBoundingClientRect().top + container.clientHeight * readingAnchorRatio;
     let bestIndex = 0;
     let bestDistance = Infinity;
 
@@ -45,9 +59,7 @@ export function useAutoScroll({
       if (!element) return;
 
       const rect = element.getBoundingClientRect();
-      const virtualTop = rect.top - virtualOffset;
-      const virtualBottom = rect.bottom - virtualOffset;
-      const distance = Math.abs((virtualTop + virtualBottom) / 2 - marker);
+      const distance = Math.abs((rect.top + rect.bottom) / 2 - marker);
       if (distance < bestDistance) {
         bestDistance = distance;
         bestIndex = index;
@@ -57,19 +69,81 @@ export function useAutoScroll({
     setCurrentIndex((current) => (current === bestIndex ? current : bestIndex));
 
     const maxScroll = container.scrollHeight - container.clientHeight;
-    setProgress(maxScroll > 0 ? virtualOffset / maxScroll : 0);
-  }, [containerRef, itemRefs, items, markerRatio, virtualOffset]);
+    const nextOffset = container.scrollTop;
+    scrollOffsetRef.current = nextOffset;
+    setScrollOffset(nextOffset);
+    setProgress(maxScroll > 0 ? nextOffset / maxScroll : 0);
+  }, [containerRef, itemRefs, items, readingAnchorRatio]);
 
   const scrollToItem = useCallback(
-    (index: number) => {
+    (index: number, options: ScrollToItemOptions = {}) => {
       const container = containerRef.current;
       const item = items[index];
       const element = item ? itemRefs.current[item.id] : null;
       if (!container || !element) return;
 
-      setVirtualOffset(Math.max(0, element.offsetTop - container.clientHeight * markerRatio));
+      const scrollContainer = container;
+      const maxScroll = Math.max(0, container.scrollHeight - container.clientHeight);
+      const target =
+        options.align === "anchor"
+          ? Math.min(
+              maxScroll,
+              Math.max(
+                0,
+                container.scrollTop +
+                  element.getBoundingClientRect().top -
+                  container.getBoundingClientRect().top +
+                  element.offsetHeight * 0.5 -
+                  container.clientHeight * readingAnchorRatio
+              )
+            )
+          : Math.min(
+              maxScroll,
+              Math.max(
+                0,
+                element.offsetTop + element.offsetHeight * 0.5 - container.clientHeight * (options.align === "center" ? 0.5 : markerRatio)
+              )
+            );
+
+      cancelAnimationFrame(animationRef.current);
+
+      if (!options.smooth) {
+        scrollContainer.scrollTop = target;
+        scrollOffsetRef.current = target;
+        setScrollOffset(target);
+        setCurrentIndex(index);
+        setProgress(maxScroll > 0 ? target / maxScroll : 0);
+        return;
+      }
+
+      const start = scrollContainer.scrollTop;
+      const distance = target - start;
+      const startedAt = performance.now();
+      const duration =
+        options.align === "anchor"
+          ? Math.min(360, Math.max(120, Math.abs(distance) * 0.28))
+          : Math.min(620, Math.max(220, Math.abs(distance) * 0.45));
+
+      function animate(now: number) {
+        const t = Math.min(1, (now - startedAt) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const next = start + distance * eased;
+
+        scrollContainer.scrollTop = next;
+        scrollOffsetRef.current = next;
+        setScrollOffset(next);
+        setProgress(maxScroll > 0 ? next / maxScroll : 0);
+
+        if (t < 1) {
+          animationRef.current = requestAnimationFrame(animate);
+        } else {
+          setCurrentIndex(index);
+        }
+      }
+
+      animationRef.current = requestAnimationFrame(animate);
     },
-    [containerRef, itemRefs, items, markerRatio]
+    [containerRef, itemRefs, items, markerRatio, readingAnchorRatio]
   );
 
   const jumpSection = useCallback(
@@ -83,7 +157,7 @@ export function useAutoScroll({
         )
       );
       const targetIndex = items.findIndex((item) => item.kind === "heading" && item.sectionIndex === targetSectionIndex);
-      if (targetIndex >= 0) scrollToItem(targetIndex);
+      if (targetIndex >= 0) scrollToItem(targetIndex, { smooth: true });
     },
     [currentIndex, items, scrollToItem]
   );
@@ -96,6 +170,8 @@ export function useAutoScroll({
   useEffect(() => {
     if (!isPlaying) return;
 
+    cancelAnimationFrame(animationRef.current);
+
     let animationFrame = 0;
     let last = performance.now();
 
@@ -106,11 +182,28 @@ export function useAutoScroll({
 
       if (activeContainer) {
         const maxScroll = Math.max(0, activeContainer.scrollHeight - activeContainer.clientHeight);
-        setVirtualOffset((current) => {
-          const next = Math.min(maxScroll, current + fontSize * 0.62 * speed * deltaSeconds);
+        if (canAutoScroll({
+          clientHeight: activeContainer.clientHeight,
+          isPlaying,
+          scrollHeight: activeContainer.scrollHeight,
+          scrollTop: activeContainer.scrollTop,
+          voiceFollowActive
+        })) {
+          const next = nextScrollTop({
+            clientHeight: activeContainer.clientHeight,
+            deltaSeconds,
+            scrollHeight: activeContainer.scrollHeight,
+            scrollTop: activeContainer.scrollTop,
+            speedMultiplier: speed
+          });
+          activeContainer.scrollTop = next;
+          scrollOffsetRef.current = next;
+          setScrollOffset(next);
+          setProgress(maxScroll > 0 ? next / maxScroll : 0);
           if (next >= maxScroll - 1) onEnd?.();
-          return next;
-        });
+        } else {
+          setProgress(maxScroll > 0 ? activeContainer.scrollTop / maxScroll : 0);
+        }
       }
 
       recompute();
@@ -119,7 +212,9 @@ export function useAutoScroll({
 
     animationFrame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationFrame);
-  }, [containerRef, fontSize, isPlaying, onEnd, recompute, speed]);
+  }, [containerRef, isPlaying, onEnd, recompute, speed, voiceFollowActive]);
 
-  return { currentIndex, progress, recompute, scrollToItem, jumpSection, virtualOffset };
+  useEffect(() => () => cancelAnimationFrame(animationRef.current), []);
+
+  return { currentIndex, progress, recompute, scrollToItem, jumpSection, virtualOffset: scrollOffset };
 }

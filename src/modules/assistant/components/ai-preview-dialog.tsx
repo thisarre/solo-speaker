@@ -38,6 +38,17 @@ export function AiPreviewDialog({ result, onAppend, onClose, onReplace }: AiPrev
                 </article>
               ))}
             </div>
+          ) : result.kind === "bible" ? (
+            <article className="rounded-[8px] border border-line bg-surface p-4">
+              <h3 className="m-0 text-[15px] font-semibold tracking-[0] text-ink">{result.reference}</h3>
+              <p className="m-0 mt-3 whitespace-pre-wrap text-[14px] leading-7 text-mute">{result.text}</p>
+              <p className="m-0 mt-3 border-t border-line2 pt-3 text-[13px] leading-6 text-mute">{result.reason}</p>
+            </article>
+          ) : result.kind === "suggestion" ? (
+            <article className="rounded-[8px] border border-line bg-surface p-4">
+              <h3 className="m-0 text-[15px] font-semibold tracking-[0] text-ink">Suite proposée</h3>
+              <p className="m-0 mt-3 whitespace-pre-wrap text-[14px] leading-7 text-mute">{result.text}</p>
+            </article>
           ) : (
             <article className="rounded-[8px] border border-line bg-surface p-4">
               <h3 className="m-0 text-[15px] font-semibold tracking-[0] text-ink">{result.heading || "Section"}</h3>
@@ -52,7 +63,7 @@ export function AiPreviewDialog({ result, onAppend, onClose, onReplace }: AiPrev
             <Button onClick={onReplace} type="button" variant="ghost">Remplacer</Button>
           ) : null}
           <Button onClick={onAppend} type="button" variant="primary">
-            {result.kind === "outline" ? "Ajouter les sections" : "Ajouter à la suite"}
+            {result.kind === "outline" ? "Ajouter les sections" : result.kind === "bible" ? "Insérer le verset" : "Ajouter à la suite"}
           </Button>
         </footer>
       </section>

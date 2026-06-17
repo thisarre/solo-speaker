@@ -6,6 +6,8 @@ import { Alert } from "@/components/ui/Alert";
 import { cn } from "@/lib/utils";
 import { AssistantActionButton } from "@/modules/assistant/components/assistant-action-button";
 import { generateAssistantContent } from "@/modules/assistant/actions";
+import { getEnabledAssistantFeatures } from "@/modules/assistant/feature-registry";
+import { useAssistantFeatureSettings } from "@/modules/assistant/feature-settings";
 import type {
   AssistantAction,
   AssistantGenerateResult,
@@ -41,6 +43,8 @@ export function AssistantPanel({
   const [targetMinutes, setTargetMinutes] = useState(String(durationMinutes));
   const [loadingAction, setLoadingAction] = useState<AssistantAction | null>(null);
   const [error, setError] = useState("");
+  const { settings } = useAssistantFeatureSettings();
+  const enabledFeatures = getEnabledAssistantFeatures(type, settings);
 
   const parsedDuration = Math.max(1, Math.round(Number(targetMinutes) || durationMinutes || 10));
   const isSectionActionDisabled = !activeSection || loadingAction !== null;
@@ -107,18 +111,21 @@ export function AssistantPanel({
         </label>
 
         <div className="grid gap-2">
-          <AssistantActionButton loading={loadingAction === "outline"} onClick={() => runAssistant("outline")}>
+          {enabledFeatures.has("outline") ? <AssistantActionButton loading={loadingAction === "outline"} onClick={() => runAssistant("outline")}>
             Générer un plan
-          </AssistantActionButton>
-          <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "expand-section"} onClick={() => runAssistant("expand-section")}>
+          </AssistantActionButton> : null}
+          {enabledFeatures.has("expand-section") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "expand-section"} onClick={() => runAssistant("expand-section")}>
             Développer la section
-          </AssistantActionButton>
-          <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "oralize-section"} onClick={() => runAssistant("oralize-section")}>
+          </AssistantActionButton> : null}
+          {enabledFeatures.has("oralize-section") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "oralize-section"} onClick={() => runAssistant("oralize-section")}>
             Rendre plus oral
-          </AssistantActionButton>
-          <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "shorten-section"} onClick={() => runAssistant("shorten-section")}>
+          </AssistantActionButton> : null}
+          {enabledFeatures.has("shorten-section") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "shorten-section"} onClick={() => runAssistant("shorten-section")}>
             Raccourcir
-          </AssistantActionButton>
+          </AssistantActionButton> : null}
+          {enabledFeatures.has("suggest-bible") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "suggest-bible"} onClick={() => runAssistant("suggest-bible")}>
+            Proposer un verset
+          </AssistantActionButton> : null}
         </div>
 
         {activeSection ? (

@@ -1,223 +1,212 @@
 import Link from "next/link";
-import { ArrowRight, Gauge, Mic2, PanelsTopLeft, Play, Sparkles, Timer, Wand2 } from "lucide-react";
+import { ArrowRight, Check, FileText, Mic2, PanelsTopLeft, Sparkles, Timer, Wand2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Logo } from "@/components/ui/Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { LandingMotion } from "@/modules/landing/components/landing-motion";
 import { ProductPreview } from "@/modules/landing/components/product-preview";
 
-const benefits = [
+const features = [
   {
-    title: "Structurez votre message",
-    text: "Transformez une idée brute en plan clair, sections ordonnées et progression facile à suivre.",
+    title: "Structurer",
+    text: "Clarifiez l'objectif, l'audience et les sections avant de développer.",
     icon: PanelsTopLeft
   },
   {
-    title: "Améliorez votre contenu avec l'IA",
-    text: "Développez, oralisez ou raccourcissez une section sans remplacer votre voix.",
+    title: "Oraliser",
+    text: "Rendez une section plus naturelle, plus courte ou plus vivante sans changer votre voix.",
     icon: Wand2
   },
   {
-    title: "Présentez avec Speaking Mode",
-    text: "Passez du brouillon au mode présentation avec timer, progression et lecture fluide.",
+    title: "Présenter",
+    text: "Répétez avec un prompteur vocal, un timer et une position de lecture réglable.",
     icon: Mic2
   }
 ];
 
-const workflow = [
-  ["Préparer", "Créer le talk, poser l'audience, clarifier l'objectif."],
-  ["Améliorer", "Utiliser l'IA pour rendre le texte plus net et plus oral."],
-  ["Présenter", "Ouvrir Speaking Mode et garder le fil pendant la prise de parole."]
-];
+const formats = ["Sermon", "Conférence", "Formation", "Pitch", "Discours"];
 
-const useCases = ["Sermon", "Conférence", "Formation", "Pitch", "Discours"];
-
-const speakingFeatures = [
-  ["Auto-scroll", "Le texte avance avec le rythme prévu."],
-  ["Timer", "Une lecture claire du temps écoulé et restant."],
-  ["Progression", "Section courante et avancée globale visibles."],
-  ["Plein écran", "Une surface calme pour présenter sans distraction."],
-  ["Raccourcis", "Contrôle rapide au clavier pendant la session."]
+const prompterDetails = [
+  "Défilement progressif quand vous arrivez en fin de paragraphe",
+  "Texte actif net, sans encadrer chaque mot",
+  "Mode clair et sombre cohérent avec le reste de l'application",
+  "Fallback manuel avec vitesse, taille et position de lecture"
 ];
 
 export function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-20 border-b border-line bg-[color-mix(in_oklab,var(--bg)_92%,transparent)] backdrop-blur-md">
+      <LandingMotion />
+
+      <header className="sticky top-0 z-30 border-b border-line bg-[color-mix(in_oklab,var(--bg)_88%,transparent)] backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-5 md:px-8">
           <Link aria-label="Solo Speaker" href="/">
             <Logo />
           </Link>
           <nav className="hidden items-center gap-6 text-[13px] font-[550] text-muted md:flex">
-            <a className="transition hover:text-foreground" href="#features">Fonctionnalités</a>
-            <a className="transition hover:text-foreground" href="#use-cases">Cas d&apos;usage</a>
+            <a className="transition hover:text-foreground" href="#studio">Studio</a>
+            <a className="transition hover:text-foreground" href="#prompteur">Prompteur</a>
+            <a className="transition hover:text-foreground" href="#formats">Formats</a>
           </nav>
           <div className="flex items-center gap-2">
+            <ThemeToggle className="hidden w-[92px] sm:inline-grid" />
             <Link className="hidden sm:block" href="/login">
               <Button size="sm" variant="quiet">Connexion</Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm" variant="primary">Commencer</Button>
+              <Button size="sm" variant="primary">Créer un talk</Button>
             </Link>
           </div>
         </div>
       </header>
 
       <section className="border-b border-line">
-        <div className="mx-auto grid min-h-[calc(100vh-56px)] w-full max-w-6xl content-center gap-8 px-5 py-10 md:px-8 lg:grid-cols-[minmax(0,1fr)_520px] lg:py-14">
-          <div className="flex max-w-2xl flex-col justify-center">
-            <Badge className="w-fit" tone="accent">AI Speaking Studio</Badge>
-            <h1 className="mt-5 max-w-3xl text-[44px] font-semibold leading-[.98] tracking-[0] text-foreground md:text-[64px] lg:text-[72px]">
-              Préparez vos prises de parole avec l&apos;IA.
+        <div className="mx-auto grid min-h-[calc(100svh-56px)] w-full max-w-6xl items-center gap-10 px-5 py-10 md:px-8 lg:grid-cols-[minmax(0,.9fr)_minmax(460px,1fr)] lg:py-16">
+          <div className="max-w-2xl">
+            <Badge data-landing-reveal tone="accent">AI Speaking Studio</Badge>
+            <h1 className="m-0 mt-5 text-[46px] font-bold leading-[.96] tracking-[0] md:text-[68px] lg:text-[76px]" data-landing-reveal>
+              Préparez vos prises de parole. Gardez le fil en live.
             </h1>
-            <p className="mt-5 max-w-xl text-[16px] leading-7 text-muted">
-              Créez, structurez, améliorez et présentez vos talks depuis un studio sobre pensé pour les speakers.
+            <p className="m-0 mt-5 max-w-xl text-[17px] leading-8 text-muted" data-landing-reveal>
+              Structurez vos idées, rendez votre texte plus oral, puis répétez avec un prompteur vocal qui suit votre rythme.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-7 flex flex-wrap gap-3" data-landing-reveal>
               <Link href="/signup">
-                <Button leftIcon={<ArrowRight />} variant="primary">Commencer</Button>
+                <Button className="h-10 rounded-[8px] px-4" leftIcon={<ArrowRight />} variant="primary">Créer mon premier talk</Button>
               </Link>
               <Link href="/dashboard">
-                <Button leftIcon={<PanelsTopLeft />} variant="ghost">Voir le dashboard</Button>
+                <Button className="h-10 rounded-[8px] px-4" leftIcon={<PanelsTopLeft />} variant="ghost">Voir le studio</Button>
               </Link>
             </div>
-            <div className="mt-8 grid max-w-lg grid-cols-3 gap-3 border-t border-line pt-4">
-              {["Plan", "IA", "Live"].map((item) => (
-                <div key={item}>
-                  <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{item}</p>
-                  <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">
-                    {item === "Plan" ? "Sections nettes" : item === "IA" ? "Texte oral" : "Mode scène"}
-                  </p>
+            <div className="mt-8 grid max-w-lg grid-cols-3 gap-4 border-t border-line pt-5" data-landing-reveal>
+              {[
+                ["Plan", "Sections nettes"],
+                ["IA", "Texte plus oral"],
+                ["Live", "Prompteur vocal"]
+              ].map(([title, text]) => (
+                <div key={title}>
+                  <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{title}</p>
+                  <p className="m-0 mt-1 text-[13px] leading-5 text-muted">{text}</p>
                 </div>
               ))}
             </div>
           </div>
-          <ProductPreview />
+
+          <div data-landing-reveal>
+            <ProductPreview />
+          </div>
         </div>
       </section>
 
-      <section className="border-b border-line py-14 md:py-16" id="features">
+      <section className="border-b border-line py-14 md:py-18" id="studio">
         <div className="mx-auto w-full max-w-6xl px-5 md:px-8">
-          <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Fonctionnalités</p>
-              <h2 className="m-0 mt-2 text-[28px] font-semibold tracking-[0] text-foreground md:text-[34px]">Un studio pour aller de l&apos;idée à la scène.</h2>
-            </div>
-            <p className="m-0 max-w-sm text-[13.5px] leading-6 text-muted">
-              Solo Speaker garde les contrôles essentiels proches du texte, sans transformer la préparation en usine.
-            </p>
+          <div className="mb-7 max-w-2xl" data-scroll-reveal>
+            <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Studio</p>
+            <h2 className="m-0 mt-2 text-[30px] font-bold leading-tight tracking-[0] md:text-[42px]">
+              Un flux court entre l&apos;idée et la prise de parole.
+            </h2>
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
-            {benefits.map((benefit) => {
-              const Icon = benefit.icon;
+            {features.map((feature) => {
+              const Icon = feature.icon;
               return (
-                <Card className="p-4" key={benefit.title}>
-                  <div className="mb-4 flex size-9 items-center justify-center rounded-[9px] bg-accent-muted text-accent-ink">
+                <article className="rounded-[8px] border border-line bg-surface p-4 shadow-[0_1px_2px_rgba(20,20,25,.04)]" data-scroll-reveal key={feature.title}>
+                  <div className="mb-5 flex size-9 items-center justify-center rounded-[7px] bg-foreground text-background">
                     <Icon className="size-4" />
                   </div>
-                  <h3 className="m-0 text-[16px] font-semibold tracking-[0] text-foreground">{benefit.title}</h3>
-                  <p className="m-0 mt-2 text-[13px] leading-6 text-muted">{benefit.text}</p>
-                </Card>
+                  <h3 className="m-0 text-[17px] font-semibold tracking-[0]">{feature.title}</h3>
+                  <p className="m-0 mt-2 text-[13.5px] leading-6 text-muted">{feature.text}</p>
+                </article>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="border-b border-line bg-panel py-14 md:py-16">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 md:px-8 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <div>
-            <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Workflow</p>
-            <h2 className="m-0 mt-2 text-[28px] font-semibold tracking-[0] text-foreground">Trois gestes. Un talk plus clair.</h2>
-          </div>
-          <div className="grid gap-2">
-            {workflow.map(([title, text], index) => (
-              <div className="grid gap-3 rounded-[12px] border border-border bg-surface p-4 md:grid-cols-[72px_1fr]" key={title}>
-                <span className="font-mono text-[11px] uppercase tracking-[.12em] text-faint">{String(index + 1).padStart(2, "0")}</span>
-                <div>
-                  <h3 className="m-0 text-[16px] font-semibold text-foreground">{title}</h3>
-                  <p className="m-0 mt-1 text-[13px] leading-6 text-muted">{text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-line py-14 md:py-16" id="use-cases">
-        <div className="mx-auto w-full max-w-6xl px-5 md:px-8">
-          <div className="mb-6 max-w-2xl">
-            <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Cas d&apos;usage</p>
-            <h2 className="m-0 mt-2 text-[28px] font-semibold tracking-[0] text-foreground">Pour toutes les prises de parole structurées.</h2>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            {useCases.map((item) => (
-              <Card className="p-3" key={item}>
-                <p className="m-0 text-[14px] font-semibold text-foreground">{item}</p>
-                <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">Plan, sections, répétition.</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-line bg-panel py-14 md:py-16">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_420px]">
-          <div>
+      <section className="border-b border-line bg-panel py-14 md:py-18" id="prompteur">
+        <div className="mx-auto grid w-full max-w-6xl gap-9 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_430px]">
+          <div data-scroll-reveal>
             <Badge tone="neutral">Speaking Mode</Badge>
-            <h2 className="m-0 mt-4 text-[30px] font-semibold leading-tight tracking-[0] text-foreground md:text-[42px]">
-              Une interface calme quand vient le moment de parler.
+            <h2 className="m-0 mt-4 max-w-3xl text-[32px] font-bold leading-tight tracking-[0] md:text-[48px]">
+              Le prompteur prépare la suite avant le bloc suivant.
             </h2>
-            <p className="m-0 mt-4 max-w-xl text-[14px] leading-7 text-muted">
-              Le mode présentation retire les distractions et garde sous les yeux le texte, le temps, la progression et les repères utiles.
+            <p className="m-0 mt-4 max-w-2xl text-[15px] leading-7 text-muted">
+              Le suivi vocal estime votre progression dans le paragraphe. Le texte actif reste lisible, la suite arrive doucement, et vous ne vous retrouvez pas bloqué sur la dernière ligne.
             </p>
-            <div className="mt-6 grid gap-2 sm:grid-cols-2">
-              {speakingFeatures.map(([title, text]) => (
-                <div className="rounded-[10px] border border-border bg-surface p-3" key={title}>
-                  <p className="m-0 text-[13.5px] font-semibold text-foreground">{title}</p>
-                  <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">{text}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
-          <div className="rounded-[12px] border border-border bg-[color-mix(in_oklab,var(--ink)_92%,var(--bg))] p-4 text-background shadow-[0_1px_2px_rgba(20,20,25,.04)]">
-            <div className="mb-10 flex items-center justify-between font-mono text-[10px] uppercase tracking-[.12em] text-[color-mix(in_oklab,var(--bg)_62%,transparent)]">
-              <span>Live</span>
-              <span>Section 3 · 5</span>
+          <div className="rounded-[8px] border border-line bg-surface p-4" data-scroll-reveal>
+            <div className="mb-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-[.12em] text-faint">
+              <span>Prompteur</span>
+              <span>Voice follow</span>
             </div>
-            <p className="m-0 text-[25px] font-semibold leading-tight tracking-[0]">Gardez une phrase simple, puis laissez respirer.</p>
-            <p className="m-0 mt-5 text-[14px] leading-7 text-[color-mix(in_oklab,var(--bg)_78%,transparent)]">
-              Le timer avance, le script reste lisible, et chaque transition garde sa place pendant la présentation.
-            </p>
-            <div className="mt-8 grid grid-cols-3 gap-2 border-t border-[color-mix(in_oklab,var(--bg)_18%,transparent)] pt-4">
-              <div>
-                <Timer className="mb-2 size-4 text-[color-mix(in_oklab,var(--bg)_72%,transparent)]" />
-                <p className="m-0 font-mono text-[11px]">08:42</p>
-              </div>
-              <div>
-                <Gauge className="mb-2 size-4 text-[color-mix(in_oklab,var(--bg)_72%,transparent)]" />
-                <p className="m-0 font-mono text-[11px]">68%</p>
-              </div>
-              <div>
-                <Play className="mb-2 size-4 text-[color-mix(in_oklab,var(--bg)_72%,transparent)]" />
-                <p className="m-0 font-mono text-[11px]">Space</p>
+            <div className="relative rounded-[7px] bg-[#111217] p-5 text-[#ececf1]">
+              <p className="m-0 text-[25px] font-bold leading-tight tracking-[0]">Laissez le regard tenir la salle.</p>
+              <p className="m-0 mt-4 text-[18px] font-semibold leading-7 text-[#ececf1]/42">La transition arrive naturellement.</p>
+              <div className="mt-6 h-px origin-left bg-[#ececf1]/64" data-progress-line />
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <div className="border border-[#ececf1]/12 p-3">
+                  <Timer className="mb-2 size-4 text-[#ececf1]/60" />
+                  <p className="m-0 font-mono text-[11px]">08:42</p>
+                </div>
+                <div className="border border-[#ececf1]/12 p-3">
+                  <Mic2 className="mb-2 size-4 text-[#ececf1]/60" />
+                  <p className="m-0 font-mono text-[11px]">Following</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-14 md:py-16">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-5 px-5 md:flex-row md:items-center md:px-8">
-          <div>
-            <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Solo Speaker</p>
-            <h2 className="m-0 mt-2 text-[30px] font-semibold tracking-[0] text-foreground">Votre prochain talk commence ici.</h2>
+      <section className="border-b border-line py-14 md:py-18" id="formats">
+        <div className="mx-auto w-full max-w-6xl px-5 md:px-8">
+          <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between" data-scroll-reveal>
+            <div>
+              <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Formats</p>
+              <h2 className="m-0 mt-2 max-w-2xl text-[30px] font-bold leading-tight md:text-[42px]">Pour toutes les prises de parole structurées.</h2>
+            </div>
+            <p className="m-0 max-w-sm text-[14px] leading-6 text-muted">
+              Le même espace de travail pour préparer, améliorer et répéter sans changer d&apos;outil.
+            </p>
           </div>
-          <Link href="/signup">
-            <Button leftIcon={<Sparkles />} variant="primary">Créer un compte</Button>
-          </Link>
+
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            {formats.map((item) => (
+              <div className="rounded-[8px] border border-line bg-surface p-3" data-scroll-reveal key={item}>
+                <FileText className="mb-4 size-4 text-faint" />
+                <p className="m-0 text-[15px] font-semibold">{item}</p>
+                <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">Plan, voix, répétition.</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-panel py-14 text-foreground md:py-18">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 md:px-8 lg:grid-cols-[minmax(0,1fr)_430px]">
+          <div data-scroll-reveal>
+            <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Solo Speaker</p>
+            <h2 className="m-0 mt-3 max-w-2xl text-[34px] font-bold leading-tight tracking-[0] md:text-[52px]">
+              Votre prochaine prise de parole peut déjà respirer.
+            </h2>
+            <div className="mt-6">
+              <Link href="/signup">
+                <Button className="h-10 rounded-[8px] px-4" leftIcon={<Sparkles />} variant="primary">Créer mon premier talk</Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-2" data-scroll-reveal>
+            {prompterDetails.map((item) => (
+              <div className="flex items-start gap-3 rounded-[8px] border border-line bg-surface p-3" key={item}>
+                <Check className="mt-0.5 size-4 shrink-0 text-accent-ink" />
+                <p className="m-0 text-[14px] leading-6 text-muted">{item}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>

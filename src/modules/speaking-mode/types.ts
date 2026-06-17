@@ -25,6 +25,8 @@ export type SpeakingSettings = {
   fontSize: number;
 };
 
+export type ReadingPosition = "high" | "center" | "low";
+
 export type SpeakingModeProps = {
   talk: Talk;
 };

@@ -6,6 +6,8 @@ import { buildTalkOutlinePrompt } from "@/modules/assistant/prompts/build-talk-o
 import { buildSectionExpandPrompt } from "@/modules/assistant/prompts/build-section-expand-prompt";
 import { buildOralizeSectionPrompt } from "@/modules/assistant/prompts/build-oralize-section-prompt";
 import { buildShortenSectionPrompt } from "@/modules/assistant/prompts/build-shorten-section-prompt";
+import { buildPredictNextPrompt } from "@/modules/assistant/prompts/build-predict-next-prompt";
+import { buildBibleSuggestionPrompt } from "@/modules/assistant/prompts/build-bible-suggestion-prompt";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import type {
   AssistantAction,
@@ -18,7 +20,7 @@ import type {
 import type { TalkType } from "@/types/talk";
 import type { Database } from "@/lib/supabase/database.types";
 
-const actions = new Set<AssistantAction>(["outline", "expand-section", "oralize-section", "shorten-section"]);
+const actions = new Set<AssistantAction>(["outline", "expand-section", "oralize-section", "shorten-section", "predict-next", "suggest-bible"]);
 const talkTypes = new Set<TalkType>(["sermon", "conference", "training", "pitch", "speech"]);
 const languages = new Set(["FR", "EN"]);
 const openAiUrl = "https://api.openai.com/v1/responses";
@@ -113,6 +115,14 @@ function buildPrompt(input: AssistantGenerateRequest) {
     return buildOralizeSectionPrompt(input.talk, input.section);
   }
 
+  if (input.action === "predict-next") {
+    return buildPredictNextPrompt(input.talk, input.section);
+  }
+
+  if (input.action === "suggest-bible") {
+    return buildBibleSuggestionPrompt(input.talk, input.section);
+  }
+
   return buildShortenSectionPrompt(input.talk, input.section);
 }
 
@@ -136,6 +146,30 @@ function schemaFor(action: AssistantAction) {
         }
       },
       required: ["sections"]
+    };
+  }
+
+  if (action === "predict-next") {
+    return {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        text: { type: "string" }
+      },
+      required: ["text"]
+    };
+  }
+
+  if (action === "suggest-bible") {
+    return {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        reference: { type: "string" },
+        text: { type: "string" },
+        reason: { type: "string" }
+      },
+      required: ["reference", "text", "reason"]
     };
   }
 
@@ -199,6 +233,28 @@ function parseModelResult(action: AssistantAction, text: string): AssistantGener
     }
 
     return { ok: true, result: { kind: "outline", sections } };
+  }
+
+  if (action === "predict-next") {
+    const text = cleanString(record.text);
+
+    if (!text) {
+      return { ok: false, error: "La prédiction générée est vide." };
+    }
+
+    return { ok: true, result: { kind: "suggestion", text } };
+  }
+
+  if (action === "suggest-bible") {
+    const reference = cleanString(record.reference);
+    const verseText = cleanString(record.text);
+    const reason = cleanString(record.reason);
+
+    if (!reference || !verseText) {
+      return { ok: false, error: "La suggestion biblique est incomplète." };
+    }
+
+    return { ok: true, result: { kind: "bible", reference, text: verseText, reason } };
   }
 
   const heading = cleanString(record.heading);
@@ -343,7 +399,14 @@ export async function POST(request: NextRequest) {
       text: {
         format: {
           type: "json_schema",
-          name: action === "outline" ? "talk_outline" : "section_rewrite",
+          name:
+            action === "outline"
+              ? "talk_outline"
+              : action === "predict-next"
+                ? "next_text_prediction"
+                : action === "suggest-bible"
+                  ? "bible_suggestion"
+                  : "section_rewrite",
           strict: true,
           schema: schemaFor(action)
         }
