@@ -27,7 +27,11 @@ export async function getProfile() {
   if (!user) return null;
 
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("id, full_name").eq("id", user.id).maybeSingle();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, speaker_role, primary_talk_type, onboarding_completed_at, onboarding_help_requested, onboarding_support_note")
+    .eq("id", user.id)
+    .maybeSingle();
 
   return data;
 }

@@ -7,18 +7,33 @@ export type Database = {
         Row: {
           id: string;
           full_name: string | null;
+          speaker_role: "pastor" | "conference_speaker" | "trainer" | "founder" | "speaker";
+          primary_talk_type: "sermon" | "conference" | "training" | "pitch" | "speech";
+          onboarding_completed_at: string | null;
+          onboarding_help_requested: boolean;
+          onboarding_support_note: string;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id: string;
           full_name?: string | null;
+          speaker_role?: "pastor" | "conference_speaker" | "trainer" | "founder" | "speaker";
+          primary_talk_type?: "sermon" | "conference" | "training" | "pitch" | "speech";
+          onboarding_completed_at?: string | null;
+          onboarding_help_requested?: boolean;
+          onboarding_support_note?: string;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
           full_name?: string | null;
+          speaker_role?: "pastor" | "conference_speaker" | "trainer" | "founder" | "speaker";
+          primary_talk_type?: "sermon" | "conference" | "training" | "pitch" | "speech";
+          onboarding_completed_at?: string | null;
+          onboarding_help_requested?: boolean;
+          onboarding_support_note?: string;
           created_at?: string;
           updated_at?: string;
         };

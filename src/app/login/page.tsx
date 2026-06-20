@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { login } from "@/modules/auth/actions";
-import { getUser } from "@/modules/auth/queries";
+import { getProfile, getUser } from "@/modules/auth/queries";
 import { Alert } from "@/components/ui/Alert";
 import { AuthSubmitButton } from "@/components/auth/AuthSubmitButton";
 import { Input } from "@/components/ui/Input";
@@ -16,6 +16,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const user = await getUser();
 
   if (user) {
+    const profile = await getProfile();
+    if (profile && !profile.onboarding_completed_at) {
+      redirect(`/onboarding?next=${encodeURIComponent(params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard")}`);
+    }
     redirect(params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard");
   }
 

@@ -5,15 +5,22 @@ import {
   Bot,
   BrainCircuit,
   Check,
+  CircleHelp,
   FileText,
+  Gauge,
+  LifeBuoy,
   Mic2,
   Monitor,
+  Moon,
   Palette,
+  Radio,
   RotateCcw,
   SlidersHorizontal,
-  Sparkles
+  Sparkles,
+  Sun,
+  Type,
+  Wand2
 } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
   assistantFeatureDefinitions,
@@ -40,6 +47,7 @@ import {
 import { talkTypeLabels, type TalkType } from "@/types/talk";
 
 const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
+const coreFeatureIds = ["outline", "expand-section", "oralize-section", "shorten-section", "predict-next", "suggest-bible"] as const;
 
 function readPreference(key: string, fallback: string) {
   if (typeof window === "undefined") return fallback;
@@ -98,154 +106,232 @@ export function AssistantFeatureSettingsPage() {
   }
 
   return (
-    <div className="grid gap-5">
-      <section className="grid gap-3 md:grid-cols-3">
-        <SummaryCard icon={<Bot />} label="Assistant" value={aiEnabled ? "Actif" : "Manuel"} detail={predictiveWritingEnabled ? "Prédiction activée" : "Prédiction coupée"} />
-        <SummaryCard icon={<Monitor />} label="Prompteur" value={prompterTheme === "light" ? "Mode clair" : "Mode sombre"} detail={`${prompterSpeed}x · ${prompterFontSize}px`} />
-        <SummaryCard icon={<Sparkles />} label="Modules" value={extraFeatureCount ? `${extraFeatureCount} extra` : "Par défaut"} detail="Adaptés à chaque format" />
+    <div className="grid min-w-0 max-w-full gap-6">
+      <section className="w-full max-w-[calc(100vw-40px)] overflow-hidden rounded-[14px] border border-border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)]">
+        <div className="grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_320px] md:p-6">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-[8px] border border-line bg-panel px-2.5 py-1.5 font-mono text-[10.5px] uppercase tracking-[.12em] text-faint">
+              <SlidersHorizontal className="size-3.5" />
+              Console du studio
+            </div>
+            <h2 className="mb-0 mt-4 max-w-2xl text-[28px] font-semibold leading-[1.06] tracking-[0] text-foreground md:text-[36px]">
+              Réglez ce qui apparaît quand vous écrivez, répétez et présentez.
+            </h2>
+            <p className="mt-3 max-w-2xl text-[14px] leading-6 text-muted">
+              Ces préférences servent de base aux nouveaux talks. Les réglages propres à un talk restent ajustables dans l&apos;éditeur et le mode prompteur.
+            </p>
+          </div>
+
+          <div className="rounded-[12px] border border-line bg-background p-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="m-0 font-mono text-[10.5px] uppercase tracking-[.12em] text-faint">État actuel</p>
+              <span className="rounded-[6px] bg-accent-muted px-2 py-1 text-[11px] font-semibold text-accent-ink">Local</span>
+            </div>
+            <div className="grid gap-2">
+              <StatusLine icon={<Bot />} label="Assistant" value={aiEnabled ? "Actif" : "Masqué"} />
+              <StatusLine icon={<BrainCircuit />} label="Prédiction" value={predictiveWritingEnabled ? "Active" : "Coupée"} />
+              <StatusLine icon={<Monitor />} label="Prompteur" value={`${prompterTheme === "light" ? "Clair" : "Sombre"} · ${prompterSpeed}x · ${prompterFontSize}px`} />
+              <StatusLine icon={<Sparkles />} label="Modules extra" value={extraFeatureCount ? String(extraFeatureCount) : "Aucun"} />
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="grid gap-5">
+      <section className="grid w-full max-w-[calc(100vw-40px)] gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid min-w-0 gap-6">
           <SettingsPanel
-            icon={<SlidersHorizontal />}
-            title="Studio d'écriture"
-            description="Ces réglages pilotent ce qui apparaît dans l'éditeur quand vous préparez un talk."
+            eyebrow="Écriture"
+            icon={<Wand2 />}
+            title="Assistant dans l&apos;éditeur"
+            description="Choisissez le niveau d'aide affiché pendant la préparation d'un talk."
           >
             <div className="grid gap-3">
               <ToggleRow
                 checked={aiEnabled}
                 description="Affiche les actions de plan, reformulation, oralisation et raccourci dans l'éditeur."
                 icon={<Bot />}
-                label="Assistant IA dans l'éditeur"
+                label="Afficher l'assistant IA"
                 onChange={setAiEnabled}
               />
               <ToggleRow
                 checked={predictiveWritingEnabled}
-                description="Propose une suite pendant la rédaction quand une section contient assez de contexte."
+                description="Propose une suite uniquement quand le texte contient assez de contexte."
                 disabled={!aiEnabled}
                 icon={<BrainCircuit />}
-                label="Prédiction pendant l'écriture"
+                label="Suggérer la suite pendant l'écriture"
                 onChange={setPredictiveWritingEnabled}
               />
             </div>
           </SettingsPanel>
 
           <SettingsPanel
+            eyebrow="Prompteur"
             icon={<Monitor />}
-            title="Prompteur"
-            description="Définissez les valeurs de départ utilisées quand un talk n'a pas encore ses propres préférences."
+            title="Base de lecture"
+            description="Définissez les valeurs de départ utilisées au moment d'ouvrir un talk en prompteur."
           >
             <div className="grid gap-4">
-              <ChoiceGroup
-                icon={<Palette />}
-                label="Thème par défaut"
-                onChange={setPrompterTheme}
-                options={[
-                  { label: "Sombre", value: "dark" },
-                  { label: "Clair", value: "light" }
-                ]}
-                value={prompterTheme}
-              />
-              <ChoiceGroup
-                label="Vitesse de départ"
-                onChange={setPrompterSpeed}
-                options={prompterSpeedOptions.map((speed) => ({ label: `${formatSpeed(speed)}x`, value: String(speed) }))}
-                value={prompterSpeed}
-              />
-              <ChoiceGroup
-                label="Taille du texte"
-                onChange={setPrompterFontSize}
-                options={prompterFontSizeOptions.map((size) => ({ label: `${size}px`, value: String(size) }))}
-                value={prompterFontSize}
-              />
-              <ChoiceGroup
-                icon={<Mic2 />}
-                label="Suivi vocal"
-                onChange={setVoiceProvider}
-                options={voiceProviderOptions.map((provider) => ({ label: formatVoiceProvider(provider), value: provider }))}
-                value={voiceProvider}
-              />
+              <PreferenceBlock icon={<Palette />} label="Apparence par défaut" note="Le mode reste modifiable pendant la présentation.">
+                <SegmentedChoice
+                  onChange={setPrompterTheme}
+                  options={[
+                    { icon: <Moon />, label: "Sombre", value: "dark" },
+                    { icon: <Sun />, label: "Clair", value: "light" }
+                  ]}
+                  value={prompterTheme}
+                />
+              </PreferenceBlock>
+
+              <PreferenceBlock icon={<Gauge />} label="Vitesse automatique" note="Point de départ du scroll quand le suivi vocal n'est pas utilisé.">
+                <SegmentedChoice
+                  compact
+                  onChange={setPrompterSpeed}
+                  options={prompterSpeedOptions.map((speed) => ({ label: `${formatSpeed(speed)}x`, value: String(speed) }))}
+                  value={prompterSpeed}
+                />
+              </PreferenceBlock>
+
+              <PreferenceBlock icon={<Type />} label="Taille du texte" note="Confort de lecture initial pour la scène ou l'entraînement.">
+                <SegmentedChoice
+                  onChange={setPrompterFontSize}
+                  options={prompterFontSizeOptions.map((size) => ({ label: `${size}px`, value: String(size) }))}
+                  value={prompterFontSize}
+                />
+              </PreferenceBlock>
+
+              <PreferenceBlock icon={<Mic2 />} label="Suivi vocal" note="Auto choisit la meilleure option disponible sur l'appareil.">
+                <SegmentedChoice
+                  onChange={setVoiceProvider}
+                  options={voiceProviderOptions.map((provider) => ({ icon: provider === "realtime" ? <Radio /> : undefined, label: formatVoiceProvider(provider), value: provider }))}
+                  value={voiceProvider}
+                />
+              </PreferenceBlock>
             </div>
           </SettingsPanel>
         </div>
 
-        <aside className="grid content-start gap-5">
+        <aside className="grid min-w-0 content-start gap-6">
           <SettingsPanel
+            eyebrow="Avancé"
             icon={<Sparkles />}
             title="Modules spécialisés"
-            description="Activez un outil spécialisé partout uniquement si vous en avez vraiment besoin."
+            description="Activez un module partout seulement si vous voulez qu'il sorte de son format naturel."
+            compact
           >
             <div className="grid gap-3">
               {optionalFeatures.map((feature) => {
                 const enabled = settings.extraEnabledFeatures.includes(feature.id);
                 return (
-                  <div className="rounded-[10px] border border-border bg-background p-3" key={feature.id}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="m-0 text-[14px] font-semibold text-foreground">{feature.optionalLabel ?? feature.label}</p>
-                        <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">{feature.description}</p>
-                      </div>
-                      <SwitchButton checked={enabled} label={enabled ? "Activé" : "Activer"} onClick={() => setFeatureEnabled(feature.id, !enabled)} />
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      <Badge tone="accent">par défaut: {feature.defaultTalkTypes.map((type) => talkTypeLabels[type]).join(", ")}</Badge>
-                    </div>
-                  </div>
+                  <FeatureOption
+                    checked={enabled}
+                    defaultText={`Par défaut: ${feature.defaultTalkTypes.map((type) => talkTypeLabels[type]).join(", ")}`}
+                    description={feature.description}
+                    key={feature.id}
+                    label={feature.optionalLabel ?? feature.label}
+                    onToggle={() => setFeatureEnabled(feature.id, !enabled)}
+                  />
                 );
               })}
             </div>
           </SettingsPanel>
 
-          <div className="rounded-[12px] border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(20,20,25,.03)]">
+          <section className="rounded-[14px] border border-[color-mix(in_oklab,var(--accent)_22%,var(--line))] bg-[color-mix(in_oklab,var(--accent)_7%,var(--surface))] p-4 text-foreground shadow-[0_1px_2px_rgba(20,20,25,.03)] sm:p-5">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-[9px] bg-accent-muted text-accent-ink">
+                <LifeBuoy className="size-4" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="m-0 text-[17px] font-semibold tracking-[0]">Besoin d&apos;aide ?</h2>
+                <p className="mb-4 mt-2 max-w-[28rem] text-[13px] leading-6 text-muted">
+                  Si un réglage vous bloque, envoyez le contexte. L&apos;objectif est que le studio reste simple avant de monter sur scène.
+                </p>
+                <a className="inline-flex min-h-9 items-center justify-center rounded-[8px] border border-transparent bg-accent px-3 py-2 text-[12.5px] font-semibold leading-none text-white shadow-[0_1px_2px_rgba(20,20,25,.08)] transition hover:opacity-90 focus:outline-none focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_24%,transparent)]" href="mailto:support@solo-speaker.app?subject=Besoin%20d'aide%20Solo%20Speaker">
+                  Contacter l&apos;aide
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-[14px] border border-border bg-surface p-5 shadow-[0_1px_2px_rgba(20,20,25,.03)]">
             <div className="mb-3 flex items-center gap-2">
               <RotateCcw className="size-4 text-faint" />
-              <p className="m-0 text-[14px] font-semibold text-foreground">Revenir à une base saine</p>
+              <h2 className="m-0 text-[15px] font-semibold text-foreground">Revenir aux réglages de départ</h2>
             </div>
-            <p className="mb-4 mt-0 text-[12.5px] leading-5 text-muted">Réinitialise les préférences locales sans toucher à vos talks.</p>
+            <p className="mb-4 mt-0 text-[12.5px] leading-5 text-muted">Réinitialise les préférences de ce navigateur sans modifier vos talks.</p>
             <Button leftIcon={<RotateCcw />} onClick={resetStudioPreferences} size="sm" type="button" variant="ghost">
-              Réinitialiser les réglages
+              Réinitialiser
             </Button>
-          </div>
+          </section>
         </aside>
       </section>
 
       <SettingsPanel
+        eyebrow="Formats"
         icon={<FileText />}
-        title="Modules par format"
-        description="Vue d'ensemble des outils visibles par défaut selon le type de prise de parole."
+        title="Modules visibles par format"
+        description="Vue claire des outils proposés par défaut. Les modules activés en extra s'ajoutent à tous les formats."
       >
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-          {talkTypes.map((type) => (
-            <article className="rounded-[10px] border border-border bg-background p-3" key={type}>
-              <p className="m-0 text-[14px] font-semibold text-foreground">{talkTypeLabels[type]}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {defaultAssistantFeaturesByTalkType[type].map((featureId) => {
+        <div className="overflow-x-auto rounded-[12px] border border-border">
+          <table className="w-full min-w-[760px] border-collapse bg-background text-left">
+            <thead>
+              <tr className="border-b border-border bg-panel">
+                <th className="w-[150px] px-4 py-3 text-[12px] font-semibold text-foreground">Format</th>
+                {coreFeatureIds.map((featureId) => {
                   const feature = assistantFeatureDefinitions.find((item) => item.id === featureId);
-                  return feature ? <Badge key={feature.id}>{feature.optionalLabel ?? feature.label}</Badge> : null;
+                  return (
+                    <th className="px-3 py-3 text-center text-[11px] font-semibold text-muted" key={featureId}>
+                      {shortFeatureLabel(feature?.optionalLabel ?? feature?.label ?? featureId)}
+                    </th>
+                  );
                 })}
-                {settings.extraEnabledFeatures.map((featureId) => {
-                  if (defaultAssistantFeaturesByTalkType[type].includes(featureId)) return null;
-                  const feature = assistantFeatureDefinitions.find((item) => item.id === featureId);
-                  return feature ? <Badge key={feature.id} tone="success">+ {feature.optionalLabel ?? feature.label}</Badge> : null;
-                })}
-              </div>
-            </article>
-          ))}
+              </tr>
+            </thead>
+            <tbody>
+              {talkTypes.map((type) => (
+                <tr className="border-b border-border last:border-b-0" key={type}>
+                  <th className="px-4 py-3 text-[13px] font-semibold text-foreground">{talkTypeLabels[type]}</th>
+                  {coreFeatureIds.map((featureId) => {
+                    const isDefault = defaultAssistantFeaturesByTalkType[type].includes(featureId);
+                    const isExtra = settings.extraEnabledFeatures.includes(featureId) && !isDefault;
+                    return (
+                      <td className="px-3 py-3 text-center" key={featureId}>
+                        <FeatureMark active={isDefault || isExtra} extra={isExtra} />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </SettingsPanel>
     </div>
   );
 }
 
-function SettingsPanel({ children, description, icon, title }: { children: ReactNode; description: string; icon: ReactNode; title: string }) {
+function SettingsPanel({
+  children,
+  compact = false,
+  description,
+  eyebrow,
+  icon,
+  title
+}: {
+  children: ReactNode;
+  compact?: boolean;
+  description: string;
+  eyebrow: string;
+  icon: ReactNode;
+  title: string;
+}) {
   return (
-    <section className="rounded-[12px] border border-border bg-surface p-5 shadow-[0_1px_2px_rgba(20,20,25,.03)]">
-      <div className="mb-4 flex items-start gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-[9px] bg-accent-muted text-accent-ink [&_svg]:size-4">{icon}</div>
+    <section className={`min-w-0 max-w-[calc(100vw-40px)] rounded-[14px] border border-border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)] ${compact ? "p-4" : "p-5 md:p-6"}`}>
+      <div className="mb-5 flex items-start gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-accent-muted text-accent-ink [&_svg]:size-4">{icon}</div>
         <div className="min-w-0">
-          <h2 className="m-0 text-[18px] font-semibold tracking-[0] text-foreground">{title}</h2>
-          <p className="mt-1 max-w-2xl text-[13px] leading-6 text-muted">{description}</p>
+          <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{eyebrow}</p>
+          <h2 className="m-0 mt-1 text-[20px] font-semibold leading-tight tracking-[0] text-foreground">{title}</h2>
+          <p className="m-0 mt-1 max-w-2xl text-[13px] leading-6 text-muted">{description}</p>
         </div>
       </div>
       {children}
@@ -253,16 +339,13 @@ function SettingsPanel({ children, description, icon, title }: { children: React
   );
 }
 
-function SummaryCard({ detail, icon, label, value }: { detail: string; icon: ReactNode; label: string; value: string }) {
+function StatusLine({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <article className="rounded-[12px] border border-border bg-surface p-4 shadow-[0_1px_2px_rgba(20,20,25,.03)]">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{label}</p>
-        <div className="flex size-8 items-center justify-center rounded-[8px] bg-panel text-faint [&_svg]:size-4">{icon}</div>
-      </div>
-      <p className="m-0 text-[22px] font-semibold tracking-[0] text-foreground">{value}</p>
-      <p className="m-0 mt-1 text-[12px] text-muted">{detail}</p>
-    </article>
+    <div className="flex items-center gap-3 rounded-[9px] border border-border bg-surface px-3 py-2">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-panel text-faint [&_svg]:size-3.5">{icon}</span>
+      <span className="min-w-0 flex-1 text-[12px] text-muted">{label}</span>
+      <span className="truncate text-right text-[12px] font-semibold text-foreground">{value}</span>
+    </div>
   );
 }
 
@@ -282,9 +365,9 @@ function ToggleRow({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-border bg-background p-3">
-      <div className="flex min-w-0 flex-1 items-start gap-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-panel text-faint [&_svg]:size-4">{icon}</div>
+    <div className="grid gap-3 rounded-[12px] border border-border bg-background p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-[9px] bg-panel text-faint [&_svg]:size-4">{icon}</div>
         <div className="min-w-0">
           <p className="m-0 text-[14px] font-semibold text-foreground">{label}</p>
           <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">{description}</p>
@@ -295,42 +378,80 @@ function ToggleRow({
   );
 }
 
-function ChoiceGroup({
-  icon,
-  label,
+function PreferenceBlock({ children, icon, label, note }: { children: ReactNode; icon: ReactNode; label: string; note: string }) {
+  return (
+    <div className="grid gap-3 rounded-[12px] border border-border bg-background p-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-center">
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-panel text-faint [&_svg]:size-4">{icon}</span>
+        <div className="min-w-0">
+          <p className="m-0 text-[13.5px] font-semibold text-foreground">{label}</p>
+          <p className="m-0 mt-1 text-[12px] leading-5 text-muted">{note}</p>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function SegmentedChoice({
+  compact = false,
   onChange,
   options,
   value
 }: {
-  icon?: ReactNode;
-  label: string;
+  compact?: boolean;
   onChange: (value: string) => void;
-  options: Array<{ label: string; value: string }>;
+  options: Array<{ icon?: ReactNode; label: string; value: string }>;
   value: string;
 }) {
   return (
-    <div className="rounded-[10px] border border-border bg-background p-3">
-      <div className="mb-2 flex items-center gap-2">
-        {icon ? <span className="text-faint [&_svg]:size-4">{icon}</span> : null}
-        <p className="m-0 text-[13px] font-semibold text-foreground">{label}</p>
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <button
+            aria-pressed={active}
+            className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[8px] border px-3 text-[12.5px] font-[550] leading-none transition focus:outline-none focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_20%,transparent)] ${
+              compact ? "min-w-12 px-2.5" : "min-w-20"
+            } ${active ? "border-accent bg-accent-muted text-accent-ink" : "border-border bg-surface text-muted hover:text-foreground"}`}
+            key={option.value}
+            onClick={() => onChange(option.value)}
+            type="button"
+          >
+            {option.icon ? <span className="flex [&_svg]:size-3.5">{option.icon}</span> : null}
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function FeatureOption({
+  checked,
+  defaultText,
+  description,
+  label,
+  onToggle
+}: {
+  checked: boolean;
+  defaultText: string;
+  description: string;
+  label: string;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="rounded-[12px] border border-border bg-background p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="m-0 text-[14px] font-semibold text-foreground">{label}</p>
+          <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">{description}</p>
+        </div>
+        <SwitchButton checked={checked} label={checked ? "Activé" : "Activer"} onClick={onToggle} />
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((option) => {
-          const active = option.value === value;
-          return (
-            <button
-              aria-pressed={active}
-              className={`rounded-[8px] border px-2.5 py-1.5 text-[12px] font-[550] transition ${
-                active ? "border-accent bg-accent-muted text-accent-ink" : "border-border bg-surface text-muted hover:text-foreground"
-              }`}
-              key={option.value}
-              onClick={() => onChange(option.value)}
-              type="button"
-            >
-              {option.label}
-            </button>
-          );
-        })}
+      <div className="mt-3 inline-flex items-center gap-1.5 rounded-[7px] bg-panel px-2 py-1 font-mono text-[10px] uppercase tracking-[.1em] text-faint">
+        <CircleHelp className="size-3" />
+        {defaultText}
       </div>
     </div>
   );
@@ -340,17 +461,42 @@ function SwitchButton({ checked, disabled = false, label, onClick }: { checked: 
   return (
     <button
       aria-pressed={checked}
-      className={`inline-flex h-9 items-center gap-2 rounded-[9px] border px-3 text-[12.5px] font-[550] transition ${
+      className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-[999px] border py-1 pl-1.5 pr-3 text-[12.5px] font-[550] transition focus:outline-none focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-45 ${
         checked ? "border-accent bg-accent-muted text-accent-ink" : "border-border bg-surface text-muted hover:text-foreground"
       }`}
       disabled={disabled}
       onClick={onClick}
       type="button"
     >
-      {checked ? <Check className="size-4" /> : null}
+      <span className={`flex size-5 items-center justify-center rounded-full ${checked ? "bg-accent text-white" : "bg-panel text-faint"}`}>{checked ? <Check className="size-3.5" /> : null}</span>
       {label}
     </button>
   );
+}
+
+function FeatureMark({ active, extra }: { active: boolean; extra: boolean }) {
+  if (!active) return <span className="mx-auto block h-px w-5 bg-line" aria-label="Indisponible" />;
+
+  return (
+    <span
+      className={`mx-auto flex size-6 items-center justify-center rounded-full ${
+        extra ? "bg-[color-mix(in_oklab,var(--ok)_14%,transparent)] text-ok" : "bg-accent-muted text-accent-ink"
+      }`}
+      aria-label={extra ? "Activé en extra" : "Disponible par défaut"}
+      title={extra ? "Activé en extra" : "Disponible par défaut"}
+    >
+      <Check className="size-3.5" />
+    </span>
+  );
+}
+
+function shortFeatureLabel(label: string) {
+  if (label === "Générer un plan") return "Plan";
+  if (label === "Développer la section") return "Développer";
+  if (label === "Rendre plus oral") return "Oraliser";
+  if (label === "Prédiction pendant l'écriture") return "Prédiction";
+  if (label === "Suggestions bibliques") return "Bible";
+  return label;
 }
 
 function formatVoiceProvider(provider: string) {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Home, LogOut, Plus, Search, Settings } from "lucide-react";
+import { FileText, HelpCircle, Home, LogOut, Plus, Search, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
@@ -26,6 +26,7 @@ function isActiveNavItem(pathname: string, href: string) {
 export function Sidebar({ talkCount, userName }: { talkCount: number; userName: string }) {
   const pathname = usePathname();
   const navItems = getNavItems(talkCount);
+  const helpHref = "mailto:support@solo-speaker.app?subject=Besoin%20d'aide%20Solo%20Speaker";
 
   return (
     <>
@@ -60,6 +61,13 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
             );
           })}
         </nav>
+        <a
+          className="mt-3 hidden h-9 items-center justify-center gap-2.5 rounded-lg border border-line bg-surface px-2 text-[13px] font-medium text-mute transition hover:text-ink lg:flex"
+          href={helpHref}
+        >
+          <HelpCircle className="size-4" />
+          Besoin d&apos;aide
+        </a>
         <div className="mt-auto border-t border-line pt-3">
           <div className="mb-3 flex justify-center lg:justify-start lg:px-2">
             <ThemeToggle className="w-[92px] lg:w-[96px]" />
@@ -103,6 +111,9 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
           );
         })}
         <ThemeToggle className="w-[92px]" />
+        <a aria-label="Aide" className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href={helpHref}>
+          <HelpCircle className="size-4" />
+        </a>
         <Link aria-label="Logout" className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href="/logout">
           <LogOut className="size-4" />
         </Link>

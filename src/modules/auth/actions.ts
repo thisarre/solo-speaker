@@ -2,14 +2,21 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { TalkType } from "@/types/talk";
+
+const speakerRoles = new Set(["pastor", "conference_speaker", "trainer", "founder", "speaker"]);
+const talkTypes = new Set<TalkType>(["sermon", "conference", "training", "pitch", "speech"]);
+type SpeakerRole = "pastor" | "conference_speaker" | "trainer" | "founder" | "speaker";
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
 }
 
-function redirectWithError(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
+function redirectWithError(path: string, message: string, params?: Record<string, string>): never {
+  const query = new URLSearchParams(params);
+  query.set("error", message);
+  redirect(`${path}?${query.toString()}`);
 }
 
 function authErrorMessage(message: string) {
@@ -36,6 +43,14 @@ function authErrorMessage(message: string) {
   }
 
   return message || "Une erreur est survenue. Réessaie dans un instant.";
+}
+
+function safeNext(value: string, fallback = "/dashboard") {
+  return value.startsWith("/") && !value.startsWith("//") ? value : fallback;
+}
+
+function isSpeakerRole(value: string): value is SpeakerRole {
+  return speakerRoles.has(value);
 }
 
 export async function signUp(formData: FormData) {
@@ -66,7 +81,7 @@ export async function signUp(formData: FormData) {
     redirect(`/login?message=${encodeURIComponent("Compte créé. Vérifie ton email si la confirmation est activée.")}`);
   }
 
-  redirect("/dashboard");
+  redirect("/onboarding");
 }
 
 export async function login(formData: FormData) {
@@ -85,11 +100,55 @@ export async function login(formData: FormData) {
     redirectWithError("/login", authErrorMessage(error.message));
   }
 
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
+  const destination = safeNext(next);
+  redirect(`/onboarding?next=${encodeURIComponent(destination)}`);
 }
 
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect(`/login?message=${encodeURIComponent("Déconnexion effectuée.")}`);
+}
+
+export async function completeOnboarding(formData: FormData) {
+  const next = safeNext(getString(formData, "next"));
+  const speakerRole = getString(formData, "speakerRole");
+  const primaryTalkType = getString(formData, "primaryTalkType") as TalkType;
+  const helpRequested = getString(formData, "helpRequested") === "yes";
+  const supportNote = getString(formData, "supportNote").slice(0, 600);
+
+  if (!isSpeakerRole(speakerRole)) {
+    redirectWithError("/onboarding", "Choisissez le profil qui vous ressemble le plus.", { next });
+  }
+
+  if (!talkTypes.has(primaryTalkType)) {
+    redirectWithError("/onboarding", "Choisissez le type de talk que vous préparez le plus souvent.", { next });
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/login?next=/onboarding");
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      speaker_role: speakerRole,
+      primary_talk_type: primaryTalkType,
+      onboarding_help_requested: helpRequested,
+      onboarding_support_note: supportNote,
+      onboarding_completed_at: new Date().toISOString()
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    redirectWithError("/onboarding", error.message, { next });
+  }
+
+  redirect(next);
 }
