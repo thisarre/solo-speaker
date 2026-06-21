@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   return (
     <AppShell>
-      <ModularDashboard talks={talks} />
+      <ModularDashboard profile={profile} talks={talks} />
     </AppShell>
   );
 }

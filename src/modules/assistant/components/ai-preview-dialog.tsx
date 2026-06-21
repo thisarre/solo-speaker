@@ -8,10 +8,11 @@ type AiPreviewDialogProps = {
   result: AssistantGenerateResult;
   onAppend: () => void;
   onClose: () => void;
+  primaryLabel?: string;
   onReplace?: () => void;
 };
 
-export function AiPreviewDialog({ result, onAppend, onClose, onReplace }: AiPreviewDialogProps) {
+export function AiPreviewDialog({ result, onAppend, onClose, onReplace, primaryLabel }: AiPreviewDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_oklab,var(--ink)_34%,transparent)] p-4 backdrop-blur-sm">
       <section className="grid max-h-[86vh] w-full max-w-[720px] grid-rows-[auto_minmax(0,1fr)_auto] rounded-[10px] border border-line bg-bg shadow-[0_24px_80px_rgba(10,10,16,.25)]">
@@ -63,7 +64,7 @@ export function AiPreviewDialog({ result, onAppend, onClose, onReplace }: AiPrev
             <Button onClick={onReplace} type="button" variant="ghost">Remplacer</Button>
           ) : null}
           <Button onClick={onAppend} type="button" variant="primary">
-            {result.kind === "outline" ? "Ajouter les sections" : result.kind === "bible" ? "Insérer le verset" : "Ajouter à la suite"}
+            {primaryLabel ?? (result.kind === "outline" ? "Ajouter les sections" : result.kind === "bible" ? "Insérer le verset" : "Ajouter à la suite")}
           </Button>
         </footer>
       </section>

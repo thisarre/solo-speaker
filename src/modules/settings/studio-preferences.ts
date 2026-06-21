@@ -19,6 +19,16 @@ export const prompterFontSizeOptions = [32, 40, 48, 56] as const;
 export const prompterThemeOptions = ["dark", "light"] as const;
 export const voiceProviderOptions: VoiceFollowProviderMode[] = ["auto", "browser", "realtime"];
 
+export function resolvePredictiveWritingPreference(
+  current: { aiEnabled: boolean; predictiveWritingEnabled: boolean },
+  nextPredictiveWritingEnabled: boolean
+) {
+  return {
+    aiEnabled: nextPredictiveWritingEnabled ? true : current.aiEnabled,
+    predictiveWritingEnabled: nextPredictiveWritingEnabled
+  };
+}
+
 function readStoredValue(key: string) {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem(key);

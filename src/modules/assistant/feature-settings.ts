@@ -45,6 +45,19 @@ function writeAssistantFeatureSettings(settings: AssistantFeatureSettings) {
   window.dispatchEvent(new Event(assistantFeatureSettingsEvent));
 }
 
+export function applyAssistantFeatureSettingsDefaults(defaults: AssistantFeatureSettings) {
+  if (typeof window === "undefined") return;
+
+  const current = readAssistantFeatureSettings();
+  const merged = uniqueFeatures([...current.extraEnabledFeatures, ...defaults.extraEnabledFeatures]);
+
+  if (merged.length === current.extraEnabledFeatures.length) return;
+
+  writeAssistantFeatureSettings({
+    extraEnabledFeatures: merged
+  });
+}
+
 export function useAssistantFeatureSettings() {
   const settings = useSyncExternalStore(
     (onStoreChange) => {

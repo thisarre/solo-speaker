@@ -324,6 +324,7 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
       className="fixed inset-0 z-50 flex h-screen overflow-hidden bg-[var(--speaking-bg)] text-[var(--speaking-strong)]"
       data-speaking-playing={isPlaying}
       data-speaking-theme={theme}
+      data-tour="prompter-action"
       style={themeVars}
     >
       <div className="flex min-w-0 flex-1 flex-col">

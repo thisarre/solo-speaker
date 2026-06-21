@@ -61,3 +61,20 @@ export async function getTalkCount() {
   if (error) return 0;
   return count ?? 0;
 }
+
+export async function getLatestTalkId() {
+  const user = await getUser();
+  if (!user) return null;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("talks")
+    .select("id")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) return null;
+  return data?.id ?? null;
+}

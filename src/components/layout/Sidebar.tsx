@@ -5,6 +5,7 @@ import { FileText, HelpCircle, Home, LogOut, Plus, Search, Settings } from "luci
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
+import { RestartGuidedOnboardingButton } from "@/modules/onboarding/components/restart-guided-onboarding-button";
 
 function getNavItems(talkCount: number) {
   return [
@@ -50,6 +51,7 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
                 className={`flex h-9 items-center justify-center gap-2.5 rounded-lg px-2 text-[13.5px] transition lg:justify-start lg:py-2 ${
                   active ? "bg-surface font-medium text-ink shadow-[0_1px_2px_rgba(20,20,25,.05)]" : "text-mute hover:bg-surface/70 hover:text-ink"
                 }`}
+                data-tour={item.href === "/settings" ? "settings" : item.href === "/talks/new" ? "create-talk" : undefined}
                 href={item.href}
                 key={`${item.href}-${item.label}`}
                 title={item.label}
@@ -68,6 +70,7 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
           <HelpCircle className="size-4" />
           Besoin d&apos;aide
         </a>
+        <RestartGuidedOnboardingButton />
         <div className="mt-auto border-t border-line pt-3">
           <div className="mb-3 flex justify-center lg:justify-start lg:px-2">
             <ThemeToggle className="w-[92px] lg:w-[96px]" />
@@ -102,6 +105,7 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
               className={`flex size-10 items-center justify-center rounded-[10px] transition ${
                 active ? "bg-surface text-ink shadow-[0_1px_2px_rgba(20,20,25,.08)]" : "text-mute hover:bg-surface/70 hover:text-ink"
               }`}
+              data-tour={item.href === "/settings" ? "settings" : item.href === "/talks/new" ? "create-talk" : undefined}
               href={item.href}
               key={`mobile-${item.href}-${item.label}`}
               title={item.label}
@@ -114,6 +118,7 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
         <a aria-label="Aide" className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href={helpHref}>
           <HelpCircle className="size-4" />
         </a>
+        <RestartGuidedOnboardingButton compact />
         <Link aria-label="Logout" className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href="/logout">
           <LogOut className="size-4" />
         </Link>

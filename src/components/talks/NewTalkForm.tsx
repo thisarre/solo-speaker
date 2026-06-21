@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { assistantFeatureDefinitions, getEnabledAssistantFeatures } from "@/modules/assistant/feature-registry";
 import { useAssistantFeatureSettings } from "@/modules/assistant/feature-settings";
+import { getOnboardingAssistantFeatureSettings, type GuidedTalkSuggestion } from "@/modules/onboarding/personalization";
 import { createTalk } from "@/modules/talks/actions";
 import { VoiceMemoRecorder } from "@/modules/voice-memo/components/voice-memo-recorder";
 import { talkTypeLabels, type TalkType } from "@/types/talk";
@@ -18,15 +19,26 @@ const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
 
 type NewTalkFormProps = {
   error?: string;
+  guide?: GuidedTalkSuggestion;
 };
 
-export function NewTalkForm({ error }: NewTalkFormProps) {
+export function NewTalkForm({ error, guide }: NewTalkFormProps) {
   const [title, setTitle] = useState("");
   const [brief, setBrief] = useState("");
   const [clientError, setClientError] = useState("");
-  const [selectedType, setSelectedType] = useState<TalkType>("conference");
+  const [selectedType, setSelectedType] = useState<TalkType>(guide?.type ?? "conference");
   const { settings } = useAssistantFeatureSettings();
-  const enabledFeatures = getEnabledAssistantFeatures(selectedType, settings);
+  const onboardingSettings = getOnboardingAssistantFeatureSettings(
+    guide ? {
+      speaker_role: "speaker",
+      primary_talk_type: guide.type,
+      onboarding_help_requested: false,
+      onboarding_support_note: ""
+    } : null
+  );
+  const enabledFeatures = getEnabledAssistantFeatures(selectedType, {
+    extraEnabledFeatures: Array.from(new Set([...settings.extraEnabledFeatures, ...onboardingSettings.extraEnabledFeatures]))
+  });
 
   return (
     <form
@@ -52,7 +64,7 @@ export function NewTalkForm({ error }: NewTalkFormProps) {
           setTitle(event.target.value);
           if (clientError) setClientError("");
         }}
-        placeholder="Ex. L'art de capter une salle en 90 secondes"
+        placeholder={guide?.titlePlaceholder ?? "Ex. L'art de capter une salle en 90 secondes"}
         required
         value={title}
       />
@@ -95,7 +107,7 @@ export function NewTalkForm({ error }: NewTalkFormProps) {
         label="Brief"
         name="brief"
         onChange={(event) => setBrief(event.target.value)}
-        placeholder="Décris l'objectif, le contexte, le ton et la durée cible."
+        placeholder={guide?.briefPlaceholder ?? "Décris l'objectif, le contexte, le ton et la durée cible."}
         value={brief}
       />
       <VoiceMemoRecorder

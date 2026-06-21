@@ -30,8 +30,8 @@ export const assistantFeatureDefinitions: AssistantFeatureDefinition[] = [
   },
   {
     id: "shorten-section",
-    label: "Raccourcir",
-    description: "Couper sans perdre l'idée principale.",
+    label: "Raccourcir la section",
+    description: "Créer une version plus courte sans perdre l'idée principale.",
     defaultTalkTypes: ["sermon", "conference", "training", "pitch", "speech"]
   },
   {

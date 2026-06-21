@@ -51,7 +51,7 @@ export default async function TalksPage({ searchParams }: { searchParams?: Promi
             title="Talks"
             description="Retrouvez vos brouillons, vos talks prêts et les idées à transformer en prise de parole."
             actions={
-              <Link href="/talks/new">
+              <Link href="/talks/new?guided=1" data-tour="create-talk">
                 <Button leftIcon={<Plus />} variant="primary">Créer un talk</Button>
               </Link>
             }
@@ -84,23 +84,23 @@ export default async function TalksPage({ searchParams }: { searchParams?: Promi
           </div>
 
           {filteredTalks.length ? (
-            <div className="mt-5 grid gap-3.5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-5 grid gap-3.5 md:grid-cols-2 xl:grid-cols-3" data-tour="talks-list">
               {filteredTalks.map((talk) => (
                 <TalkCard key={talk.id} talk={talk} />
               ))}
               <Link
                 className="flex min-h-[184px] flex-col items-center justify-center gap-2 rounded-[12px] border border-dashed border-line bg-panel/40 text-[13px] font-medium text-mute transition hover:border-faint hover:bg-surface hover:text-ink"
-                href="/talks/new"
+                href="/talks/new?guided=1"
               >
                 <Plus className="size-5 opacity-70" />
                 Créer un talk
               </Link>
             </div>
           ) : (
-            <div className="mt-5">
+            <div className="mt-5" data-tour="talks-list">
               <EmptyState
                 action={
-                  <Link href="/talks/new">
+                  <Link href="/talks/new?guided=1" data-tour="create-talk">
                     <Button variant="primary">Créer un talk</Button>
                   </Link>
                 }

@@ -21,7 +21,7 @@ type AssistantPanelProps = {
   className?: string;
   durationMinutes: number;
   language: "FR" | "EN";
-  onResult: (result: AssistantGenerateResult) => void;
+  onResult: (result: AssistantGenerateResult, action: AssistantAction) => void;
   talkId: string;
   title: string;
   type: AssistantTalkContext["type"];
@@ -68,7 +68,7 @@ export function AssistantPanel({
         section: action === "outline" ? undefined : activeSection
       });
 
-      onResult(normalizeResult(result));
+      onResult(normalizeResult(result), action);
     } catch (assistantError) {
       setError(assistantError instanceof Error ? assistantError.message : "Génération IA impossible.");
     } finally {
@@ -100,30 +100,34 @@ export function AssistantPanel({
         </label>
 
         <label className="grid gap-1.5 text-xs font-[550] text-muted">
-          Durée cible
-          <input
-            className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
-            min={1}
-            onChange={(event) => setTargetMinutes(event.target.value)}
-            type="number"
-            value={targetMinutes}
-          />
+          Durée cible du talk
+          <div className="flex h-9 items-center rounded-[8px] border border-border bg-background focus-within:border-accent focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]">
+            <input
+              aria-label="Durée cible du talk en minutes"
+              className="studio-input min-w-0 flex-1 bg-transparent px-3 text-foreground outline-none"
+              min={1}
+              onChange={(event) => setTargetMinutes(event.target.value)}
+              type="number"
+              value={targetMinutes}
+            />
+            <span className="shrink-0 border-l border-line2 px-2.5 font-mono text-[10.5px] uppercase tracking-[.08em] text-faint">min</span>
+          </div>
         </label>
 
         <div className="grid gap-2">
-          {enabledFeatures.has("outline") ? <AssistantActionButton loading={loadingAction === "outline"} onClick={() => runAssistant("outline")}>
+          {enabledFeatures.has("outline") ? <AssistantActionButton description="Crée une structure complète à partir du titre et de l'objectif." loading={loadingAction === "outline"} onClick={() => runAssistant("outline")}>
             Générer un plan
           </AssistantActionButton> : null}
-          {enabledFeatures.has("expand-section") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "expand-section"} onClick={() => runAssistant("expand-section")}>
+          {enabledFeatures.has("expand-section") ? <AssistantActionButton description="Ajoute des idées, transitions et exemples à la section active." disabled={isSectionActionDisabled} loading={loadingAction === "expand-section"} onClick={() => runAssistant("expand-section")}>
             Développer la section
           </AssistantActionButton> : null}
-          {enabledFeatures.has("oralize-section") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "oralize-section"} onClick={() => runAssistant("oralize-section")}>
+          {enabledFeatures.has("oralize-section") ? <AssistantActionButton description="Réécrit pour sonner plus naturel à voix haute." disabled={isSectionActionDisabled} loading={loadingAction === "oralize-section"} onClick={() => runAssistant("oralize-section")}>
             Rendre plus oral
           </AssistantActionButton> : null}
-          {enabledFeatures.has("shorten-section") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "shorten-section"} onClick={() => runAssistant("shorten-section")}>
-            Raccourcir
+          {enabledFeatures.has("shorten-section") ? <AssistantActionButton description="Réduit le texte en gardant l'idée principale." disabled={isSectionActionDisabled} loading={loadingAction === "shorten-section"} onClick={() => runAssistant("shorten-section")}>
+            Raccourcir la section
           </AssistantActionButton> : null}
-          {enabledFeatures.has("suggest-bible") ? <AssistantActionButton disabled={isSectionActionDisabled} loading={loadingAction === "suggest-bible"} onClick={() => runAssistant("suggest-bible")}>
+          {enabledFeatures.has("suggest-bible") ? <AssistantActionButton description="Propose un passage biblique lié à l'idée en cours." disabled={isSectionActionDisabled} loading={loadingAction === "suggest-bible"} onClick={() => runAssistant("suggest-bible")}>
             Proposer un verset
           </AssistantActionButton> : null}
         </div>

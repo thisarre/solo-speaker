@@ -40,10 +40,16 @@ import {
   prompterSpeedOptions,
   prompterSpeedStorageKey,
   prompterThemeStorageKey,
+  resolvePredictiveWritingPreference,
   voiceProviderOptions,
   voiceProviderStorageKey,
   writeStudioPreference
 } from "@/modules/settings/studio-preferences";
+import {
+  getGuidedTalkSuggestion,
+  getOnboardingAssistantFeatureSettings,
+  type OnboardingProfile
+} from "@/modules/onboarding/personalization";
 import { talkTypeLabels, type TalkType } from "@/types/talk";
 
 const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
@@ -84,7 +90,7 @@ function useStoredBooleanPreference(key: string, fallback: boolean) {
   return [value === "true", (nextValue: boolean) => setValue(String(nextValue))] as const;
 }
 
-export function AssistantFeatureSettingsPage() {
+export function AssistantFeatureSettingsPage({ profile }: { profile?: OnboardingProfile | null }) {
   const { settings, setFeatureEnabled } = useAssistantFeatureSettings();
   const optionalFeatures = getAssistantOptionalFeatures();
   const [aiEnabled, setAiEnabled] = useStoredBooleanPreference(aiEnabledStorageKey, true);
@@ -94,6 +100,8 @@ export function AssistantFeatureSettingsPage() {
   const [prompterFontSize, setPrompterFontSize] = useStoredPreference(prompterFontSizeStorageKey, String(defaultPrompterFontSize));
   const [voiceProvider, setVoiceProvider] = useStoredPreference(voiceProviderStorageKey, defaultVoiceProvider);
   const extraFeatureCount = settings.extraEnabledFeatures.length;
+  const guidedTalk = getGuidedTalkSuggestion(profile);
+  const onboardingFeatureSettings = getOnboardingAssistantFeatureSettings(profile);
 
   function resetStudioPreferences() {
     setAiEnabled(true);
@@ -137,6 +145,34 @@ export function AssistantFeatureSettingsPage() {
         </div>
       </section>
 
+      {profile ? (
+        <section className="grid w-full max-w-[calc(100vw-40px)] gap-3 rounded-[14px] border border-[color-mix(in_oklab,var(--accent)_20%,var(--line))] bg-[color-mix(in_oklab,var(--accent)_5%,var(--surface))] p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div className="min-w-0">
+            <p className="m-0 font-mono text-[10.5px] uppercase tracking-[.12em] text-faint">Profil onboarding</p>
+            <h2 className="m-0 mt-1 text-[18px] font-semibold tracking-[0] text-foreground">
+              Base recommandée: {talkTypeLabels[guidedTalk.type]}
+            </h2>
+            <p className="m-0 mt-1 text-[13px] leading-6 text-muted">
+              Solo Speaker utilise ce profil pour préconfigurer le premier talk, les modules utiles et les recommandations du dashboard.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {onboardingFeatureSettings.extraEnabledFeatures.length ? onboardingFeatureSettings.extraEnabledFeatures.map((featureId) => {
+              const feature = assistantFeatureDefinitions.find((item) => item.id === featureId);
+              return feature ? (
+                <span className="rounded-[7px] border border-accent bg-accent-muted px-2 py-1 text-[11.5px] font-[550] text-accent-ink" key={featureId}>
+                  {feature.optionalLabel ?? feature.label}
+                </span>
+              ) : null;
+            }) : (
+              <span className="rounded-[7px] border border-border bg-surface px-2 py-1 text-[11.5px] font-[550] text-muted">
+                Modules standards
+              </span>
+            )}
+          </div>
+        </section>
+      ) : null}
+
       <section className="grid w-full max-w-[calc(100vw-40px)] gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="grid min-w-0 gap-6">
           <SettingsPanel
@@ -155,11 +191,17 @@ export function AssistantFeatureSettingsPage() {
               />
               <ToggleRow
                 checked={predictiveWritingEnabled}
-                description="Propose une suite uniquement quand le texte contient assez de contexte."
-                disabled={!aiEnabled}
+                description="Propose une suite uniquement quand le texte contient assez de contexte. Active aussi l'assistant si besoin."
                 icon={<BrainCircuit />}
                 label="Suggérer la suite pendant l'écriture"
-                onChange={setPredictiveWritingEnabled}
+                onChange={(nextValue) => {
+                  const nextPreferences = resolvePredictiveWritingPreference(
+                    { aiEnabled, predictiveWritingEnabled },
+                    nextValue
+                  );
+                  setAiEnabled(nextPreferences.aiEnabled);
+                  setPredictiveWritingEnabled(nextPreferences.predictiveWritingEnabled);
+                }}
               />
             </div>
           </SettingsPanel>
@@ -494,6 +536,7 @@ function shortFeatureLabel(label: string) {
   if (label === "Générer un plan") return "Plan";
   if (label === "Développer la section") return "Développer";
   if (label === "Rendre plus oral") return "Oraliser";
+  if (label === "Raccourcir la section") return "Raccourcir";
   if (label === "Prédiction pendant l'écriture") return "Prédiction";
   if (label === "Suggestions bibliques") return "Bible";
   return label;

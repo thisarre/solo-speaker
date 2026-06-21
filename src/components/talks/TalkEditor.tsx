@@ -38,8 +38,9 @@ import { AiPreviewDialog } from "@/modules/assistant/components/ai-preview-dialo
 import { AssistantPanel } from "@/modules/assistant/components/assistant-panel";
 import { isAssistantFeatureEnabled } from "@/modules/assistant/feature-registry";
 import { useAssistantFeatureSettings } from "@/modules/assistant/feature-settings";
-import type { AssistantGenerateResult, AssistantOutlineSection } from "@/modules/assistant/types";
-import { aiEnabledStorageKey, predictiveWritingStorageKey } from "@/modules/settings/studio-preferences";
+import { getAssistantPrimaryApplyLabel, getAssistantPrimaryApplyMode } from "@/modules/assistant/result-application";
+import type { AssistantAction, AssistantGenerateResult, AssistantOutlineSection } from "@/modules/assistant/types";
+import { aiEnabledStorageKey, predictiveWritingStorageKey, resolvePredictiveWritingPreference } from "@/modules/settings/studio-preferences";
 import { EditorLayoutSwitcher } from "@/modules/studio-layout/components/editor-layout-switcher";
 import { FocusModeToggle } from "@/modules/studio-layout/components/focus-mode-toggle";
 import { isEditorPanelVisible } from "@/modules/studio-layout/editor-layout-presets";
@@ -57,6 +58,11 @@ type TalkDraft = {
   audience: string;
   language: "FR" | "EN";
   sections: EditableSection[];
+};
+
+type PendingAssistantResult = {
+  action: AssistantAction;
+  result: AssistantGenerateResult;
 };
 
 const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
@@ -134,7 +140,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
   const [status, setStatus] = useState<AutosaveState>("idle");
   const [error, setError] = useState("");
   const [activeSectionId, setActiveSectionId] = useState(() => talk.sections[0]?.id ?? "");
-  const [aiResult, setAiResult] = useState<AssistantGenerateResult | null>(null);
+  const [aiResult, setAiResult] = useState<PendingAssistantResult | null>(null);
   const [deleteTalkRequested, setDeleteTalkRequested] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<EditableSection | null>(null);
   const [aiEnabled, setAiEnabled] = useStoredBoolean(aiEnabledStorageKey, true);
@@ -157,8 +163,14 @@ export function TalkEditor({ talk }: { talk: Talk }) {
   const { settings: assistantFeatureSettings } = useAssistantFeatureSettings();
 
   const totalSeconds = useMemo(() => estimateTotalSeconds(draft.sections), [draft.sections]);
+  const totalWords = useMemo(() => draft.sections.reduce((total, section) => total + wordCount(`${section.heading} ${section.body}`), 0), [draft.sections]);
   const durationMinutes = Math.max(1, Math.ceil(totalSeconds / 60));
   const activeSection = draft.sections.find((section) => section.id === activeSectionId) ?? draft.sections[0];
+  const activeSectionIndex = activeSection ? draft.sections.findIndex((section) => section.id === activeSection.id) : -1;
+  const activeSectionWords = activeSection ? wordCount(activeSection.body) : 0;
+  const activeSectionDuration = activeSection ? sectionSeconds(activeSection.heading, activeSection.body) : 0;
+  const preparedSections = draft.sections.filter((section) => section.heading.trim() && wordCount(section.body) >= 25).length;
+  const preparationPercent = draft.sections.length ? Math.round((preparedSections / draft.sections.length) * 100) : 0;
   const focusModeEnabled = editorLayout.focusModeEnabled;
   const showPanel = useCallback((panelId: Parameters<typeof isEditorPanelVisible>[1]) => isEditorPanelVisible(editorLayout, panelId), [editorLayout]);
   const showSectionRail = showPanel("section-rail") && !focusModeEnabled;
@@ -405,6 +417,10 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     setAiResult(null);
   }
 
+  function setAssistantResult(result: AssistantGenerateResult, action: AssistantAction) {
+    setAiResult({ action, result });
+  }
+
   function appendToActiveSection(result: Extract<AssistantGenerateResult, { kind: "section" }>) {
     if (!activeSection) return;
 
@@ -485,6 +501,29 @@ export function TalkEditor({ talk }: { talk: Talk }) {
         setError(sectionError instanceof Error ? sectionError.message : "Impossible d'insérer le plan généré.");
       }
     });
+  }
+
+  function applyPrimaryAssistantResult() {
+    if (!aiResult) return;
+
+    const { action, result } = aiResult;
+    if (result.kind === "outline") {
+      insertOutlineSections(result.sections);
+    } else if (result.kind === "bible") {
+      insertBibleSuggestion(result);
+    } else if (result.kind === "suggestion") {
+      if (activeSection) insertIntoSection(activeSection, result.text);
+      closeAiPreview();
+    } else if (getAssistantPrimaryApplyMode(action, result) === "replace") {
+      replaceActiveSection(result);
+    } else {
+      appendToActiveSection(result);
+    }
+  }
+
+  function replaceAiResultSection() {
+    if (aiResult?.result.kind !== "section") return;
+    replaceActiveSection(aiResult.result);
   }
 
   function addSection() {
@@ -589,7 +628,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
             className="border-0 bg-transparent p-0 shadow-none"
             durationMinutes={durationMinutes}
             language={draft.language}
-            onResult={setAiResult}
+            onResult={setAssistantResult}
             talkId={talk.id}
             title={draft.title}
             type={draft.type}
@@ -658,7 +697,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
             <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
           </div>
           {showExportActions ? <ExportPdfButton talkId={talk.id} title={draft.title} /> : null}
-          {showSpeakingActions ? <Link href={`/talks/${talk.id}/speak`}>
+          {showSpeakingActions ? <Link href={`/talks/${talk.id}/speak`} data-tour="prompter-action">
             <Button leftIcon={<Mic2 />} size="sm" type="button" variant="primary">Présenter</Button>
           </Link> : null}
           {!focusModeEnabled ? <Button aria-label="Supprimer" onClick={() => setDeleteTalkRequested(true)} size="icon" type="button" variant="quiet">
@@ -669,26 +708,49 @@ export function TalkEditor({ talk }: { talk: Talk }) {
       ) : null}
 
       <div className="flex min-h-0 flex-1">
-        {showSectionRail ? <aside className="hidden w-[220px] shrink-0 border-r border-border bg-background px-2.5 py-5 lg:block">
+        {showSectionRail ? <aside className="hidden w-[236px] shrink-0 border-r border-border bg-background px-3 py-5 lg:block">
           <div className="mb-2 flex items-center justify-between px-2.5">
             <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Plan</p>
             <span className="font-mono text-[10px] text-faint">{draft.sections.length}</span>
           </div>
-          <div className="grid gap-0.5">
-            {draft.sections.map((section, index) => (
+          <div className="mb-3 rounded-[10px] border border-border bg-surface p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[.1em] text-faint">Préparation</span>
+              <span className="text-[12px] font-semibold text-foreground">{preparationPercent}%</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-panel">
+              <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${preparationPercent}%` }} />
+            </div>
+            <div className="mt-2 flex justify-between gap-2 font-mono text-[10px] text-faint">
+              <span>{preparedSections}/{draft.sections.length} sections prêtes</span>
+              <span>{totalWords} mots</span>
+            </div>
+          </div>
+          <div className="grid gap-1">
+            {draft.sections.map((section, index) => {
+              const sectionWordCount = wordCount(section.body);
+              const sectionReady = section.heading.trim() && sectionWordCount >= 25;
+              const active = section.id === activeSection?.id;
+              return (
               <a
-                className={`grid grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-2 rounded-[7px] px-2.5 py-2 text-[12.5px] transition hover:bg-panel hover:text-foreground ${
-                  section.id === activeSection?.id ? "bg-panel font-[550] text-foreground" : "text-muted"
+                className={`grid gap-1 rounded-[9px] border px-2.5 py-2.5 text-[12.5px] transition hover:bg-panel hover:text-foreground ${
+                  active ? "border-border bg-surface font-[550] text-foreground shadow-[0_1px_2px_rgba(20,20,25,.03)]" : "border-transparent text-muted"
                 }`}
                 href={`#${section.id}`}
                 key={section.id}
                 onClick={() => setActiveSectionId(section.id)}
               >
-                <span className={`w-4 font-mono text-[10px] ${section.id === activeSection?.id ? "text-accent-ink" : "text-faint"}`}>{index + 1}</span>
-                <span className="truncate">{section.heading || "Sans titre"}</span>
-                <span className="font-mono text-[10px] text-faint">{formatDuration(sectionSeconds(section.heading, section.body))}</span>
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className={`font-mono text-[10px] ${active ? "text-accent-ink" : "text-faint"}`}>{String(index + 1).padStart(2, "0")}</span>
+                  <span className="truncate">{section.heading || "Sans titre"}</span>
+                </span>
+                <span className="flex items-center justify-between gap-2 font-mono text-[10px] text-faint">
+                  <span>{sectionWordCount} mots</span>
+                  <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
+                  <span className={`size-1.5 rounded-full ${sectionReady ? "bg-ok" : "bg-line"}`} />
+                </span>
               </a>
-            ))}
+            );})}
           </div>
           <button className="mt-3 flex w-full items-center gap-2 rounded-[7px] px-2.5 py-2 text-[12.5px] font-[550] text-muted transition hover:bg-panel hover:text-foreground" onClick={addSection} type="button">
             <Plus className="size-3.5" />
@@ -709,19 +771,25 @@ export function TalkEditor({ talk }: { talk: Talk }) {
         <main className="studio-scroll min-w-0 flex-1 overflow-y-auto bg-background">
           <div className={`mx-auto flex w-full gap-5 px-4 pb-32 pt-6 sm:px-5 md:px-8 md:pb-28 md:pt-7 ${focusModeEnabled ? "max-w-[860px]" : showAssistantPanel ? "max-w-[1180px]" : "max-w-[980px]"}`}>
             <article className="min-w-0 flex-1">
-              {showMetadataBar ? <div className="mb-4 flex flex-wrap gap-2">
-                <Badge tone="accent">{talkTypeLabels[draft.type]}</Badge>
-                <Badge>{durationMinutes} min</Badge>
-                {draft.audience ? <Badge>{draft.audience}</Badge> : null}
-              </div> : null}
-
-              <div className={`mb-5 grid gap-3 rounded-[12px] border border-border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)] ${focusModeEnabled ? "p-3 md:p-4" : "p-3.5 sm:p-4"}`}>
+              <div className={`mb-5 grid gap-4 rounded-[14px] border border-border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)] ${focusModeEnabled ? "p-3 md:p-4" : "p-4 sm:p-5"}`}>
+                {showMetadataBar ? <div className="flex flex-wrap items-center gap-2">
+                  <Badge tone="accent">{talkTypeLabels[draft.type]}</Badge>
+                  <Badge>{talkStatusLabels[draft.status]}</Badge>
+                  <Badge>{draft.language}</Badge>
+                  {draft.audience ? <Badge>{draft.audience}</Badge> : null}
+                </div> : null}
                 <input
                   className={`w-full bg-transparent font-semibold leading-[1.15] tracking-[0] text-foreground outline-none placeholder:text-faint ${focusModeEnabled ? "text-[24px]" : "studio-title-input"}`}
                   onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
                   placeholder="Titre du talk"
                   value={draft.title}
                 />
+                {showMetadataBar ? <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                  <EditorStat label="Durée estimée" value={formatDuration(totalSeconds)} />
+                  <EditorStat label="Volume" value={`${totalWords} mots`} />
+                  <EditorStat label="Sections prêtes" value={`${preparedSections}/${draft.sections.length}`} />
+                  <EditorStat label="Section active" value={activeSectionIndex >= 0 ? `${activeSectionIndex + 1} · ${activeSectionWords} mots · ${formatDuration(activeSectionDuration)}` : "-"} />
+                </div> : null}
                 {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[1fr_132px_132px_84px]">
                   <input
                     className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
@@ -769,13 +837,17 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                   <button
                     aria-pressed={predictiveWritingEnabled}
                     className={`inline-flex h-8 items-center gap-2 rounded-[8px] border px-2.5 text-[12px] font-[550] transition ${
-                      aiEnabled && predictiveWritingEnabled
+                      predictiveWritingEnabled
                         ? "border-accent bg-accent-muted text-accent-ink"
                         : "border-border bg-background text-muted hover:text-foreground"
                     }`}
-                    disabled={!aiEnabled}
                     onClick={() => {
-                      setPredictiveWritingEnabled((current) => !current);
+                      const nextPreferences = resolvePredictiveWritingPreference(
+                        { aiEnabled, predictiveWritingEnabled },
+                        !predictiveWritingEnabled
+                      );
+                      setAiEnabled(nextPreferences.aiEnabled);
+                      setPredictiveWritingEnabled(nextPreferences.predictiveWritingEnabled);
                       setPrediction("");
                       setPredictionError("");
                     }}
@@ -791,10 +863,10 @@ export function TalkEditor({ talk }: { talk: Talk }) {
               {mobileAssistantPanel}
 
             {draft.sections.length ? (
-              <div className="grid gap-3">
+              <div className="grid gap-4">
                 {draft.sections.map((section, index) => (
                   <section
-                    className={`rounded-[12px] border bg-surface p-3.5 shadow-[0_1px_2px_rgba(20,20,25,.03)] transition sm:p-4 ${
+                    className={`overflow-hidden rounded-[14px] border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)] transition ${
                       section.pending ? "opacity-70" : ""
                     } ${section.id === activeSection?.id ? "border-accent bg-[color-mix(in_oklab,var(--accent)_3%,var(--surface))]" : "border-border"
                     }`}
@@ -803,26 +875,38 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                     onFocusCapture={() => setActiveSectionId(section.id)}
                     onPointerDown={() => setActiveSectionId(section.id)}
                   >
-                    <div className="mb-2.5 flex items-center gap-2.5">
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-[6px] bg-panel font-mono text-[10.5px] text-faint">{index + 1}</span>
-                      <input
-                        className="h-8 min-w-0 flex-1 bg-transparent text-[15px] font-semibold tracking-[0] text-foreground outline-none placeholder:text-faint"
-                        onChange={(event) => updateSection(section.id, { heading: event.target.value })}
-                        placeholder="Titre de section"
-                        value={section.heading}
-                      />
-                      <span className="hidden font-mono text-[10.5px] text-faint sm:inline">{formatDuration(sectionSeconds(section.heading, section.body))}</span>
-                      <Button aria-label="Monter" disabled={index === 0 || section.pending} onClick={() => moveSection(section.id, -1)} size="icon" type="button" variant="quiet">
-                        <ArrowUp className="size-4" />
-                      </Button>
-                      <Button aria-label="Descendre" disabled={index === draft.sections.length - 1 || section.pending} onClick={() => moveSection(section.id, 1)} size="icon" type="button" variant="quiet">
-                        <ArrowDown className="size-4" />
-                      </Button>
-                      <Button aria-label="Supprimer la section" disabled={section.pending} onClick={() => setSectionToDelete(section)} size="icon" type="button" variant="quiet">
-                        <Trash2 className="size-4" />
-                      </Button>
+                    <div className="border-b border-line2 bg-[color-mix(in_oklab,var(--panel)_55%,var(--surface))] px-3.5 py-3 sm:px-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-surface font-mono text-[10.5px] text-faint">{String(index + 1).padStart(2, "0")}</span>
+                        <div className="min-w-0 flex-1">
+                          <input
+                            className="h-8 w-full min-w-0 bg-transparent text-[16px] font-semibold tracking-[0] text-foreground outline-none placeholder:text-faint"
+                            onChange={(event) => updateSection(section.id, { heading: event.target.value })}
+                            placeholder="Titre de section"
+                            value={section.heading}
+                          />
+                          <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10.5px] text-faint">
+                            <span>{wordCount(section.body)} mots</span>
+                            <span className="h-3 w-px bg-line" />
+                            <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
+                            {section.id === activeSection?.id ? <span className="rounded-[5px] bg-accent-muted px-1.5 py-0.5 text-accent-ink">active</span> : null}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <Button aria-label="Monter" disabled={index === 0 || section.pending} onClick={() => moveSection(section.id, -1)} size="icon" type="button" variant="quiet">
+                            <ArrowUp className="size-4" />
+                          </Button>
+                          <Button aria-label="Descendre" disabled={index === draft.sections.length - 1 || section.pending} onClick={() => moveSection(section.id, 1)} size="icon" type="button" variant="quiet">
+                            <ArrowDown className="size-4" />
+                          </Button>
+                          <Button aria-label="Supprimer la section" disabled={section.pending} onClick={() => setSectionToDelete(section)} size="icon" type="button" variant="quiet">
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    {showEditorToolbar ? <div className="mb-2 grid gap-1.5 rounded-[8px] border border-line2 bg-background px-2 py-1.5 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
+                    <div className="p-3.5 sm:p-4">
+                    {showEditorToolbar ? <div className="mb-3 grid gap-1.5 rounded-[8px] border border-line2 bg-background px-2 py-1.5 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
                       <div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
                         <Button aria-label="Titre 1" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "# ", "", "Titre")} size="sm" title="Titre 1" type="button" variant="quiet">
                           <Heading1 className="size-4" />
@@ -887,7 +971,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                       </div>
                     </div> : null}
                     <textarea
-                      className={`studio-textarea w-full resize-y rounded-[9px] border border-border bg-background px-3 py-2.5 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)] ${focusModeEnabled ? "min-h-56 leading-8" : "min-h-36 leading-7"}`}
+                      className={`studio-textarea w-full resize-y rounded-[10px] border border-border bg-background px-4 py-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)] ${focusModeEnabled ? "min-h-64 leading-8" : "min-h-48 leading-7"}`}
                       onChange={(event) => updateSection(section.id, { body: event.target.value })}
                       placeholder="Écris le contenu de cette section..."
                       ref={(element) => {
@@ -951,6 +1035,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                         )}
                       </div>
                     ) : null}
+                    </div>
                   </section>
                 ))}
               </div>
@@ -972,15 +1057,14 @@ export function TalkEditor({ talk }: { talk: Talk }) {
             </div> : null}
             </article>
 
-            {showAssistantPanel ? <aside className="hidden w-[286px] shrink-0 xl:block">
-              <div className="sticky top-0">
+            {showAssistantPanel ? <aside className="hidden w-[286px] shrink-0 self-start xl:sticky xl:top-6 xl:block" data-tour="editor-assistant">
                 {aiEnabled ? (
                   <AssistantPanel
                     activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
                     audience={draft.audience}
                     durationMinutes={durationMinutes}
                     language={draft.language}
-                    onResult={setAiResult}
+                    onResult={setAssistantResult}
                     talkId={talk.id}
                     title={draft.title}
                     type={draft.type}
@@ -999,28 +1083,17 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                     <Button leftIcon={<Bot />} onClick={() => setAiEnabled(true)} size="sm" type="button" variant="ghost">Réactiver l&apos;IA</Button>
                   </div>
                 )}
-              </div>
             </aside> : null}
           </div>
         </main>
       </div>
       {aiResult ? (
         <AiPreviewDialog
-          onAppend={() => {
-            if (aiResult.kind === "outline") {
-              insertOutlineSections(aiResult.sections);
-            } else if (aiResult.kind === "bible") {
-              insertBibleSuggestion(aiResult);
-            } else if (aiResult.kind === "suggestion") {
-              if (activeSection) insertIntoSection(activeSection, aiResult.text);
-              closeAiPreview();
-            } else {
-              appendToActiveSection(aiResult);
-            }
-          }}
+          onAppend={applyPrimaryAssistantResult}
           onClose={closeAiPreview}
-          onReplace={aiResult.kind === "section" ? () => replaceActiveSection(aiResult) : undefined}
-          result={aiResult}
+          onReplace={aiResult.result.kind === "section" && getAssistantPrimaryApplyMode(aiResult.action, aiResult.result) !== "replace" ? replaceAiResultSection : undefined}
+          primaryLabel={getAssistantPrimaryApplyLabel(aiResult.action, aiResult.result)}
+          result={aiResult.result}
         />
       ) : null}
       {deleteTalkRequested ? (
@@ -1055,6 +1128,15 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           title="Supprimer cette section ?"
         />
       ) : null}
+    </div>
+  );
+}
+
+function EditorStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[10px] border border-line2 bg-background px-3 py-2">
+      <p className="m-0 font-mono text-[10px] uppercase tracking-[.1em] text-faint">{label}</p>
+      <p className="m-0 mt-1 truncate text-[13px] font-semibold text-foreground">{value}</p>
     </div>
   );
 }

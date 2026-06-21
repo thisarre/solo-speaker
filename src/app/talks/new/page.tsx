@@ -5,13 +5,17 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { NewTalkForm } from "@/components/talks/NewTalkForm";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { getProfile } from "@/modules/auth/queries";
+import { getGuidedTalkSuggestion } from "@/modules/onboarding/personalization";
 
 type NewTalkPageProps = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; guided?: string }>;
 };
 
 export default async function NewTalkPage({ searchParams }: NewTalkPageProps) {
-  const params = await searchParams;
+  const [params, profile] = await Promise.all([searchParams, getProfile()]);
+  const guide = getGuidedTalkSuggestion(profile);
+  const guided = params.guided === "1";
 
   return (
     <AppShell>
@@ -19,8 +23,8 @@ export default async function NewTalkPage({ searchParams }: NewTalkPageProps) {
         <div className="mx-auto w-full max-w-[940px]">
           <PageHeader
             eyebrow="Create"
-            title="Créer un talk"
-            description="Crée un brouillon avec une première section éditable."
+            title={guided ? "Créer un premier talk guidé" : "Créer un talk"}
+            description={guided ? guide.message : "Crée un brouillon avec une première section éditable."}
             actions={
               <Link href="/talks">
                 <Button leftIcon={<ArrowLeft />} variant="ghost">Back</Button>
@@ -29,15 +33,17 @@ export default async function NewTalkPage({ searchParams }: NewTalkPageProps) {
           />
           <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,620px)_250px]">
             <Card className="p-5">
-              <NewTalkForm error={params.error} />
+              <NewTalkForm error={params.error} guide={guide} />
             </Card>
             <aside className="rounded-[10px] border border-border bg-panel p-4">
               <div className="mb-3 flex items-center gap-2 text-[13px] font-semibold text-foreground">
                 <FileText className="size-4 text-accent-ink" />
-                Structure
+                {guided ? "Guide de départ" : "Structure"}
               </div>
               <div className="rounded-[8px] border border-border bg-surface p-3 text-xs leading-5 text-muted">
-                Le brief devient une première section. Tu pourras ensuite ajouter, supprimer, réordonner et sauvegarder les sections dans l&apos;éditeur.
+                {guided
+                  ? guide.briefPlaceholder
+                  : "Le brief devient une première section. Tu pourras ensuite ajouter, supprimer, réordonner et sauvegarder les sections dans l'éditeur."}
               </div>
             </aside>
           </div>
