@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import {
@@ -23,6 +24,7 @@ import {
   Save,
   Text,
   Trash2,
+  Volume2,
   Wand2
 } from "lucide-react";
 import { deleteTalk, createTalkSection, deleteTalkSection, reorderTalkSections, updateTalk, updateTalkSection } from "@/modules/talks/actions";
@@ -45,7 +47,10 @@ import { EditorLayoutSwitcher } from "@/modules/studio-layout/components/editor-
 import { FocusModeToggle } from "@/modules/studio-layout/components/focus-mode-toggle";
 import { isEditorPanelVisible } from "@/modules/studio-layout/editor-layout-presets";
 import { useEditorLayout } from "@/modules/studio-layout/layout-storage";
+import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
 import { talkStatusLabels, talkTypeLabels, type Talk, type TalkSection, type TalkStatus, type TalkType } from "@/types/talk";
+import { VoiceSimulatorPanel } from "@/modules/voice-simulator/components/voice-simulator-panel";
 
 type EditableSection = TalkSection & {
   pending?: boolean;
@@ -136,6 +141,14 @@ function useStoredBoolean(key: string, fallback: boolean) {
 }
 
 export function TalkEditor({ talk }: { talk: Talk }) {
+  const { locale, messages } = useI18n();
+  const editor = messages.editor;
+  const addSectionFailedMessage = messages.errors.addSectionFailed;
+  const bibleSuggestionFailedMessage = messages.errors.bibleSuggestionFailed;
+  const deleteSectionFailedMessage = messages.errors.deleteSectionFailed;
+  const insertPlanFailedMessage = messages.errors.insertPlanFailed;
+  const predictionFailedMessage = messages.errors.predictionFailed;
+  const saveFailedMessage = messages.errors.saveFailed;
   const [draft, setDraft] = useState<TalkDraft>(() => toDraft(talk));
   const [status, setStatus] = useState<AutosaveState>("idle");
   const [error, setError] = useState("");
@@ -154,6 +167,8 @@ export function TalkEditor({ talk }: { talk: Talk }) {
   const [bibleSuggestionError, setBibleSuggestionError] = useState("");
   const [bibleSuggestionLoading, setBibleSuggestionLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [showVoiceSimulator, setShowVoiceSimulator] = useState(false);
+  const preSimulatorPresetRef = useRef<Parameters<typeof setPreset>[0] | null>(null);
   const lastSavedRef = useRef(JSON.stringify(toDraft(talk)));
   const hydratedRef = useRef(false);
   const lastPredictionKeyRef = useRef("");
@@ -228,12 +243,12 @@ export function TalkEditor({ talk }: { talk: Talk }) {
         setStatus("saved");
       } catch (saveError) {
         setStatus("error");
-        setError(saveError instanceof Error ? saveError.message : "Impossible de sauvegarder.");
+        setError(saveError instanceof Error ? saveError.message : saveFailedMessage);
       }
     }, 850);
 
     return () => window.clearTimeout(timeoutId);
-  }, [draft, durationMinutes, talk.id]);
+  }, [draft, durationMinutes, saveFailedMessage, talk.id]);
 
   useEffect(() => {
     if (!aiEnabled || !predictiveWritingEnabled || !activeSection || activeSection.pending) {
@@ -278,14 +293,14 @@ export function TalkEditor({ talk }: { talk: Talk }) {
         setPrediction(result.kind === "suggestion" ? result.text : "");
         setPredictionContextKey(predictionKey);
       } catch (assistantError) {
-        setPredictionError(assistantError instanceof Error ? assistantError.message : "Prédiction IA impossible.");
+        setPredictionError(assistantError instanceof Error ? assistantError.message : predictionFailedMessage);
       } finally {
         setPredictionLoading(false);
       }
     }, 1100);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeSection, aiEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, predictiveWritingEnabled, talk.id]);
+  }, [activeSection, aiEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, predictionFailedMessage, predictiveWritingEnabled, talk.id]);
 
   useEffect(() => {
     if (!aiEnabled || !bibleSuggestionsEnabled || !activeSection || activeSection.pending) {
@@ -330,14 +345,14 @@ export function TalkEditor({ talk }: { talk: Talk }) {
         setBibleSuggestion(result.kind === "bible" ? result : null);
         setBibleSuggestionContextKey(suggestionKey);
       } catch (assistantError) {
-        setBibleSuggestionError(assistantError instanceof Error ? assistantError.message : "Suggestion biblique impossible.");
+        setBibleSuggestionError(assistantError instanceof Error ? assistantError.message : bibleSuggestionFailedMessage);
       } finally {
         setBibleSuggestionLoading(false);
       }
     }, 1500);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeSection, aiEnabled, bibleSuggestionsEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, talk.id]);
+  }, [activeSection, aiEnabled, bibleSuggestionFailedMessage, bibleSuggestionsEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, talk.id]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -375,7 +390,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     });
   }
 
-  function formatSelectionInSection(section: EditableSection, before: string, after = before, placeholder = "texte") {
+  function formatSelectionInSection(section: EditableSection, before: string, after = before, placeholder = editor.selectionPlaceholder) {
     const textarea = sectionTextareaRefs.current[section.id];
     const currentBody = section.body ?? "";
     const start = textarea?.selectionStart ?? currentBody.length;
@@ -398,6 +413,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     if (!activeSection || !prediction) return;
     const prefix = activeSection.body.trimEnd() === activeSection.body ? " " : "";
     insertIntoSection(activeSection, `${prefix}${prediction}`);
+    posthog.capture("ai_suggestion_inserted", { type: "prediction", talk_type: draft.type });
     setPrediction("");
   }
 
@@ -426,7 +442,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
 
     const nextBody = [activeSection.body.trim(), result.body.trim()].filter(Boolean).join("\n\n");
     updateSection(activeSection.id, {
-      heading: activeSection.heading || result.heading || "Sans titre",
+      heading: activeSection.heading || result.heading || editor.untitled,
       body: nextBody
     });
     closeAiPreview();
@@ -436,7 +452,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     if (!activeSection) return;
 
     updateSection(activeSection.id, {
-      heading: result.heading || activeSection.heading || "Sans titre",
+      heading: result.heading || activeSection.heading || editor.untitled,
       body: result.body
     });
     closeAiPreview();
@@ -452,7 +468,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
   function insertOutlineSections(sections: AssistantOutlineSection[]) {
     const tempSections = sections.map((section, index) => ({
       id: `pending-ai-${Date.now()}-${index}`,
-      heading: section.heading || "Sans titre",
+      heading: section.heading || editor.untitled,
       body: section.body,
       position: draft.sections.length + index,
       pending: true
@@ -498,7 +514,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           sections: current.sections.filter((section) => !tempSections.some((pendingSection) => pendingSection.id === section.id))
         }));
         setStatus("error");
-        setError(sectionError instanceof Error ? sectionError.message : "Impossible d'insérer le plan généré.");
+        setError(sectionError instanceof Error ? sectionError.message : insertPlanFailedMessage);
       }
     });
   }
@@ -507,6 +523,8 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     if (!aiResult) return;
 
     const { action, result } = aiResult;
+    posthog.capture("ai_suggestion_inserted", { type: action, kind: result.kind, talk_type: draft.type });
+
     if (result.kind === "outline") {
       insertOutlineSections(result.sections);
     } else if (result.kind === "bible") {
@@ -534,7 +552,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
         ...current.sections,
         {
           id: tempId,
-          heading: "Nouvelle section",
+          heading: editor.newSectionTitle,
           body: "",
           position: current.sections.length,
           pending: true
@@ -562,7 +580,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           sections: current.sections.filter((section) => section.id !== tempId)
         }));
         setStatus("error");
-        setError(sectionError instanceof Error ? sectionError.message : "Impossible d'ajouter la section.");
+        setError(sectionError instanceof Error ? sectionError.message : addSectionFailedMessage);
       }
     });
   }
@@ -580,7 +598,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
       } catch (sectionError) {
         setDraft((current) => ({ ...current, sections: previous }));
         setStatus("error");
-        setError(sectionError instanceof Error ? sectionError.message : "Impossible de supprimer la section.");
+        setError(sectionError instanceof Error ? sectionError.message : deleteSectionFailedMessage);
       }
     });
   }
@@ -603,7 +621,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
         setStatus("saved");
       } catch (sectionError) {
         setStatus("error");
-        setError(sectionError instanceof Error ? sectionError.message : "Impossible de réordonner les sections.");
+        setError(sectionError instanceof Error ? sectionError.message : editor.reorderError);
       }
     });
   }
@@ -615,10 +633,10 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           <Wand2 className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="m-0 text-[14px] font-semibold tracking-[0] text-foreground">Assistant IA</p>
-          <p className="m-0 mt-0.5 truncate text-[12.5px] text-muted">Plan, reformulation, oralisation.</p>
+          <p className="m-0 text-[14px] font-semibold tracking-[0] text-foreground">{editor.assistantTitle}</p>
+          <p className="m-0 mt-0.5 truncate text-[12.5px] text-muted">{editor.assistantDescription}</p>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[.08em] text-faint">ouvrir</span>
+        <span className="font-mono text-[10px] uppercase tracking-[.08em] text-faint">{editor.open}</span>
       </summary>
       <div className="border-t border-line2 p-3">
         {aiEnabled ? (
@@ -639,10 +657,10 @@ export function TalkEditor({ talk }: { talk: Talk }) {
               <Bot className="size-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="m-0 text-[14px] font-semibold tracking-[0] text-foreground">Assistant IA désactivé</h2>
-              <p className="mt-1 text-[12.5px] leading-5 text-muted">L&apos;écriture reste entièrement manuelle.</p>
+              <h2 className="m-0 text-[14px] font-semibold tracking-[0] text-foreground">{editor.assistantOffTitle}</h2>
+              <p className="mt-1 text-[12.5px] leading-5 text-muted">{editor.assistantOffBody}</p>
             </div>
-            <Button onClick={() => setAiEnabled(true)} size="sm" type="button" variant="ghost">Activer</Button>
+            <Button onClick={() => setAiEnabled(true)} size="sm" type="button" variant="ghost">{editor.activate}</Button>
           </div>
         )}
       </div>
@@ -653,15 +671,15 @@ export function TalkEditor({ talk }: { talk: Talk }) {
     <div className={`flex h-screen min-w-0 flex-col bg-background text-foreground ${focusModeEnabled ? "fixed inset-0 z-40" : ""}`}>
       {showTalkHeader ? (
       <header className={`flex min-w-0 shrink-0 items-center gap-3 overflow-hidden border-b border-border bg-background px-4 ${focusModeEnabled ? "h-[56px]" : "h-[52px]"}`}>
-        <Link href="/talks">
-          <Button aria-label="Retour" size="icon" variant="quiet">
+        <Link href={localizedPath("/talks", locale)}>
+          <Button aria-label={editor.back} size="icon" variant="quiet">
             <ArrowLeft className="size-4" />
           </Button>
         </Link>
         <div className="flex min-w-0 items-center gap-2 text-[13px] text-muted">
-          <span>Talks</span>
+          <span>{messages.navigation.talks}</span>
           <span className="text-faint">/</span>
-          <b className="truncate font-[550] text-foreground">{draft.title || "Sans titre"}</b>
+          <b className="truncate font-[550] text-foreground">{draft.title || editor.untitled}</b>
         </div>
         <div className="ml-auto flex shrink-0 items-center justify-end gap-2 whitespace-nowrap">
           <div className="hidden items-center gap-2 lg:flex">
@@ -689,7 +707,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                 type="button"
                 variant={aiEnabled ? "ghost" : "quiet"}
               >
-                {aiEnabled ? "IA active" : "IA off"}
+                {aiEnabled ? editor.aiActive : editor.aiOff}
               </Button>
             </div>
           ) : null}
@@ -697,33 +715,57 @@ export function TalkEditor({ talk }: { talk: Talk }) {
             <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
           </div>
           {showExportActions ? <ExportPdfButton talkId={talk.id} title={draft.title} /> : null}
-          {showSpeakingActions ? <Link href={`/talks/${talk.id}/speak`} data-tour="prompter-action">
-            <Button leftIcon={<Mic2 />} size="sm" type="button" variant="primary">Présenter</Button>
+          {showSpeakingActions ? (
+            <Button
+              leftIcon={<Volume2 />}
+              onClick={() => {
+                if (showVoiceSimulator) {
+                  setShowVoiceSimulator(false);
+                  if (preSimulatorPresetRef.current) {
+                    setPreset(preSimulatorPresetRef.current);
+                    preSimulatorPresetRef.current = null;
+                  }
+                } else {
+                  preSimulatorPresetRef.current = editorLayout.preset;
+                  setPreset("rehearsal");
+                  setShowVoiceSimulator(true);
+                }
+              }}
+              size="sm"
+              type="button"
+              variant={showVoiceSimulator ? "accent" : "ghost"}
+            >
+              {editor.simulateVoice}
+            </Button>
+          ) : null}
+          {showSpeakingActions ? <Link href={localizedPath(`/talks/${talk.id}/speak`, locale)} data-tour="prompter-action" onClick={() => posthog.capture("speaking_session_started", { talk_type: draft.type, talk_language: draft.language, section_count: draft.sections.length, total_words: totalWords })}>
+            <Button leftIcon={<Mic2 />} size="sm" type="button" variant="primary">{editor.present}</Button>
           </Link> : null}
-          {!focusModeEnabled ? <Button aria-label="Supprimer" onClick={() => setDeleteTalkRequested(true)} size="icon" type="button" variant="quiet">
+          {!focusModeEnabled ? <Button aria-label={editor.delete} onClick={() => setDeleteTalkRequested(true)} size="icon" type="button" variant="quiet">
             <Trash2 className="size-4" />
           </Button> : null}
         </div>
       </header>
       ) : null}
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1">
         {showSectionRail ? <aside className="hidden w-[236px] shrink-0 border-r border-border bg-background px-3 py-5 lg:block">
           <div className="mb-2 flex items-center justify-between px-2.5">
-            <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Plan</p>
+            <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{editor.plan}</p>
             <span className="font-mono text-[10px] text-faint">{draft.sections.length}</span>
           </div>
           <div className="mb-3 rounded-[10px] border border-border bg-surface p-3">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <span className="font-mono text-[10px] uppercase tracking-[.1em] text-faint">Préparation</span>
+              <span className="font-mono text-[10px] uppercase tracking-[.1em] text-faint">{editor.preparation}</span>
               <span className="text-[12px] font-semibold text-foreground">{preparationPercent}%</span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-panel">
               <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${preparationPercent}%` }} />
             </div>
             <div className="mt-2 flex justify-between gap-2 font-mono text-[10px] text-faint">
-              <span>{preparedSections}/{draft.sections.length} sections prêtes</span>
-              <span>{totalWords} mots</span>
+              <span>{editor.sectionsReady.replace("{ready}", String(preparedSections)).replace("{total}", String(draft.sections.length))}</span>
+              <span>{totalWords} {editor.words}</span>
             </div>
           </div>
           <div className="grid gap-1">
@@ -742,10 +784,10 @@ export function TalkEditor({ talk }: { talk: Talk }) {
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span className={`font-mono text-[10px] ${active ? "text-accent-ink" : "text-faint"}`}>{String(index + 1).padStart(2, "0")}</span>
-                  <span className="truncate">{section.heading || "Sans titre"}</span>
+                  <span className="truncate">{section.heading || editor.untitled}</span>
                 </span>
                 <span className="flex items-center justify-between gap-2 font-mono text-[10px] text-faint">
-                  <span>{sectionWordCount} mots</span>
+                  <span>{sectionWordCount} {editor.words}</span>
                   <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
                   <span className={`size-1.5 rounded-full ${sectionReady ? "bg-ok" : "bg-line"}`} />
                 </span>
@@ -754,22 +796,22 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           </div>
           <button className="mt-3 flex w-full items-center gap-2 rounded-[7px] px-2.5 py-2 text-[12.5px] font-[550] text-muted transition hover:bg-panel hover:text-foreground" onClick={addSection} type="button">
             <Plus className="size-3.5" />
-            Section
+            {editor.addSection}
           </button>
           <div className="mt-3 grid gap-1 border-t border-line2 px-2.5 pt-3 font-mono text-[10.5px] text-faint">
             <div className="flex justify-between gap-2">
-              <span>Total estimé</span>
+              <span>{editor.totalEstimated}</span>
               <span>{formatDuration(totalSeconds)}</span>
             </div>
             <div className="flex justify-between gap-2">
-              <span>Objectif</span>
+              <span>{editor.target}</span>
               <span>{durationMinutes} min</span>
             </div>
           </div>
         </aside> : null}
 
         <main className="studio-scroll min-w-0 flex-1 overflow-y-auto bg-background">
-          <div className={`mx-auto flex w-full gap-5 px-4 pb-32 pt-6 sm:px-5 md:px-8 md:pb-28 md:pt-7 ${focusModeEnabled ? "max-w-[860px]" : showAssistantPanel ? "max-w-[1180px]" : "max-w-[980px]"}`}>
+          <div className={`mx-auto flex w-full gap-5 px-4 pb-32 pt-6 sm:px-5 md:px-8 md:pb-28 md:pt-7 ${focusModeEnabled ? "max-w-[920px]" : showAssistantPanel ? "max-w-[1480px]" : "max-w-[1180px]"}`}>
             <article className="min-w-0 flex-1">
               <div className={`mb-5 grid gap-4 rounded-[14px] border border-border bg-surface shadow-[0_1px_2px_rgba(20,20,25,.03)] ${focusModeEnabled ? "p-3 md:p-4" : "p-4 sm:p-5"}`}>
                 {showMetadataBar ? <div className="flex flex-wrap items-center gap-2">
@@ -781,20 +823,20 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                 <input
                   className={`w-full bg-transparent font-semibold leading-[1.15] tracking-[0] text-foreground outline-none placeholder:text-faint ${focusModeEnabled ? "text-[24px]" : "studio-title-input"}`}
                   onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="Titre du talk"
+                  placeholder={editor.talkTitlePlaceholder}
                   value={draft.title}
                 />
                 {showMetadataBar ? <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                  <EditorStat label="Durée estimée" value={formatDuration(totalSeconds)} />
-                  <EditorStat label="Volume" value={`${totalWords} mots`} />
-                  <EditorStat label="Sections prêtes" value={`${preparedSections}/${draft.sections.length}`} />
-                  <EditorStat label="Section active" value={activeSectionIndex >= 0 ? `${activeSectionIndex + 1} · ${activeSectionWords} mots · ${formatDuration(activeSectionDuration)}` : "-"} />
+                  <EditorStat label={editor.estimatedDuration} value={formatDuration(totalSeconds)} />
+                  <EditorStat label={editor.volume} value={`${totalWords} ${editor.words}`} />
+                  <EditorStat label={editor.readySections} value={`${preparedSections}/${draft.sections.length}`} />
+                  <EditorStat label={editor.activeSection} value={activeSectionIndex >= 0 ? `${activeSectionIndex + 1} · ${activeSectionWords} ${editor.words} · ${formatDuration(activeSectionDuration)}` : "-"} />
                 </div> : null}
                 {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[1fr_132px_132px_84px]">
                   <input
                     className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
                     onChange={(event) => setDraft((current) => ({ ...current, audience: event.target.value }))}
-                    placeholder="Audience"
+                    placeholder={editor.audiencePlaceholder}
                     value={draft.audience}
                   />
                   <select className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none focus:border-accent" onChange={(event) => setDraft((current) => ({ ...current, type: event.target.value as TalkType }))} value={draft.type}>
@@ -815,7 +857,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                 </div> : null}
                 {showEditorToolbar ? <div className="flex flex-wrap items-center gap-2 border-t border-line2 pt-3">
                   {!showAssistantPanel && !focusModeEnabled ? (
-                    <Button leftIcon={<Wand2 />} onClick={() => setPreset("ai")} size="sm" type="button" variant="ghost">Mode IA</Button>
+                    <Button leftIcon={<Wand2 />} onClick={() => setPreset("ai")} size="sm" type="button" variant="ghost">{editor.aiMode}</Button>
                   ) : null}
                   <button
                     aria-pressed={aiEnabled}
@@ -832,7 +874,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                     type="button"
                   >
                     <Bot className="size-3.5" />
-                    Assistant IA
+                    {editor.assistantTitle}
                   </button>
                   <button
                     aria-pressed={predictiveWritingEnabled}
@@ -854,7 +896,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                     type="button"
                   >
                     <BrainCircuit className="size-3.5" />
-                    Prédiction pendant l&apos;écriture
+                    {editor.predictiveWriting}
                   </button>
                 </div> : null}
                 {error ? <Alert>{error}</Alert> : null}
@@ -882,24 +924,24 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                           <input
                             className="h-8 w-full min-w-0 bg-transparent text-[16px] font-semibold tracking-[0] text-foreground outline-none placeholder:text-faint"
                             onChange={(event) => updateSection(section.id, { heading: event.target.value })}
-                            placeholder="Titre de section"
+                            placeholder={editor.sectionTitlePlaceholder}
                             value={section.heading}
                           />
                           <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10.5px] text-faint">
-                            <span>{wordCount(section.body)} mots</span>
+                            <span>{wordCount(section.body)} {editor.words}</span>
                             <span className="h-3 w-px bg-line" />
                             <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
-                            {section.id === activeSection?.id ? <span className="rounded-[5px] bg-accent-muted px-1.5 py-0.5 text-accent-ink">active</span> : null}
+                            {section.id === activeSection?.id ? <span className="rounded-[5px] bg-accent-muted px-1.5 py-0.5 text-accent-ink">{editor.active}</span> : null}
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
-                          <Button aria-label="Monter" disabled={index === 0 || section.pending} onClick={() => moveSection(section.id, -1)} size="icon" type="button" variant="quiet">
+                          <Button aria-label={editor.moveUp} disabled={index === 0 || section.pending} onClick={() => moveSection(section.id, -1)} size="icon" type="button" variant="quiet">
                             <ArrowUp className="size-4" />
                           </Button>
-                          <Button aria-label="Descendre" disabled={index === draft.sections.length - 1 || section.pending} onClick={() => moveSection(section.id, 1)} size="icon" type="button" variant="quiet">
+                          <Button aria-label={editor.moveDown} disabled={index === draft.sections.length - 1 || section.pending} onClick={() => moveSection(section.id, 1)} size="icon" type="button" variant="quiet">
                             <ArrowDown className="size-4" />
                           </Button>
-                          <Button aria-label="Supprimer la section" disabled={section.pending} onClick={() => setSectionToDelete(section)} size="icon" type="button" variant="quiet">
+                          <Button aria-label={editor.deleteSection} disabled={section.pending} onClick={() => setSectionToDelete(section)} size="icon" type="button" variant="quiet">
                             <Trash2 className="size-4" />
                           </Button>
                         </div>
@@ -908,25 +950,25 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                     <div className="p-3.5 sm:p-4">
                     {showEditorToolbar ? <div className="mb-3 grid gap-1.5 rounded-[8px] border border-line2 bg-background px-2 py-1.5 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
                       <div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
-                        <Button aria-label="Titre 1" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "# ", "", "Titre")} size="sm" title="Titre 1" type="button" variant="quiet">
+                        <Button aria-label={editor.heading1} className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "# ", "", editor.heading1)} size="sm" title={editor.heading1} type="button" variant="quiet">
                           <Heading1 className="size-4" />
                         </Button>
-                        <Button aria-label="Titre 2" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "## ", "", "Titre")} size="sm" title="Titre 2" type="button" variant="quiet">
+                        <Button aria-label={editor.heading2} className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "## ", "", editor.heading2)} size="sm" title={editor.heading2} type="button" variant="quiet">
                           <Heading2 className="size-4" />
                         </Button>
-                        <Button aria-label="Gras" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "**", "**")} size="sm" title="Gras" type="button" variant="quiet">
+                        <Button aria-label={editor.bold} className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "**", "**")} size="sm" title={editor.bold} type="button" variant="quiet">
                           <Bold className="size-4" />
                         </Button>
-                        <Button aria-label="Italique" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "_", "_")} size="sm" title="Italique" type="button" variant="quiet">
+                        <Button aria-label={editor.italic} className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "_", "_")} size="sm" title={editor.italic} type="button" variant="quiet">
                           <Italic className="size-4" />
                         </Button>
-                        <Button aria-label="Surligner" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "==", "==")} size="sm" title="Surligner" type="button" variant="quiet">
+                        <Button aria-label={editor.highlight} className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "==", "==")} size="sm" title={editor.highlight} type="button" variant="quiet">
                           <Highlighter className="size-4" />
                         </Button>
-                        <Button aria-label="Texte plus grand" className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "<big>", "</big>")} size="sm" title="Texte plus grand" type="button" variant="quiet">
+                        <Button aria-label={editor.largerText} className="h-7 shrink-0 px-2" onClick={() => formatSelectionInSection(section, "<big>", "</big>")} size="sm" title={editor.largerText} type="button" variant="quiet">
                           <Text className="size-4" />
                         </Button>
-                        <Button aria-label="Texte plus petit" className="h-7 shrink-0 px-2 text-[10.5px]" onClick={() => formatSelectionInSection(section, "<small>", "</small>")} size="sm" title="Texte plus petit" type="button" variant="quiet">
+                        <Button aria-label={editor.smallerText} className="h-7 shrink-0 px-2 text-[10.5px]" onClick={() => formatSelectionInSection(section, "<small>", "</small>")} size="sm" title={editor.smallerText} type="button" variant="quiet">
                           <Text className="size-3.5" />
                         </Button>
                         <span className="mx-1 h-4 w-px shrink-0 bg-line" />
@@ -935,7 +977,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                           leftIcon={<Pause />}
                           onClick={() => insertIntoSection(section, "[pause 2s]")}
                           size="sm"
-                          title="Pause courte"
+                          title={editor.shortPause}
                           type="button"
                           variant="quiet"
                         >
@@ -946,7 +988,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                           leftIcon={<Pause />}
                           onClick={() => insertIntoSection(section, "[pause 5s]")}
                           size="sm"
-                          title="Pause longue"
+                          title={editor.longPause}
                           type="button"
                           variant="quiet"
                         >
@@ -957,7 +999,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                           leftIcon={<CornerDownLeft />}
                           onClick={() => insertIntoSection(section, "\n\n")}
                           size="sm"
-                          title="Nouveau paragraphe"
+                          title={editor.newParagraph}
                           type="button"
                           variant="quiet"
                         >
@@ -965,7 +1007,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                         </Button>
                       </div>
                       <div className="flex items-center gap-2 border-t border-line2 pt-1.5 font-mono text-[10.5px] text-faint sm:border-t-0 sm:pt-0">
-                        <span>{wordCount(section.body)} mots</span>
+                        <span>{wordCount(section.body)} {editor.words}</span>
                         <span className="h-3 w-px bg-line" />
                         <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
                       </div>
@@ -973,7 +1015,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                     <textarea
                       className={`studio-textarea w-full resize-y rounded-[10px] border border-border bg-background px-4 py-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)] ${focusModeEnabled ? "min-h-64 leading-8" : "min-h-48 leading-7"}`}
                       onChange={(event) => updateSection(section.id, { body: event.target.value })}
-                      placeholder="Écris le contenu de cette section..."
+                      placeholder={editor.sectionBodyPlaceholder}
                       ref={(element) => {
                         sectionTextareaRefs.current[section.id] = element;
                       }}
@@ -984,16 +1026,16 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                         {prediction && predictionContextKey === predictionKeyForSection(section) ? (
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <p className="m-0 min-w-0 flex-1 text-[12.5px] leading-5 text-muted">
-                              <span className="font-[550] text-foreground">Suite proposée: </span>
+                              <span className="font-[550] text-foreground">{editor.suggestedNext}</span>
                               {prediction}
                             </p>
-                            <Button onClick={insertPrediction} size="sm" type="button" variant="ghost">Insérer</Button>
+                            <Button onClick={insertPrediction} size="sm" type="button" variant="ghost">{editor.insert}</Button>
                           </div>
                         ) : (
                           <p className="m-0 text-[12px] leading-5 text-faint">
                             {predictionLoading && predictionContextKey === predictionKeyForSection(section)
-                              ? "L'IA prépare une suite dans ton style..."
-                              : predictionError || "Continue à écrire: une proposition apparaîtra ici."}
+                              ? editor.predictionLoading
+                              : predictionError || editor.predictionEmpty}
                           </p>
                         )}
                       </div>
@@ -1016,21 +1058,21 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                             </p>
                             <div className="flex flex-wrap gap-2">
                               <Button leftIcon={<BookOpen />} onClick={insertBibleReferenceInline} size="sm" type="button" variant="ghost">
-                                Ajouter ({bibleSuggestion.reference})
+                                {editor.addReference.replace("{reference}", bibleSuggestion.reference)}
                               </Button>
                               <Button leftIcon={<Quote />} onClick={insertFullBibleQuote} size="sm" type="button" variant="ghost">
-                                Insérer le verset
+                                {editor.insertVerse}
                               </Button>
                               <Button onClick={() => setBibleSuggestion(null)} size="sm" type="button" variant="quiet">
-                                Ignorer
+                                {editor.ignore}
                               </Button>
                             </div>
                           </div>
                         ) : (
                           <p className="m-0 text-[12px] leading-5 text-faint">
                             {bibleSuggestionLoading && bibleSuggestionContextKey === bibleSuggestionKeyForSection(section)
-                              ? "Recherche d'un lien biblique..."
-                              : bibleSuggestionError || "Une suggestion biblique apparaîtra si l'idée rejoint un verset."}
+                              ? editor.bibleLoading
+                              : bibleSuggestionError || editor.bibleEmpty}
                           </p>
                         )}
                       </div>
@@ -1041,9 +1083,9 @@ export function TalkEditor({ talk }: { talk: Talk }) {
               </div>
             ) : (
               <div className="rounded-[12px] border border-dashed border-border bg-panel px-5 py-10 text-center">
-                <p className="m-0 text-[15px] font-semibold text-foreground">Aucune section</p>
-                <p className="mx-auto mb-4 mt-1 max-w-sm text-[13px] leading-6 text-muted">Ajoute une première section pour structurer ce talk.</p>
-                <Button leftIcon={<Plus />} onClick={addSection} type="button" variant="primary">Ajouter une section</Button>
+                <p className="m-0 text-[15px] font-semibold text-foreground">{editor.noSectionTitle}</p>
+                <p className="mx-auto mb-4 mt-1 max-w-sm text-[13px] leading-6 text-muted">{editor.noSectionBody}</p>
+                <Button leftIcon={<Plus />} onClick={addSection} type="button" variant="primary">{editor.addSection}</Button>
               </div>
             )}
 
@@ -1052,7 +1094,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                 <Save className="size-4 text-faint" />
                 <span className="font-mono text-[10.5px] text-faint">{durationMinutes} min</span>
                 <AutosaveStatus state={status} />
-                {focusModeEnabled ? <Button onClick={() => setFocusMode(false)} size="sm" type="button" variant="ghost">Quitter focus</Button> : null}
+                {focusModeEnabled ? <Button onClick={() => setFocusMode(false)} size="sm" type="button" variant="ghost">{editor.quitFocus}</Button> : null}
               </div>
             </div> : null}
             </article>
@@ -1076,16 +1118,31 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                         <Bot className="size-4" />
                       </div>
                       <div className="min-w-0">
-                        <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-foreground">Assistant IA désactivé</h2>
-                        <p className="mt-1 text-[12.5px] leading-5 text-muted">L&apos;écriture reste entièrement manuelle.</p>
+                        <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-foreground">{editor.assistantOffTitle}</h2>
+                        <p className="mt-1 text-[12.5px] leading-5 text-muted">{editor.assistantOffBody}</p>
                       </div>
                     </div>
-                    <Button leftIcon={<Bot />} onClick={() => setAiEnabled(true)} size="sm" type="button" variant="ghost">Réactiver l&apos;IA</Button>
+                    <Button leftIcon={<Bot />} onClick={() => setAiEnabled(true)} size="sm" type="button" variant="ghost">{editor.reactivateAi}</Button>
                   </div>
                 )}
             </aside> : null}
           </div>
         </main>
+        </div>
+        {showVoiceSimulator ? (
+          <VoiceSimulatorPanel
+            activeSectionId={activeSectionId}
+            onClose={() => {
+              setShowVoiceSimulator(false);
+              if (preSimulatorPresetRef.current) {
+                setPreset(preSimulatorPresetRef.current);
+                preSimulatorPresetRef.current = null;
+              }
+            }}
+            onSectionChange={setActiveSectionId}
+            sections={draft.sections}
+          />
+        ) : null}
       </div>
       {aiResult ? (
         <AiPreviewDialog
@@ -1098,19 +1155,19 @@ export function TalkEditor({ talk }: { talk: Talk }) {
       ) : null}
       {deleteTalkRequested ? (
         <ConfirmDialog
-          body="Cette action supprimera le talk et toutes ses sections. Elle ne peut pas être annulée."
+          body={editor.deleteTalkBody}
           confirm={
             <form action={() => deleteTalk(talk.id)}>
-              <Button leftIcon={<Trash2 />} type="submit" variant="primary">Supprimer</Button>
+              <Button leftIcon={<Trash2 />} type="submit" variant="primary">{editor.delete}</Button>
             </form>
           }
           onClose={() => setDeleteTalkRequested(false)}
-          title="Supprimer ce talk ?"
+          title={editor.deleteTalkTitle}
         />
       ) : null}
       {sectionToDelete ? (
         <ConfirmDialog
-          body={`La section "${sectionToDelete.heading || "Sans titre"}" sera retirée du talk.`}
+          body={editor.deleteSectionBody.replace("{title}", sectionToDelete.heading || editor.untitled)}
           confirm={
             <Button
               leftIcon={<Trash2 />}
@@ -1121,11 +1178,11 @@ export function TalkEditor({ talk }: { talk: Talk }) {
               type="button"
               variant="primary"
             >
-              Supprimer
+              {editor.delete}
             </Button>
           }
           onClose={() => setSectionToDelete(null)}
-          title="Supprimer cette section ?"
+          title={editor.deleteSectionTitle}
         />
       ) : null}
     </div>

@@ -2,7 +2,8 @@
 
 import { ArrowDown, ArrowUp, Eye, EyeOff, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { dashboardWidgetLabels } from "../dashboard-widget-registry";
+import { useI18n } from "@/i18n/client";
+import { getDashboardWidgetLabels } from "../dashboard-widget-registry";
 import type { DashboardWidgetConfig } from "../types";
 
 type CustomizeDashboardDialogProps = {
@@ -13,6 +14,8 @@ type CustomizeDashboardDialogProps = {
 };
 
 export function CustomizeDashboardDialog({ onClose, onReset, onUpdate, widgets }: CustomizeDashboardDialogProps) {
+  const { messages } = useI18n();
+  const dashboardWidgetLabels = getDashboardWidgetLabels(messages);
   const sortedWidgets = [...widgets].sort((a, b) => a.order - b.order);
 
   function commit(nextWidgets: DashboardWidgetConfig[]) {
@@ -34,14 +37,14 @@ export function CustomizeDashboardDialog({ onClose, onReset, onUpdate, widgets }
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[color-mix(in_oklab,var(--ink)_24%,transparent)] px-4 py-6">
-      <section className="w-full max-w-[560px] rounded-[10px] border border-border bg-background shadow-studio">
+    <div className="fixed inset-0 z-[80] grid place-items-center bg-[color-mix(in_oklab,var(--ink)_24%,transparent)] px-4 py-6" onMouseDown={onClose}>
+      <section aria-modal="true" className="w-full max-w-[560px] rounded-[10px] border border-border bg-background shadow-studio" onMouseDown={(event) => event.stopPropagation()} role="dialog">
         <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
           <div>
-            <h2 className="m-0 text-[16px] font-semibold tracking-[0] text-foreground">Personnaliser l&apos;accueil</h2>
-            <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">Afficher, masquer ou réordonner les blocs du Dashboard.</p>
+            <h2 className="m-0 text-[16px] font-semibold tracking-[0] text-foreground">{messages.layout.customizeHome}</h2>
+            <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">{messages.layout.customizeHomeDescription}</p>
           </div>
-          <Button aria-label="Fermer" onClick={onClose} size="icon" type="button" variant="quiet">
+          <Button aria-label={messages.ui.close} onClick={onClose} size="icon" type="button" variant="quiet">
             <X className="size-4" />
           </Button>
         </header>
@@ -50,25 +53,25 @@ export function CustomizeDashboardDialog({ onClose, onReset, onUpdate, widgets }
             <div className="grid gap-2 rounded-[9px] border border-border bg-surface p-3 sm:grid-cols-[1fr_auto]" key={widget.id}>
               <div className="min-w-0">
                 <p className="m-0 text-[13.5px] font-[550] text-foreground">{dashboardWidgetLabels[widget.id]}</p>
-                <p className="m-0 mt-1 font-mono text-[10.5px] uppercase tracking-[.1em] text-faint">{widget.visible ? "Visible" : "Masqué"}</p>
+                <p className="m-0 mt-1 font-mono text-[10.5px] uppercase tracking-[.1em] text-faint">{widget.visible ? messages.layout.visible : messages.layout.hidden}</p>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                <Button aria-label="Monter" disabled={index === 0} onClick={() => move(index, -1)} size="icon" type="button" variant="quiet">
+                <Button aria-label={messages.layout.moveUp} disabled={index === 0} onClick={() => move(index, -1)} size="icon" type="button" variant="quiet">
                   <ArrowUp className="size-4" />
                 </Button>
-                <Button aria-label="Descendre" disabled={index === sortedWidgets.length - 1} onClick={() => move(index, 1)} size="icon" type="button" variant="quiet">
+                <Button aria-label={messages.layout.moveDown} disabled={index === sortedWidgets.length - 1} onClick={() => move(index, 1)} size="icon" type="button" variant="quiet">
                   <ArrowDown className="size-4" />
                 </Button>
                 <Button leftIcon={widget.visible ? <EyeOff /> : <Eye />} onClick={() => toggleVisibility(index)} size="sm" type="button" variant="ghost">
-                  {widget.visible ? "Masquer" : "Afficher"}
+                  {widget.visible ? messages.layout.hide : messages.layout.show}
                 </Button>
               </div>
             </div>
           ))}
         </div>
         <footer className="flex flex-wrap justify-between gap-2 border-t border-border px-5 py-4">
-          <Button leftIcon={<RotateCcw />} onClick={onReset} type="button" variant="quiet">Réinitialiser</Button>
-          <Button onClick={onClose} type="button" variant="primary">Terminer</Button>
+          <Button leftIcon={<RotateCcw />} onClick={onReset} type="button" variant="quiet">{messages.dashboard.reset}</Button>
+          <Button onClick={onClose} type="button" variant="primary">{messages.layout.finish}</Button>
         </footer>
       </section>
     </div>

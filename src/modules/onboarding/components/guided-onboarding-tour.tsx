@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Check, Compass, MousePointer2, X } from "lucide-react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { useI18n } from "@/i18n/client";
 import {
   getOnboardingTourProgress,
   getRestartedOnboardingTourState,
@@ -37,6 +38,7 @@ function readCompleted() {
 }
 
 export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboardingTourProps) {
+  const { messages } = useI18n();
   const [hydrated, hydrate] = useReducer(() => true, false);
   const [completed, setCompleted] = useState(readCompleted);
   const [stepIndex, setStepIndex] = useState(readStoredProgress);
@@ -101,12 +103,13 @@ export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboarding
   }, [completed, hydrated, stepIndex]);
 
   const step = onboardingTourSteps[stepIndex];
+  const stepCopy = messages.onboarding.tourSteps[stepIndex];
   const isLastStep = stepIndex === onboardingTourSteps.length - 1;
   const progressLabel = `${stepIndex + 1}/${onboardingTourSteps.length}`;
   const currentHref = useMemo(() => resolveOnboardingTourStepHref(step, { latestTalkId }), [latestTalkId, step]);
   const panelPosition = targetRect && targetRect.top < window.innerHeight * 0.52 ? "bottom" : "top";
 
-  if (!enabled || !hydrated || completed || !step) return null;
+  if (!enabled || !hydrated || completed || !step || !stepCopy) return null;
 
   function finishTour() {
     window.localStorage.setItem(onboardingTourStorageKey, "completed");
@@ -152,9 +155,9 @@ export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboarding
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-3">
-              <p className="m-0 font-mono text-[10.5px] uppercase tracking-[.12em] text-faint">{step.eyebrow} · {progressLabel}</p>
+              <p className="m-0 font-mono text-[10.5px] uppercase tracking-[.12em] text-faint">{stepCopy.eyebrow} · {progressLabel}</p>
               <button
-                aria-label="Fermer la visite guidée"
+                aria-label={messages.onboarding.closeTour}
                 className="flex size-7 cursor-pointer items-center justify-center rounded-[8px] text-faint transition hover:bg-panel hover:text-foreground"
                 onClick={finishTour}
                 type="button"
@@ -162,11 +165,11 @@ export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboarding
                 <X className="size-4" />
               </button>
             </div>
-            <h2 className="m-0 mt-1 text-[17px] font-semibold tracking-[0] text-foreground">{step.title}</h2>
-            <p className="m-0 mt-2 text-[13px] leading-6 text-muted">{step.body}</p>
+            <h2 className="m-0 mt-1 text-[17px] font-semibold tracking-[0] text-foreground">{stepCopy.title}</h2>
+            <p className="m-0 mt-2 text-[13px] leading-6 text-muted">{stepCopy.body}</p>
             <div className="mt-3 flex items-start gap-2 rounded-[10px] border border-line2 bg-background px-3 py-2">
               <MousePointer2 className="mt-0.5 size-4 shrink-0 text-accent-ink" />
-              <p className="m-0 text-[12.5px] font-[550] leading-5 text-foreground">{step.instruction}</p>
+              <p className="m-0 text-[12.5px] font-[550] leading-5 text-foreground">{stepCopy.instruction}</p>
             </div>
           </div>
         </div>
@@ -174,7 +177,7 @@ export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboarding
         <div className="mb-3 grid grid-cols-5 gap-1">
           {onboardingTourSteps.map((item, index) => (
             <span
-              aria-label={item.title}
+              aria-label={messages.onboarding.tourSteps[index]?.title}
               className={`h-1.5 rounded-full ${index <= stepIndex ? "bg-accent" : "bg-line2"}`}
               key={item.id}
             />
@@ -183,21 +186,21 @@ export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboarding
 
         <div className="flex flex-wrap items-center justify-between gap-2">
           <button className="cursor-pointer text-[12.5px] font-[550] text-muted transition hover:text-foreground" onClick={finishTour} type="button">
-            Passer la visite
+            {messages.onboarding.skipTour}
           </button>
           <div className="flex flex-wrap gap-2">
             {stepIndex > 0 ? (
               <Button onClick={previousStep} size="sm" type="button" variant="quiet">
-                Retour
+                {messages.onboarding.back}
               </Button>
             ) : null}
             <Link href={currentHref}>
               <Button leftIcon={<ArrowRight />} size="sm" type="button" variant="ghost">
-                Aller à cet écran
+                {messages.onboarding.goToScreen}
               </Button>
             </Link>
             <Button leftIcon={isLastStep ? <Check /> : undefined} onClick={nextStep} size="sm" type="button" variant="primary">
-              {isLastStep ? "Terminer" : "J'ai fait cette étape"}
+              {isLastStep ? messages.onboarding.finishTour : messages.onboarding.stepDone}
             </Button>
           </div>
         </div>

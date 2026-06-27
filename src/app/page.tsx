@@ -1,5 +1,6 @@
-import { LandingPage } from "@/modules/landing/components/landing-page";
+import { redirect } from "next/navigation";
+import { localizedPath } from "@/i18n/routing";
 
 export default function HomePage() {
-  return <LandingPage />;
+  redirect(localizedPath("/", "en"));
 }

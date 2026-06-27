@@ -1,14 +1,19 @@
 import type { ProgressionRecommendation, TalkReadiness } from "@/modules/progression/types";
+import { getMessages } from "@/i18n/messages";
+import type { Locale } from "@/i18n/routing";
 
-export function buildGlobalRecommendations(readiness: TalkReadiness[]): ProgressionRecommendation[] {
+const fallbackLocale: Locale = "fr";
+
+export function buildGlobalRecommendations(readiness: TalkReadiness[], locale: Locale = fallbackLocale): ProgressionRecommendation[] {
+  const copy = getMessages(locale).progression.recommendationCopy;
   const active = readiness.filter((item) => !item.isArchived);
   const recommendations: ProgressionRecommendation[] = [];
 
   if (active.some((item) => !item.talk.audience.trim())) {
     recommendations.push({
       id: "missing-audience",
-      message: "Ajoute une audience aux Talks qui n'en ont pas.",
-      actionLabel: "Voir les talks",
+      message: copy.missingAudience[0],
+      actionLabel: copy.missingAudience[1],
       href: "/talks"
     });
   }
@@ -16,8 +21,8 @@ export function buildGlobalRecommendations(readiness: TalkReadiness[]): Progress
   if (active.some((item) => item.talk.sections.length < 3)) {
     recommendations.push({
       id: "missing-sections",
-      message: "Finalise les Talks avec moins de 3 sections.",
-      actionLabel: "Structurer",
+      message: copy.missingSections[0],
+      actionLabel: copy.missingSections[1],
       href: "/talks"
     });
   }
@@ -26,8 +31,8 @@ export function buildGlobalRecommendations(readiness: TalkReadiness[]): Progress
   if (ready) {
     recommendations.push({
       id: "practice-ready",
-      message: "Passe en Speaking Mode sur les Talks prêts.",
-      actionLabel: "Présenter",
+      message: copy.practiceReady[0],
+      actionLabel: copy.practiceReady[1],
       href: `/talks/${ready.talk.id}/speak`
     });
   }
@@ -35,8 +40,8 @@ export function buildGlobalRecommendations(readiness: TalkReadiness[]): Progress
   if (readiness.some((item) => item.isArchived)) {
     recommendations.push({
       id: "review-archives",
-      message: "Garde les Talks terminés archivés pour clarifier ta préparation active.",
-      actionLabel: "Voir",
+      message: copy.reviewArchives[0],
+      actionLabel: copy.reviewArchives[1],
       href: "/talks"
     });
   }
@@ -45,8 +50,8 @@ export function buildGlobalRecommendations(readiness: TalkReadiness[]): Progress
   if (tooLong) {
     recommendations.push({
       id: "shorten-long-talks",
-      message: "Raccourcis les Talks qui dépassent fortement leur durée cible.",
-      actionLabel: "Éditer",
+      message: copy.shortenLongTalks[0],
+      actionLabel: copy.shortenLongTalks[1],
       href: `/talks/${tooLong.talk.id}`
     });
   }
@@ -54,8 +59,8 @@ export function buildGlobalRecommendations(readiness: TalkReadiness[]): Progress
   if (!recommendations.length) {
     recommendations.push({
       id: "create-talk",
-      message: "Crée un nouveau Talk pour commencer une préparation.",
-      actionLabel: "Nouveau talk",
+      message: copy.createTalk[0],
+      actionLabel: copy.createTalk[1],
       href: "/talks/new"
     });
   }

@@ -1,6 +1,10 @@
 "use client";
 
+import posthog from "posthog-js";
 import { createClient } from "@/lib/supabase/browser";
+import { getMessages } from "@/i18n/messages";
+
+const errors = getMessages("fr").errors;
 
 type TranscribeVoiceMemoResponse =
   | {
@@ -19,7 +23,7 @@ export async function transcribeVoiceMemo(input: { audio: Blob; language: "FR" |
   } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    throw new Error("Session navigateur Supabase introuvable. Déconnecte-toi puis reconnecte-toi.");
+    throw new Error(errors.voiceSessionMissing);
   }
 
   const formData = new FormData();
@@ -35,11 +39,13 @@ export async function transcribeVoiceMemo(input: { audio: Blob; language: "FR" |
     body: formData
   });
 
-  const payload = (await response.json().catch(() => ({ ok: false, error: "Réponse transcription invalide." }))) as TranscribeVoiceMemoResponse;
+  const payload = (await response.json().catch(() => ({ ok: false, error: errors.invalidTranscriptionResponse }))) as TranscribeVoiceMemoResponse;
 
   if (!response.ok || !payload.ok) {
-    throw new Error(payload.ok ? "Transcription impossible." : payload.error);
+    throw new Error(payload.ok ? errors.transcriptionFailed : payload.error);
   }
+
+  posthog.capture("voice_memo_transcribed", { language: input.language, audio_size_bytes: input.audio.size });
 
   return payload.text;
 }

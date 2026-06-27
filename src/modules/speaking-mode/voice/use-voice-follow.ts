@@ -12,21 +12,21 @@ import { buildTalkVocabulary } from "./talk-vocabulary";
 import { mergeTranscriptBuffer } from "./transcript-buffer";
 import { canApplyTranscriptCorrection } from "./transcript-sync-engine";
 import { evaluateTranscriptQuality } from "./transcript-quality";
-import { useOpenAIRealtimeProvider } from "./providers/openai-realtime-provider";
+import { useDeepgramProvider } from "./providers/deepgram-provider";
 import { readVoiceProviderPreference } from "@/modules/settings/studio-preferences";
 
 export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", currentIndex: number) {
   const browserRecognition = useSpeechRecognition(language);
-  const realtimeRecognition = useOpenAIRealtimeProvider(language);
+  const deepgramRecognition = useDeepgramProvider(language);
   const [enabled, setEnabled] = useState(false);
   const [providerMode, setProviderMode] = useState<VoiceFollowProviderMode>(() => readVoiceProviderPreference());
-  const [autoRealtimeDisabled, setAutoRealtimeDisabled] = useState(false);
+  const [autoDeepgramDisabled, setAutoDeepgramDisabled] = useState(false);
   const [lockState, setLockState] = useState<LockOnState>(() => resetLockOn());
   const globalFallbackTimerRef = useRef(0);
-  const shouldUseRealtime =
-    providerMode === "realtime" ||
-    (providerMode === "auto" && !browserRecognition.isSupported && realtimeRecognition.isSupported && !autoRealtimeDisabled);
-  const activeRecognition = shouldUseRealtime ? realtimeRecognition : browserRecognition;
+  const shouldUseDeepgram =
+    providerMode === "deepgram" ||
+    (providerMode === "auto" && !browserRecognition.isSupported && deepgramRecognition.isSupported && !autoDeepgramDisabled);
+  const activeRecognition = shouldUseDeepgram ? deepgramRecognition : browserRecognition;
   const vocabulary = useMemo(() => buildTalkVocabulary({ items }), [items]);
   const speakingIndex = useMemo(() => buildSpeakingIndex(items, vocabulary), [items, vocabulary]);
   const transcriptBuffer = useMemo(
@@ -36,7 +36,7 @@ export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", cur
   const transcript = transcriptBuffer.recentText;
   // No acoustic VAD any more, so we can't tell a silent pause from a stalled provider — never
   // degrade on staleness here (that path wrongly disabled transcript-sync during normal pauses).
-  // A genuinely stuck realtime session is still caught by the provider's explicit "aucun delta"
+  // A genuinely stuck Deepgram session is still caught by the provider's explicit "aucun delta"
   // timeout, which trips the browser fallback below.
   const providerHealth = getProviderHealth({ latencyMs: null, provider: activeRecognition.provider });
   const stableCurrentIndex = lockState.lockedIndex ?? currentIndex;
@@ -113,8 +113,8 @@ export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", cur
     resetRuntime();
     activeRecognition.stop();
     browserRecognition.stop();
-    realtimeRecognition.stop();
-  }, [activeRecognition, browserRecognition, realtimeRecognition, resetRuntime]);
+    deepgramRecognition.stop();
+  }, [activeRecognition, browserRecognition, deepgramRecognition, resetRuntime]);
 
   const toggle = useCallback(() => {
     if (enabled) {
@@ -131,17 +131,17 @@ export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", cur
   }, [activeRecognition, enabled]);
 
   useEffect(() => {
-    if (!enabled || providerMode !== "auto" || activeRecognition.provider !== "realtime") return;
+    if (!enabled || providerMode !== "auto" || activeRecognition.provider !== "deepgram") return;
     if (!activeRecognition.error.includes("aucun delta")) return;
 
     const timeoutId = window.setTimeout(() => {
-      realtimeRecognition.stop();
-      setAutoRealtimeDisabled(true);
+      deepgramRecognition.stop();
+      setAutoDeepgramDisabled(true);
       browserRecognition.start();
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeRecognition.error, activeRecognition.provider, browserRecognition, enabled, providerMode, realtimeRecognition]);
+  }, [activeRecognition.error, activeRecognition.provider, browserRecognition, deepgramRecognition, enabled, providerMode]);
 
   const recalibrate = useCallback(() => {
     setLockState((current) => ({ ...current, globalFallbackEnabled: true, lockedIndex: null, lockedItemId: null, pendingCount: 0, pendingItemId: null }));

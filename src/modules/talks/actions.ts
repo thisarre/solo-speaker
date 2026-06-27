@@ -4,8 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/modules/auth/queries";
+import { canCreateTalk, type BillingPlan } from "@/modules/billing/entitlements";
+import { getPostHogClient } from "@/lib/posthog-server";
+import { getMessages } from "@/i18n/messages";
 import type { TalkStatus, TalkType } from "@/types/talk";
 
+const copy = getMessages("fr");
 const talkTypes = new Set<TalkType>(["sermon", "conference", "training", "pitch", "speech"]);
 const talkStatuses = new Set<TalkStatus>(["draft", "ready", "archived"]);
 const languages = new Set(["FR", "EN"]);
@@ -35,7 +39,7 @@ async function assertOwnTalk(talkId: string) {
   }
 
   if (!data) {
-    throw new Error("Talk introuvable.");
+    throw new Error(copy.errors.talkNotFound);
   }
 
   return { user, supabase };
@@ -51,7 +55,22 @@ export async function createTalk(formData: FormData) {
   const brief = getString(formData, "brief");
 
   if (!title || !talkTypes.has(typeValue)) {
-    redirect("/talks/new?error=Le titre et le type sont requis.");
+    redirect(`/talks/new?error=${encodeURIComponent(copy.errors.titleAndTypeRequired)}`);
+  }
+
+  const [{ count, error: countError }, { data: profileData }] = await Promise.all([
+    supabase.from("talks").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("profiles").select("billing_plan").eq("id", user.id).maybeSingle()
+  ]);
+
+  if (countError) {
+    redirect(`/talks/new?error=${encodeURIComponent(countError.message)}`);
+  }
+
+  const billingPlan = (profileData?.billing_plan ?? "trial") as BillingPlan;
+  const entitlement = canCreateTalk({ currentTalkCount: count ?? 0, plan: billingPlan });
+  if (!entitlement.allowed) {
+    redirect(`/pricing?error=${encodeURIComponent(entitlement.reason)}`);
   }
 
   const { data: talk, error } = await supabase
@@ -81,6 +100,12 @@ export async function createTalk(formData: FormData) {
     redirect(`/talks/new?error=${encodeURIComponent(sectionError.message)}`);
   }
 
+  getPostHogClient().capture({
+    distinctId: user.id,
+    event: "talk_created",
+    properties: { talk_type: typeValue, has_audience: Boolean(audience), has_brief: Boolean(brief) }
+  });
+
   revalidatePath("/dashboard");
   revalidatePath("/talks");
   redirect(`/talks/${talk.id}`);
@@ -103,11 +128,11 @@ export async function updateTalk(input: {
   const durationMinutes = Math.max(1, Math.round(Number(input.durationMinutes) || 1));
 
   if (!title) {
-    throw new Error("Le titre est requis.");
+    throw new Error(copy.errors.titleRequired);
   }
 
   if (!talkTypes.has(type) || !talkStatuses.has(status) || !languages.has(language)) {
-    throw new Error("Valeur de talk invalide.");
+    throw new Error(copy.errors.invalidTalkValue);
   }
 
   const { error } = await supabase
@@ -142,6 +167,11 @@ export async function deleteTalk(talkId: string) {
     throw new Error(error.message);
   }
 
+  getPostHogClient().capture({
+    distinctId: user.id,
+    event: "talk_deleted"
+  });
+
   revalidatePath("/dashboard");
   revalidatePath("/talks");
   redirect("/talks");
@@ -163,7 +193,7 @@ export async function createTalkSection(talkId: string) {
     .from("talk_sections")
     .insert({
       talk_id: talkId,
-      heading: "Nouvelle section",
+      heading: copy.editor.newSectionTitle,
       body: "",
       position: count ?? 0
     })
@@ -186,7 +216,7 @@ export async function updateTalkSection(input: {
   body: string;
 }) {
   const { supabase } = await assertOwnTalk(input.talkId);
-  const heading = cleanText(input.heading) || "Sans titre";
+  const heading = cleanText(input.heading) || copy.editor.untitled;
 
   const { error } = await supabase
     .from("talk_sections")

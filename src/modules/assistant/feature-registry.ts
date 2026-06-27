@@ -1,5 +1,7 @@
 import type { TalkType } from "@/types/talk";
 import type { AssistantFeature } from "@/modules/assistant/types";
+import { getMessages } from "@/i18n/messages";
+import { defaultLocale, type Locale } from "@/i18n/routing";
 
 export type AssistantFeatureDefinition = {
   id: AssistantFeature;
@@ -9,45 +11,30 @@ export type AssistantFeatureDefinition = {
   optionalLabel?: string;
 };
 
-export const assistantFeatureDefinitions: AssistantFeatureDefinition[] = [
-  {
-    id: "outline",
-    label: "Générer un plan",
-    description: "Créer une structure complète adaptée au type de talk.",
-    defaultTalkTypes: ["sermon", "conference", "training", "pitch", "speech"]
-  },
-  {
-    id: "expand-section",
-    label: "Développer la section",
-    description: "Transformer une idée courte en section exploitable.",
-    defaultTalkTypes: ["sermon", "conference", "training", "pitch", "speech"]
-  },
-  {
-    id: "oralize-section",
-    label: "Rendre plus oral",
-    description: "Rendre le texte plus naturel à dire à voix haute.",
-    defaultTalkTypes: ["sermon", "conference", "training", "pitch", "speech"]
-  },
-  {
-    id: "shorten-section",
-    label: "Raccourcir la section",
-    description: "Créer une version plus courte sans perdre l'idée principale.",
-    defaultTalkTypes: ["sermon", "conference", "training", "pitch", "speech"]
-  },
-  {
-    id: "predict-next",
-    label: "Prédiction pendant l'écriture",
-    description: "Proposer une suite pendant la rédaction.",
-    defaultTalkTypes: ["sermon", "conference", "training", "pitch", "speech"]
-  },
-  {
-    id: "suggest-bible",
-    label: "Proposer un verset",
-    description: "Suggérer un passage biblique pertinent pour l'idée en cours.",
-    defaultTalkTypes: ["sermon"],
-    optionalLabel: "Suggestions bibliques"
-  }
-];
+const featureIds: AssistantFeature[] = ["outline", "expand-section", "oralize-section", "shorten-section", "predict-next", "suggest-bible"];
+
+const defaultAssistantFeaturesByFeature: Record<AssistantFeature, TalkType[]> = {
+  outline: ["sermon", "conference", "training", "pitch", "speech"],
+  "expand-section": ["sermon", "conference", "training", "pitch", "speech"],
+  "oralize-section": ["sermon", "conference", "training", "pitch", "speech"],
+  "shorten-section": ["sermon", "conference", "training", "pitch", "speech"],
+  "predict-next": ["sermon", "conference", "training", "pitch", "speech"],
+  "suggest-bible": ["sermon"]
+};
+
+export function getAssistantFeatureDefinitions(locale: Locale = defaultLocale): AssistantFeatureDefinition[] {
+  const copy = getMessages(locale).assistant.features;
+
+  return featureIds.map((id) => ({
+    id,
+    label: copy[id][0],
+    description: copy[id][1],
+    defaultTalkTypes: defaultAssistantFeaturesByFeature[id],
+    optionalLabel: copy[id][2]
+  }));
+}
+
+export const assistantFeatureDefinitions: AssistantFeatureDefinition[] = getAssistantFeatureDefinitions(defaultLocale);
 
 export const defaultAssistantFeaturesByTalkType: Record<TalkType, AssistantFeature[]> = {
   sermon: ["outline", "expand-section", "oralize-section", "shorten-section", "predict-next", "suggest-bible"],
@@ -66,15 +53,15 @@ export const defaultAssistantFeatureSettings: AssistantFeatureSettings = {
 };
 
 export function isAssistantFeature(value: string): value is AssistantFeature {
-  return assistantFeatureDefinitions.some((feature) => feature.id === value);
+  return featureIds.some((feature) => feature === value);
 }
 
-export function getAssistantFeatureDefinition(featureId: AssistantFeature) {
-  return assistantFeatureDefinitions.find((feature) => feature.id === featureId);
+export function getAssistantFeatureDefinition(featureId: AssistantFeature, locale: Locale = defaultLocale) {
+  return getAssistantFeatureDefinitions(locale).find((feature) => feature.id === featureId);
 }
 
-export function getAssistantOptionalFeatures() {
-  return assistantFeatureDefinitions.filter((feature) => !isFeatureDefaultForEveryTalkType(feature));
+export function getAssistantOptionalFeatures(locale: Locale = defaultLocale) {
+  return getAssistantFeatureDefinitions(locale).filter((feature) => !isFeatureDefaultForEveryTalkType(feature));
 }
 
 export function getEnabledAssistantFeatures(talkType: TalkType, settings: AssistantFeatureSettings = defaultAssistantFeatureSettings) {

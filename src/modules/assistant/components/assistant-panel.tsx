@@ -1,9 +1,11 @@
 "use client";
 
+import posthog from "posthog-js";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/client";
 import { AssistantActionButton } from "@/modules/assistant/components/assistant-action-button";
 import { generateAssistantContent } from "@/modules/assistant/actions";
 import { getEnabledAssistantFeatures } from "@/modules/assistant/feature-registry";
@@ -39,6 +41,8 @@ export function AssistantPanel({
   title,
   type
 }: AssistantPanelProps) {
+  const { messages } = useI18n();
+  const copy = messages.assistant;
   const [objective, setObjective] = useState("");
   const [targetMinutes, setTargetMinutes] = useState(String(durationMinutes));
   const [loadingAction, setLoadingAction] = useState<AssistantAction | null>(null);
@@ -68,9 +72,17 @@ export function AssistantPanel({
         section: action === "outline" ? undefined : activeSection
       });
 
-      onResult(normalizeResult(result), action);
+      posthog.capture("ai_assistant_used", {
+        action,
+        talk_type: type,
+        talk_language: language,
+        has_section: Boolean(activeSection)
+      });
+
+      onResult(normalizeResult(result, copy.untitled), action);
     } catch (assistantError) {
-      setError(assistantError instanceof Error ? assistantError.message : "Génération IA impossible.");
+      posthog.captureException(assistantError);
+      setError(assistantError instanceof Error ? assistantError.message : copy.generationError);
     } finally {
       setLoadingAction(null);
     }
@@ -83,27 +95,27 @@ export function AssistantPanel({
           <Sparkles className="size-4" />
         </div>
         <div className="min-w-0">
-          <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-foreground">Assistant IA</h2>
-          <p className="mt-1 text-[12.5px] leading-5 text-muted">Génère une proposition, puis valide l&apos;insertion.</p>
+          <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-foreground">{copy.title}</h2>
+          <p className="mt-1 text-[12.5px] leading-5 text-muted">{copy.panelDescription}</p>
         </div>
       </div>
 
       <div className="grid gap-3">
         <label className="grid gap-1.5 text-xs font-[550] text-muted">
-          Objectif
+          {copy.objective}
           <textarea
             className="studio-textarea min-h-20 resize-y rounded-[9px] border border-border bg-background px-3 py-2 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
             onChange={(event) => setObjective(event.target.value)}
-            placeholder={"Ce que l'audience doit comprendre, ressentir ou faire."}
+            placeholder={copy.objectivePlaceholder}
             value={objective}
           />
         </label>
 
         <label className="grid gap-1.5 text-xs font-[550] text-muted">
-          Durée cible du talk
+          {copy.targetDuration}
           <div className="flex h-9 items-center rounded-[8px] border border-border bg-background focus-within:border-accent focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]">
             <input
-              aria-label="Durée cible du talk en minutes"
+              aria-label={copy.targetDurationAria}
               className="studio-input min-w-0 flex-1 bg-transparent px-3 text-foreground outline-none"
               min={1}
               onChange={(event) => setTargetMinutes(event.target.value)}
@@ -115,27 +127,27 @@ export function AssistantPanel({
         </label>
 
         <div className="grid gap-2">
-          {enabledFeatures.has("outline") ? <AssistantActionButton description="Crée une structure complète à partir du titre et de l'objectif." loading={loadingAction === "outline"} onClick={() => runAssistant("outline")}>
-            Générer un plan
+          {enabledFeatures.has("outline") ? <AssistantActionButton description={copy.outlineDescription} loading={loadingAction === "outline"} onClick={() => runAssistant("outline")}>
+            {copy.outline}
           </AssistantActionButton> : null}
-          {enabledFeatures.has("expand-section") ? <AssistantActionButton description="Ajoute des idées, transitions et exemples à la section active." disabled={isSectionActionDisabled} loading={loadingAction === "expand-section"} onClick={() => runAssistant("expand-section")}>
-            Développer la section
+          {enabledFeatures.has("expand-section") ? <AssistantActionButton description={copy.expandDescription} disabled={isSectionActionDisabled} loading={loadingAction === "expand-section"} onClick={() => runAssistant("expand-section")}>
+            {copy.expand}
           </AssistantActionButton> : null}
-          {enabledFeatures.has("oralize-section") ? <AssistantActionButton description="Réécrit pour sonner plus naturel à voix haute." disabled={isSectionActionDisabled} loading={loadingAction === "oralize-section"} onClick={() => runAssistant("oralize-section")}>
-            Rendre plus oral
+          {enabledFeatures.has("oralize-section") ? <AssistantActionButton description={copy.oralizeDescription} disabled={isSectionActionDisabled} loading={loadingAction === "oralize-section"} onClick={() => runAssistant("oralize-section")}>
+            {copy.oralize}
           </AssistantActionButton> : null}
-          {enabledFeatures.has("shorten-section") ? <AssistantActionButton description="Réduit le texte en gardant l'idée principale." disabled={isSectionActionDisabled} loading={loadingAction === "shorten-section"} onClick={() => runAssistant("shorten-section")}>
-            Raccourcir la section
+          {enabledFeatures.has("shorten-section") ? <AssistantActionButton description={copy.shortenDescription} disabled={isSectionActionDisabled} loading={loadingAction === "shorten-section"} onClick={() => runAssistant("shorten-section")}>
+            {copy.shorten}
           </AssistantActionButton> : null}
-          {enabledFeatures.has("suggest-bible") ? <AssistantActionButton description="Propose un passage biblique lié à l'idée en cours." disabled={isSectionActionDisabled} loading={loadingAction === "suggest-bible"} onClick={() => runAssistant("suggest-bible")}>
-            Proposer un verset
+          {enabledFeatures.has("suggest-bible") ? <AssistantActionButton description={copy.suggestBibleDescription} disabled={isSectionActionDisabled} loading={loadingAction === "suggest-bible"} onClick={() => runAssistant("suggest-bible")}>
+            {copy.suggestBible}
           </AssistantActionButton> : null}
         </div>
 
         {activeSection ? (
-          <p className="m-0 truncate font-mono text-[10.5px] text-faint">Section active: {activeSection.heading || "Sans titre"}</p>
+          <p className="m-0 truncate font-mono text-[10.5px] text-faint">{copy.activeSection.replace("{title}", activeSection.heading || copy.untitled)}</p>
         ) : (
-          <p className="m-0 text-[12px] leading-5 text-muted">Sélectionne une section pour utiliser les actions ciblées.</p>
+          <p className="m-0 text-[12px] leading-5 text-muted">{copy.noSection}</p>
         )}
         {error ? <Alert>{error}</Alert> : null}
       </div>
@@ -143,20 +155,20 @@ export function AssistantPanel({
   );
 }
 
-function normalizeResult(result: AssistantGenerateResult): AssistantGenerateResult {
+function normalizeResult(result: AssistantGenerateResult, untitled: string): AssistantGenerateResult {
   if (result.kind !== "outline") {
     return result;
   }
 
   return {
     kind: "outline",
-    sections: result.sections.map(cleanSection).filter((section) => section.heading || section.body)
+    sections: result.sections.map((section) => cleanSection(section, untitled)).filter((section) => section.heading || section.body)
   };
 }
 
-function cleanSection(section: AssistantOutlineSection): AssistantOutlineSection {
+function cleanSection(section: AssistantOutlineSection, untitled: string): AssistantOutlineSection {
   return {
-    heading: section.heading.trim() || "Sans titre",
+    heading: section.heading.trim() || untitled,
     body: section.body.trim()
   };
 }

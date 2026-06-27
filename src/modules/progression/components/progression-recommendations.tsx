@@ -2,12 +2,15 @@ import Link from "next/link";
 import { ArrowRight, Lightbulb } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import type { ProgressionRecommendation } from "@/modules/progression/types";
+import { useI18n } from "@/i18n/client";
 
 export function ProgressionRecommendations({ recommendations }: { recommendations: ProgressionRecommendation[] }) {
+  const { messages } = useI18n();
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-baseline justify-between gap-3">
-        <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-ink">Recommandations</h2>
+        <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-ink">{messages.progression.recommendations}</h2>
         <span className="font-mono text-[10.5px] text-faint">{recommendations.length}</span>
       </div>
       <div className="grid gap-2">

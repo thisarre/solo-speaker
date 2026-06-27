@@ -1,10 +1,17 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { ArrowLeft, FileQuestion, Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { getMessages } from "@/i18n/messages";
+import { defaultLocale, isLocale, localizedPath } from "@/i18n/routing";
 
-export default function TalkNotFoundPage() {
+export default async function TalkNotFoundPage() {
+  const headerLocale = (await headers()).get("x-locale") ?? defaultLocale;
+  const locale = isLocale(headerLocale) ? headerLocale : defaultLocale;
+  const copy = getMessages(locale).talks;
+
   return (
     <AppShell>
       <main className="studio-scroll flex h-screen items-center justify-center overflow-y-auto px-6 py-8 md:px-11">
@@ -12,17 +19,17 @@ export default function TalkNotFoundPage() {
           <EmptyState
             action={
               <div className="flex flex-wrap justify-center gap-2">
-                <Link href="/talks">
-                  <Button leftIcon={<ArrowLeft />} variant="ghost">Retour aux talks</Button>
+                <Link href={localizedPath("/talks", locale)}>
+                  <Button leftIcon={<ArrowLeft />} variant="ghost">{copy.backToTalks}</Button>
                 </Link>
-                <Link href="/talks/new">
-                  <Button leftIcon={<Plus />} variant="primary">Nouveau talk</Button>
+                <Link href={localizedPath("/talks/new", locale)}>
+                  <Button leftIcon={<Plus />} variant="primary">{copy.newTalk}</Button>
                 </Link>
               </div>
             }
             icon={<FileQuestion />}
-            title="Talk introuvable"
-            description="Ce talk n'existe pas, a été supprimé, ou n'est pas accessible avec cette session."
+            title={copy.notFoundTitle}
+            description={copy.notFoundBody}
           />
         </div>
       </main>

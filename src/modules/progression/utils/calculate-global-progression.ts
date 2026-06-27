@@ -1,11 +1,20 @@
 import type { GlobalProgressionReport, ProgressionTalkInput } from "@/modules/progression/types";
+import { getMessages } from "@/i18n/messages";
+import type { Locale } from "@/i18n/routing";
 import { buildGlobalRecommendations } from "./build-global-recommendations";
 import { calculateStatusDistribution } from "./calculate-status-distribution";
 import { calculateTalkReadiness, scoreLabel } from "./calculate-talk-readiness";
 import { calculateTypeDistribution } from "./calculate-type-distribution";
 
-export function calculateGlobalProgression(talks: ProgressionTalkInput[]): GlobalProgressionReport {
-  const readiness = talks.map(calculateTalkReadiness);
+function formatCount(template: string, count: number) {
+  return template.replace("{count}", String(count)).replace("{plural}", count > 1 ? "s" : "");
+}
+
+const fallbackLocale: Locale = "fr";
+
+export function calculateGlobalProgression(talks: ProgressionTalkInput[], locale: Locale = fallbackLocale): GlobalProgressionReport {
+  const copy = getMessages(locale).progression;
+  const readiness = talks.map((talk) => calculateTalkReadiness(talk, locale));
   const activeReadiness = readiness.filter((item) => !item.isArchived);
   const activeTalks = activeReadiness.length;
   const readyTalks = readiness.filter((item) => item.talk.status === "ready").length;
@@ -19,7 +28,7 @@ export function calculateGlobalProgression(talks: ProgressionTalkInput[]): Globa
 
   return {
     score,
-    label: scoreLabel(score),
+    label: scoreLabel(score, locale),
     activeTalks,
     readyTalks,
     draftTalks,
@@ -27,10 +36,10 @@ export function calculateGlobalProgression(talks: ProgressionTalkInput[]): Globa
     totalPreparedMinutes,
     totalSections,
     metrics: [
-      { id: "active", label: "Talks actifs", value: activeTalks, detail: `${talks.length} au total` },
-      { id: "ready", label: "Prêts", value: readyTalks, detail: `${draftTalks} brouillon${draftTalks > 1 ? "s" : ""}` },
-      { id: "minutes", label: "Temps préparé", value: `${totalPreparedMinutes} min`, detail: "Hors archives" },
-      { id: "sections", label: "Sections", value: totalSections, detail: "Dans les talks actifs" }
+      { id: "active", label: copy.metrics.active, value: activeTalks, detail: copy.metrics.total.replace("{count}", String(talks.length)) },
+      { id: "ready", label: copy.metrics.ready, value: readyTalks, detail: formatCount(copy.metrics.drafts, draftTalks) },
+      { id: "minutes", label: copy.metrics.minutes, value: `${totalPreparedMinutes} min`, detail: copy.metrics.outsideArchives },
+      { id: "sections", label: copy.metrics.sections, value: totalSections, detail: copy.metrics.activeTalks }
     ],
     readiness,
     toFinish: activeReadiness
@@ -42,6 +51,6 @@ export function calculateGlobalProgression(talks: ProgressionTalkInput[]): Globa
       .slice(0, 5),
     statusDistribution: calculateStatusDistribution(talks),
     typeDistribution: calculateTypeDistribution(talks),
-    recommendations: buildGlobalRecommendations(readiness)
+    recommendations: buildGlobalRecommendations(readiness, locale)
   };
 }

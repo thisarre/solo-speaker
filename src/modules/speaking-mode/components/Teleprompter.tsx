@@ -3,6 +3,7 @@
 import { RefObject } from "react";
 import { TalkContent } from "./TalkContent";
 import type { SpeakingItem } from "../types";
+import { useI18n } from "@/i18n/client";
 
 type TeleprompterProps = {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -29,6 +30,7 @@ export function Teleprompter({
   readingAnchorRatio,
   theme
 }: TeleprompterProps) {
+  const { messages } = useI18n();
   const isLight = theme === "light";
 
   return (
@@ -89,10 +91,10 @@ export function Teleprompter({
             })
           ) : (
             <p className={`text-center text-[32px] leading-[1.5] ${isLight ? "text-[#71727a]" : "text-[#83848f]"}`}>
-              Aucune section à lire.
+              {messages.speakingMode.noSection}
             </p>
           )}
-          <p className={`mt-[3em] text-center text-[.5em] ${isLight ? "text-[#b7b3aa]" : "text-[#3c3d46]"}`}>Fin du talk</p>
+          <p className={`mt-[3em] text-center text-[.5em] ${isLight ? "text-[#b7b3aa]" : "text-[#3c3d46]"}`}>{messages.speakingMode.endOfTalk}</p>
         </div>
       </div>
       <div className={`pointer-events-none fixed inset-x-0 top-[54px] h-24 bg-gradient-to-b to-transparent ${isLight ? "from-[#f7f4ec]" : "from-[#0a0b0d]"}`} />

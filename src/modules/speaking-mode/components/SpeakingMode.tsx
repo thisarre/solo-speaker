@@ -21,6 +21,7 @@ import {
   readPrompterSpeedPreference,
   readPrompterThemePreference
 } from "@/modules/settings/studio-preferences";
+import { useI18n } from "@/i18n/client";
 
 const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4];
 const fontSizes = [32, 40, 48, 56];
@@ -37,8 +38,10 @@ function nearestIndex<T>(items: T[], value: T) {
 }
 
 export function SpeakingMode({ talk }: SpeakingModeProps) {
+  const { messages } = useI18n();
+  const copy = messages.speakingMode;
   const router = useRouter();
-  const items = useMemo(() => buildSpeakingItems(talk), [talk]);
+  const items = useMemo(() => buildSpeakingItems(talk, messages.editor.untitled), [messages.editor.untitled, talk]);
   const totalSeconds = useMemo(() => estimateDuration(items), [items]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -284,7 +287,9 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
 
   const currentItem: SpeakingItem | undefined = items[currentIndex];
   const currentSection = currentItem ? talk.sections[currentItem.sectionIndex] : talk.sections[0];
-  const sectionLabel = items.length ? `Section ${(currentItem?.sectionIndex ?? 0) + 1} · ${talk.sections.length}` : "Aucune section";
+  const sectionLabel = items.length
+    ? copy.sectionLabel.replace("{current}", String((currentItem?.sectionIndex ?? 0) + 1)).replace("{total}", String(talk.sections.length))
+    : copy.noSection;
   const themeVars = useMemo<CSSProperties>(
     () =>
       theme === "light"
@@ -390,10 +395,10 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
           }}
           type="button"
         >
-          Reset timer
+          {copy.resetTimer}
         </button>
 
-        {currentSection ? <span className="sr-only">Section courante: {currentSection.heading}</span> : null}
+        {currentSection ? <span className="sr-only">{copy.currentSection.replace("{title}", currentSection.heading)}</span> : null}
       </div>
     </div>
   );

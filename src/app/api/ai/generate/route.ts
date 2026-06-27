@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { buildAiGenerationCapture } from "@/lib/posthog-ai";
+import { getPostHogClient } from "@/lib/posthog-server";
+import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
 import { createClient as createSupabaseClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { buildTalkOutlinePrompt } from "@/modules/assistant/prompts/build-talk-outline-prompt";
 import { buildSectionExpandPrompt } from "@/modules/assistant/prompts/build-section-expand-prompt";
@@ -9,6 +12,7 @@ import { buildShortenSectionPrompt } from "@/modules/assistant/prompts/build-sho
 import { buildPredictNextPrompt } from "@/modules/assistant/prompts/build-predict-next-prompt";
 import { buildBibleSuggestionPrompt } from "@/modules/assistant/prompts/build-bible-suggestion-prompt";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { consumeAssistantAiCredit } from "@/modules/billing/ai-credits";
 import type {
   AssistantAction,
   AssistantGenerateRequest,
@@ -40,6 +44,11 @@ type OpenAIResponseBody = {
   output_text?: string;
   error?: {
     message?: string;
+  };
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    total_tokens?: number;
   };
 };
 
@@ -337,6 +346,24 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  let rateLimit;
+
+  try {
+    rateLimit = await consumeAiRateLimit({
+      identity: {
+        ip: getRequestIp(request.headers),
+        userId: auth.user.id
+      },
+      route: "generate"
+    });
+  } catch {
+    return errorResponse("Protection anti-abus indisponible. Réessaie dans un instant.", 503);
+  }
+
+  if (!rateLimit.allowed) {
+    return errorResponse("Trop de requêtes IA. Réessaie dans un instant.", 429, rateLimit.headers);
+  }
+
   let body: unknown;
 
   try {
@@ -359,6 +386,15 @@ export async function POST(request: NextRequest) {
     return errorResponse("Section requise pour cette action IA.");
   }
 
+  // Trial accounts get a limited pool of deliberate assistant generations; predictive writing
+  // (predict-next) stays free so it can run continuously. Studio/team are unlimited.
+  if (action !== "predict-next") {
+    const credit = await consumeAssistantAiCredit(auth.supabase, auth.user.id);
+    if (!credit.allowed) {
+      return errorResponse("Limite IA de l’essai atteinte. Passez à Studio pour un assistant illimité.", 402);
+    }
+  }
+
   const { data: ownedTalk, error: talkError } = await auth.supabase
     .from("talks")
     .select("id")
@@ -377,6 +413,17 @@ export async function POST(request: NextRequest) {
   const input: AssistantGenerateRequest = { action, talkId, talk, section: section ?? undefined };
   const prompt = buildPrompt(input);
   const model = process.env.OPENAI_MODEL || "gpt-5-mini";
+  const aiInput = [
+    {
+      role: "system" as const,
+      content: "Tu es un assistant d'ecriture orale. Tu retournes uniquement du JSON conforme au schema."
+    },
+    {
+      role: "user" as const,
+      content: prompt
+    }
+  ];
+  const startedAt = performance.now();
 
   const response = await fetch(openAiUrl, {
     method: "POST",
@@ -386,16 +433,7 @@ export async function POST(request: NextRequest) {
     },
     body: JSON.stringify({
       model,
-      input: [
-        {
-          role: "system",
-          content: "Tu es un assistant d'ecriture orale. Tu retournes uniquement du JSON conforme au schema."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
+      input: aiInput,
       text: {
         format: {
           type: "json_schema",
@@ -414,6 +452,7 @@ export async function POST(request: NextRequest) {
       store: false
     })
   });
+  const latencySeconds = Number(((performance.now() - startedAt) / 1000).toFixed(3));
 
   let payload: OpenAIResponseBody;
 
@@ -441,5 +480,32 @@ export async function POST(request: NextRequest) {
   }
 
   const result = parseModelResult(action, text);
-  return NextResponse.json<AssistantGenerateResponse>(result, { status: result.ok ? 200 : 502 });
+
+  if (result.ok && auth.user) {
+    getPostHogClient().capture(
+      buildAiGenerationCapture({
+        action,
+        distinctId: auth.user.id,
+        input: aiInput,
+        latencySeconds,
+        model,
+        outputText: text,
+        provider: "openai",
+        status: response.status,
+        talkLanguage: talk.language,
+        talkType: talk.type,
+        tokens: {
+          input: payload.usage?.input_tokens,
+          output: payload.usage?.output_tokens
+        }
+      })
+    );
+    getPostHogClient().capture({
+      distinctId: auth.user.id,
+      event: "ai_generation_completed",
+      properties: { action, talk_type: talk.type, talk_language: talk.language }
+    });
+  }
+
+  return NextResponse.json<AssistantGenerateResponse>(result, { headers: rateLimit.headers, status: result.ok ? 200 : 502 });
 }

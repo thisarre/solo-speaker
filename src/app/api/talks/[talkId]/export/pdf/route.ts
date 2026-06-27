@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import { createClient } from "@/lib/supabase/server";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { formatDuration, sectionSeconds } from "@/lib/utils";
 import { mapTalk, type TalkWithSectionsRow } from "@/modules/talks/mappers";
 import { talkTypeLabels } from "@/types/talk";
@@ -165,6 +166,21 @@ function drawMetaRow(context: PdfContext, label: string, value: string) {
   context.cursorY -= 17;
 }
 
+function drawTrialWatermark(doc: PDFDocument, font: PDFFont) {
+  for (const page of doc.getPages()) {
+    const { width, height } = page.getSize();
+    page.drawText("SOLO SPEAKER · ESSAI", {
+      x: width * 0.12,
+      y: height * 0.46,
+      size: 40,
+      font,
+      color: rgb(0.82, 0.82, 0.86),
+      rotate: degrees(32),
+      opacity: 0.4
+    });
+  }
+}
+
 function findBrief(talk: ReturnType<typeof mapTalk>) {
   return talk.sections.find((section) => /^(brief|objectif)/i.test(section.heading.trim()))?.body.trim() ?? "";
 }
@@ -200,6 +216,9 @@ export async function GET(_request: Request, { params }: ExportPdfRouteProps) {
   if (!data) {
     return jsonError("Talk introuvable.", 404);
   }
+
+  const { data: profile } = await supabase.from("profiles").select("billing_plan").eq("id", user.id).maybeSingle();
+  const isTrial = (profile?.billing_plan ?? "trial") === "trial";
 
   const talk = mapTalk(data as TalkWithSectionsRow);
   const estimatedSeconds = talk.sections.reduce((total, section) => total + sectionSeconds(section.heading, section.body), 0);
@@ -293,6 +312,10 @@ export async function GET(_request: Request, { params }: ExportPdfRouteProps) {
     });
   }
 
+  if (isTrial) {
+    drawTrialWatermark(doc, bold);
+  }
+
   doc.setTitle(talk.title || "Talk");
   doc.setSubject("Solo Speaker Talk Export");
   doc.setCreator("Solo Speaker");
@@ -301,6 +324,12 @@ export async function GET(_request: Request, { params }: ExportPdfRouteProps) {
 
   const bytes = await doc.save();
   const fileName = `${sanitizeFileName(talk.title)}.pdf`;
+
+  getPostHogClient().capture({
+    distinctId: user.id,
+    event: "talk_exported_pdf",
+    properties: { talk_type: talk.type, section_count: talk.sections.length, estimated_seconds: estimatedSeconds }
+  });
 
   return new NextResponse(Buffer.from(bytes), {
     headers: {

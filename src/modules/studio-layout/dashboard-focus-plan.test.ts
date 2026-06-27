@@ -22,7 +22,7 @@ test("buildDashboardFocusPlan guides an empty studio toward creating a first tal
   const plan = buildDashboardFocusPlan([]);
 
   assert.equal(plan.label, "Démarrage");
-  assert.equal(plan.title, "Créer le premier talk");
+  assert.equal(plan.title, "Créer la première prise de parole");
   assert.equal(plan.href, "/talks/new?guided=1");
   assert.equal(plan.status, "À lancer");
 });

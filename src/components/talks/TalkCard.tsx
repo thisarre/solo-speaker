@@ -1,16 +1,24 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, Clock3, Layers3, Users } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { talkStatusLabels, talkTypeLabels, type Talk } from "@/types/talk";
+import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
 
 export function TalkCard({ talk }: { talk: Talk }) {
+  const { locale, messages } = useI18n();
   const isReady = talk.status === "ready";
   const sectionCount = talk.sections.length;
+  const sectionLabel = messages.talks.sectionCount
+    .replace("{count}", String(sectionCount))
+    .replace("{plural}", sectionCount > 1 ? "s" : "");
 
   return (
-    <Link className="group block focus-visible:outline-none" href={`/talks/${talk.id}`}>
+    <Link className="group block focus-visible:outline-none" href={localizedPath(`/talks/${talk.id}`, locale)}>
       <Card className="relative flex min-h-[184px] flex-col overflow-hidden p-[18px] transition group-hover:-translate-y-px group-hover:border-faint group-hover:shadow-studio group-focus-visible:ring-2 group-focus-visible:ring-accent/35">
         <div className={`absolute inset-x-0 top-0 h-1 ${isReady ? "bg-ok" : "bg-accent"}`} />
         <div className="flex items-start justify-between gap-3">
@@ -25,14 +33,14 @@ export function TalkCard({ talk }: { talk: Talk }) {
 
         <div className="grid gap-2 text-[12px] text-muted">
           <TalkMeta icon={<Clock3 />} label={`${talk.durationMinutes} min`} />
-          <TalkMeta icon={<Users />} label={talk.audience || "Audience à préciser"} />
-          <TalkMeta icon={<Layers3 />} label={`${sectionCount} section${sectionCount > 1 ? "s" : ""}`} />
+          <TalkMeta icon={<Users />} label={talk.audience || messages.talks.audienceMissing} />
+          <TalkMeta icon={<Layers3 />} label={sectionLabel} />
         </div>
 
         <div className="mt-auto flex items-center justify-between border-t border-line2 pt-3">
           <span className="font-mono text-[10.5px] text-faint">{talk.updatedAtLabel}</span>
           <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-foreground">
-            Ouvrir
+            {messages.talks.open}
             <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" />
           </span>
         </div>

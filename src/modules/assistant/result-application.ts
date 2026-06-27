@@ -1,4 +1,5 @@
 import type { AssistantAction, AssistantGenerateResult } from "@/modules/assistant/types";
+import { getMessages } from "@/i18n/messages";
 
 export type AssistantPrimaryApplyMode = "append" | "replace";
 
@@ -8,8 +9,9 @@ export function getAssistantPrimaryApplyMode(action: AssistantAction, result: As
 }
 
 export function getAssistantPrimaryApplyLabel(action: AssistantAction, result: AssistantGenerateResult) {
-  if (result.kind === "outline") return "Ajouter les sections";
-  if (result.kind === "bible") return "Insérer le verset";
-  if (getAssistantPrimaryApplyMode(action, result) === "replace") return "Remplacer la section";
-  return "Ajouter à la suite";
+  const copy = getMessages("fr").assistant;
+  if (result.kind === "outline") return copy.addSections;
+  if (result.kind === "bible") return copy.insertVerseLabel;
+  if (getAssistantPrimaryApplyMode(action, result) === "replace") return copy.replaceSectionLabel;
+  return copy.appendLabel;
 }

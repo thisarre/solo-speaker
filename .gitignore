@@ -4,5 +4,16 @@ out
 dist
 coverage
 *.tsbuildinfo
+.DS_Store
+.tmp/
 .env*
 !.env.example
+.env.local
+
+# Local MCP config (may contain API tokens — keep out of git)
+.mcp.json
+
+# Tooling / agent scratch (not application code)
+.agents/
+.claude/
+docs/superpowers/

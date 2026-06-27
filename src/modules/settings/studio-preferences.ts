@@ -17,7 +17,7 @@ export const defaultVoiceProvider: VoiceFollowProviderMode = "auto";
 export const prompterSpeedOptions = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4] as const;
 export const prompterFontSizeOptions = [32, 40, 48, 56] as const;
 export const prompterThemeOptions = ["dark", "light"] as const;
-export const voiceProviderOptions: VoiceFollowProviderMode[] = ["auto", "browser", "realtime"];
+export const voiceProviderOptions: VoiceFollowProviderMode[] = ["auto", "browser", "deepgram"];
 
 export function resolvePredictiveWritingPreference(
   current: { aiEnabled: boolean; predictiveWritingEnabled: boolean },
@@ -61,5 +61,6 @@ export function readPrompterFontSizePreference() {
 
 export function readVoiceProviderPreference(): VoiceFollowProviderMode {
   const value = readStoredValue(voiceProviderStorageKey);
-  return value === "browser" || value === "realtime" || value === "auto" ? value : defaultVoiceProvider;
+  if (value === "realtime") return "deepgram";
+  return value === "browser" || value === "deepgram" || value === "auto" ? value : defaultVoiceProvider;
 }

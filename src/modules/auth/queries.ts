@@ -29,7 +29,7 @@ export async function getProfile() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, full_name, speaker_role, primary_talk_type, onboarding_completed_at, onboarding_help_requested, onboarding_support_note")
+    .select("id, full_name, speaker_role, primary_talk_type, onboarding_completed_at, onboarding_help_requested, onboarding_support_note, created_at, billing_plan")
     .eq("id", user.id)
     .maybeSingle();
 

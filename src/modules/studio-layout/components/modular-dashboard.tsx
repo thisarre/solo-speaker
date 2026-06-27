@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Archive, ArrowRight, Clock3, FileText, Gauge, LifeBuoy, Mic2, Plus, Settings2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClassName } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { RestartGuidedOnboardingButton } from "@/modules/onboarding/components/restart-guided-onboarding-button";
 import { buildOnboardingDashboardRecommendations, getGuidedTalkSuggestion, type OnboardingProfile } from "@/modules/onboarding/personalization";
@@ -13,16 +13,20 @@ import { DashboardMetric, buildDashboardWidgetData, renderDashboardWidget } from
 import { useDashboardLayout } from "../layout-storage";
 import { CustomizeDashboardDialog } from "./customize-dashboard-dialog";
 import { useState } from "react";
+import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
 
 export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfile | null; talks: Talk[] }) {
+  const { locale, messages } = useI18n();
+  const dashboard = messages.dashboard;
   const [customizing, setCustomizing] = useState(false);
   const { layout, reset, updateWidgets } = useDashboardLayout();
   const data = buildDashboardWidgetData(talks);
-  const focusPlan = buildDashboardFocusPlan(talks);
+  const focusPlan = buildDashboardFocusPlan(talks, locale);
   const visibleWidgets = [...layout.widgets].sort((a, b) => a.order - b.order).filter((widget) => widget.visible);
   const currentTalk = data.currentTalk;
-  const guidedTalk = getGuidedTalkSuggestion(profile);
-  const onboardingRecommendations = buildOnboardingDashboardRecommendations(profile, talks);
+  const guidedTalk = getGuidedTalkSuggestion(profile, locale);
+  const onboardingRecommendations = buildOnboardingDashboardRecommendations(profile, talks, locale);
   const supportRecommendation = onboardingRecommendations.find((recommendation) => recommendation.id === "onboarding-help");
   const profileRecommendations = onboardingRecommendations.filter((recommendation) => recommendation.id !== "onboarding-help");
 
@@ -31,20 +35,21 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
       <section className="rounded-[8px] border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(20,20,25,.04)] md:p-6" data-tour="dashboard-home">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <Badge tone="accent">Studio</Badge>
+            <Badge tone="accent">{dashboard.studio}</Badge>
             <h1 className="m-0 mt-3 text-[30px] font-semibold leading-tight tracking-[0] md:text-[38px]">
-              {currentTalk ? "Reprenez votre prochain talk là où vous l'avez laissé." : `Préparez votre premier ${talkTypeLabels[guidedTalk.type]} sans vous disperser.`}
+              {currentTalk ? dashboard.resumeTitle : dashboard.firstTitle.replace("{type}", talkTypeLabels[guidedTalk.type])}
             </h1>
             <p className="m-0 mt-3 max-w-xl text-[14px] leading-6 text-muted">
               {currentTalk
-                ? "Structurez, améliorez et répétez depuis un seul espace. Le Dashboard garde l'action suivante visible."
+                ? dashboard.resumeBody
                 : guidedTalk.message}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button leftIcon={<Settings2 />} onClick={() => setCustomizing(true)} variant="ghost">Personnaliser</Button>
-            <Link href="/talks/new?guided=1" data-tour="create-talk">
-              <Button leftIcon={<Plus />} variant="primary">Créer un talk</Button>
+            <Button leftIcon={<Settings2 />} onClick={() => setCustomizing(true)} variant="ghost">{dashboard.customize}</Button>
+            <Link className={buttonClassName({ variant: "primary" })} href={localizedPath("/talks/new?guided=1", locale)} data-tour="create-talk">
+              <span className="flex [&_svg]:size-4"><Plus /></span>
+              {dashboard.createTalk}
             </Link>
           </div>
         </div>
@@ -52,7 +57,7 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
         {currentTalk ? (
           <div className="mt-6 grid gap-3 border-t border-line pt-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="min-w-0">
-              <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">À reprendre</p>
+              <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{dashboard.resumeEyebrow}</p>
               <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <h2 className="m-0 truncate text-[18px] font-semibold tracking-[0]">{currentTalk.title}</h2>
                 <span className="font-mono text-[11px] text-faint">{currentTalk.durationMinutes} min</span>
@@ -61,11 +66,13 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href={`/talks/${currentTalk.id}`}>
-                <Button leftIcon={<ArrowRight />} variant="primary">Continuer la préparation</Button>
+              <Link className={buttonClassName({ variant: "primary" })} href={localizedPath(`/talks/${currentTalk.id}`, locale)}>
+                <span className="flex [&_svg]:size-4"><ArrowRight /></span>
+                {dashboard.continuePreparation}
               </Link>
-              <Link href={`/talks/${currentTalk.id}/speak`}>
-                <Button leftIcon={<Mic2 />} variant="ghost">Répéter</Button>
+              <Link className={buttonClassName({ variant: "ghost" })} href={localizedPath(`/talks/${currentTalk.id}/speak`, locale)}>
+                <span className="flex [&_svg]:size-4"><Mic2 /></span>
+                {dashboard.rehearse}
               </Link>
             </div>
           </div>
@@ -88,14 +95,15 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
             </div>
             <div className="min-w-0">
               <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="font-mono text-[10.5px] uppercase tracking-[.1em] text-faint">Signal de préparation</span>
+                <span className="font-mono text-[10.5px] uppercase tracking-[.1em] text-faint">{dashboard.preparationSignal}</span>
                 <span className="font-mono text-[11px] text-faint">{focusPlan.progress}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-line2">
                 <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),color-mix(in_oklab,var(--ok)_65%,var(--accent)))]" style={{ width: `${focusPlan.progress}%` }} />
               </div>
-              <Link className="mt-3 inline-flex" href={focusPlan.href}>
-                <Button leftIcon={<ArrowRight />} variant={focusPlan.status === "Prêt" ? "ghost" : "primary"}>Action suivante</Button>
+              <Link className={buttonClassName({ className: "mt-3", variant: focusPlan.progress >= 80 ? "ghost" : "primary" })} href={focusPlan.href}>
+                <span className="flex [&_svg]:size-4"><ArrowRight /></span>
+                {dashboard.nextAction}
               </Link>
             </div>
           </div>
@@ -110,13 +118,13 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
                 <LifeBuoy className="size-5" />
               </span>
               <div className="min-w-0">
-                <p className="m-0 font-mono text-[10.5px] uppercase tracking-[.12em] text-faint">Accompagnement</p>
+                <p className="m-0 font-mono text-[10.5px] uppercase tracking-[.12em] text-faint">{dashboard.support}</p>
                 <h2 className="m-0 mt-1 text-[18px] font-semibold tracking-[0] text-foreground">{supportRecommendation.title}</h2>
                 <p className="m-0 mt-1 max-w-2xl text-[13px] leading-6 text-muted">{supportRecommendation.message}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  <span className="rounded-[7px] border border-border bg-surface px-2 py-1 text-[11.5px] font-[550] text-muted">Réglages</span>
-                  <span className="rounded-[7px] border border-border bg-surface px-2 py-1 text-[11.5px] font-[550] text-muted">Modules IA</span>
-                  <span className="rounded-[7px] border border-border bg-surface px-2 py-1 text-[11.5px] font-[550] text-muted">Premier talk</span>
+                  <span className="rounded-[7px] border border-border bg-surface px-2 py-1 text-[11.5px] font-[550] text-muted">{dashboard.settingsTag}</span>
+                  <span className="rounded-[7px] border border-border bg-surface px-2 py-1 text-[11.5px] font-[550] text-muted">{dashboard.aiModulesTag}</span>
+                  <span className="rounded-[7px] border border-border bg-surface px-2 py-1 text-[11.5px] font-[550] text-muted">{dashboard.firstTalkTag}</span>
                 </div>
               </div>
             </div>
@@ -124,7 +132,7 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
               <RestartGuidedOnboardingButton inline />
               {supportRecommendation.href ? (
                 <a className="inline-flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-[8px] bg-accent px-3 py-2 text-[12.5px] font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(20,20,25,.12)]" href={supportRecommendation.href}>
-                  {supportRecommendation.actionLabel ?? "Contacter l'aide"}
+                  {supportRecommendation.actionLabel ?? dashboard.contactHelp}
                   <ArrowRight className="size-3.5" />
                 </a>
               ) : null}
@@ -178,10 +186,10 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
       ) : null}
 
       <section className="mt-7 grid gap-3.5 md:grid-cols-2 xl:grid-cols-4">
-        <DashboardMetric icon={<FileText />} label="Talks actifs" value={data.activeTalks.length} detail={`${talks.length} dans le studio`} />
-        <DashboardMetric icon={<Sparkles />} label="Prêts à présenter" value={data.readyTalks.length} detail={`${data.draftTalks.length} à finaliser`} />
-        <DashboardMetric icon={<Clock3 />} label="Temps estimé" value={`${data.totalMinutes} min`} detail={`${data.totalSections} sections préparées`} />
-        <DashboardMetric icon={<Archive />} label="Archivés" value={data.archivedTalks.length} detail="Hors travail courant" />
+        <DashboardMetric icon={<FileText />} label={dashboard.activeTalks} value={data.activeTalks.length} detail={dashboard.inStudio.replace("{count}", String(talks.length))} />
+        <DashboardMetric icon={<Sparkles />} label={dashboard.readyToPresent} value={data.readyTalks.length} detail={dashboard.toFinish.replace("{count}", String(data.draftTalks.length))} />
+        <DashboardMetric icon={<Clock3 />} label={dashboard.estimatedTime} value={`${data.totalMinutes} min`} detail={dashboard.preparedSections.replace("{count}", String(data.totalSections))} />
+        <DashboardMetric icon={<Archive />} label={dashboard.archived} value={data.archivedTalks.length} detail={dashboard.outsideCurrentWork} />
       </section>
 
       {visibleWidgets.length ? (
@@ -195,10 +203,10 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
       ) : (
         <div className="mt-8">
           <EmptyState
-            action={<Button leftIcon={<Settings2 />} onClick={reset} type="button" variant="primary">Réinitialiser</Button>}
+            action={<Button leftIcon={<Settings2 />} onClick={reset} type="button" variant="primary">{dashboard.reset}</Button>}
             icon={<Settings2 />}
-            title="Accueil vide"
-            description="Tous les widgets sont masqués. Réinitialisez la disposition pour retrouver le Dashboard par défaut."
+            title={dashboard.emptyHome}
+            description={dashboard.emptyHomeBody}
           />
         </div>
       )}

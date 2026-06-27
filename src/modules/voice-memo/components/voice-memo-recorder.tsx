@@ -4,6 +4,7 @@ import { Clipboard, Loader2, Mic, Plus, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { useI18n } from "@/i18n/client";
 import { transcribeVoiceMemo } from "@/modules/voice-memo/actions";
 
 type VoiceMemoRecorderProps = {
@@ -27,6 +28,8 @@ function formatElapsed(seconds: number) {
 }
 
 export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps) {
+  const { messages } = useI18n();
+  const copy = messages.voiceMemo;
   const [state, setState] = useState<RecorderState>("idle");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [transcript, setTranscript] = useState("");
@@ -62,7 +65,7 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
     setTranscript("");
 
     if (isUnsupported) {
-      setError("L'enregistrement audio n'est pas disponible dans ce navigateur.");
+      setError(copy.unsupportedError);
       return;
     }
 
@@ -91,7 +94,7 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
       recorder.start();
       setState("recording");
     } catch (recordingError) {
-      setError(recordingError instanceof Error ? recordingError.message : "Impossible d'accéder au micro.");
+      setError(recordingError instanceof Error ? recordingError.message : copy.microphoneError);
       setState("idle");
     }
   }
@@ -106,7 +109,7 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
   async function transcribe(audio: Blob) {
     if (audio.size <= 0) {
       setState("idle");
-      setError("Le mémo est vide. Réessaie en parlant un peu plus près du micro.");
+      setError(copy.emptyError);
       return;
     }
 
@@ -114,7 +117,7 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
       const text = await transcribeVoiceMemo({ audio, language });
       setTranscript(text);
     } catch (transcriptionError) {
-      setError(transcriptionError instanceof Error ? transcriptionError.message : "Transcription impossible.");
+      setError(transcriptionError instanceof Error ? transcriptionError.message : copy.transcriptionError);
     } finally {
       setState("idle");
     }
@@ -128,7 +131,7 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
-      setError("Copie impossible depuis ce navigateur.");
+      setError(copy.copyError);
     }
   }
 
@@ -136,16 +139,16 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
     <section className="rounded-[10px] border border-border bg-panel p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="m-0 text-[13px] font-semibold text-foreground">Mémo vocal</p>
-          <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">Capture une idée parlée, puis ajoute la transcription au brief.</p>
+          <p className="m-0 text-[13px] font-semibold text-foreground">{copy.title}</p>
+          <p className="m-0 mt-1 text-[12.5px] leading-5 text-muted">{copy.description}</p>
         </div>
         {isRecording ? (
           <Button leftIcon={<Square />} onClick={stopRecording} type="button" variant="primary">
-            Stop {formatElapsed(elapsedSeconds)}
+            {copy.stop} {formatElapsed(elapsedSeconds)}
           </Button>
         ) : (
           <Button disabled={isTranscribing || isUnsupported} leftIcon={isTranscribing ? <Loader2 className="animate-spin" /> : <Mic />} onClick={startRecording} type="button" variant="ghost">
-            {isTranscribing ? "Transcription..." : "Enregistrer"}
+            {isTranscribing ? copy.transcribing : copy.record}
           </Button>
         )}
       </div>
@@ -153,8 +156,14 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
       {isRecording ? (
         <div className="mt-3 flex items-center gap-2 rounded-[8px] border border-[color-mix(in_oklab,var(--danger)_24%,var(--line))] bg-[color-mix(in_oklab,var(--danger)_7%,var(--bg))] px-3 py-2 text-[12.5px] text-[var(--danger)]">
           <span className="size-2 rounded-full bg-[var(--danger)]" />
-          Enregistrement en cours
+          {copy.recording}
         </div>
+      ) : null}
+
+      {isUnsupported ? (
+        <p className="m-0 mt-3 rounded-[8px] border border-border bg-surface px-3 py-2 text-[12.5px] leading-5 text-muted">
+          {copy.unsupportedHelp}
+        </p>
       ) : null}
 
       {transcript ? (
@@ -162,10 +171,10 @@ export function VoiceMemoRecorder({ language, onInsert }: VoiceMemoRecorderProps
           <p className="m-0 whitespace-pre-wrap text-[13px] leading-6 text-foreground">{transcript}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button leftIcon={<Plus />} onClick={() => onInsert(transcript)} size="sm" type="button" variant="primary">
-              Ajouter au brief
+              {copy.addToBrief}
             </Button>
             <Button leftIcon={<Clipboard />} onClick={copyTranscript} size="sm" type="button" variant="ghost">
-              {copied ? "Copié" : "Copier"}
+              {copied ? copy.copied : copy.copy}
             </Button>
           </div>
         </div>

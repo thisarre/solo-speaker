@@ -1,5 +1,7 @@
 import { createEditorPanels } from "./default-layouts";
 import type { EditorLayoutConfig, EditorLayoutPreset, EditorPanelId } from "./types";
+import { getMessages } from "@/i18n/messages";
+import { defaultLocale, type Locale } from "@/i18n/routing";
 
 type EditorPresetDefinition = {
   label: string;
@@ -7,40 +9,54 @@ type EditorPresetDefinition = {
   visiblePanels: EditorPanelId[];
 };
 
-export const editorLayoutPresets: Record<EditorLayoutPreset, EditorPresetDefinition> = {
+const presetPanels: Record<EditorLayoutPreset, EditorPanelId[]> = {
+  complete: ["app-sidebar", "section-rail", "talk-header", "metadata-bar", "assistant-panel", "status-bar", "export-actions", "speaking-actions", "editor-toolbar"],
+  focus: ["talk-header", "status-bar", "speaking-actions", "editor-toolbar"],
+  ai: ["app-sidebar", "section-rail", "talk-header", "assistant-panel", "status-bar", "editor-toolbar"],
+  rehearsal: ["app-sidebar", "section-rail", "talk-header", "metadata-bar", "status-bar", "export-actions", "speaking-actions"],
+  minimal: ["talk-header", "status-bar"]
+};
+
+export function getEditorLayoutPresets(locale: Locale = defaultLocale): Record<EditorLayoutPreset, EditorPresetDefinition> {
+  const copy = getMessages(locale).settings.editorLayoutPresets;
+
+  return {
   complete: {
-    label: "Complet",
-    description: "Édition, plan, IA, export et présentation.",
-    visiblePanels: ["app-sidebar", "section-rail", "talk-header", "metadata-bar", "assistant-panel", "status-bar", "export-actions", "speaking-actions", "editor-toolbar"]
+      label: copy.complete[0],
+      description: copy.complete[1],
+      visiblePanels: presetPanels.complete
   },
   focus: {
-    label: "Concentration",
-    description: "Écriture centrée avec le minimum nécessaire.",
-    visiblePanels: ["talk-header", "status-bar", "speaking-actions", "editor-toolbar"]
+      label: copy.focus[0],
+      description: copy.focus[1],
+      visiblePanels: presetPanels.focus
   },
   ai: {
-    label: "IA",
-    description: "Plan, contenu et assistant mis en avant.",
-    visiblePanels: ["app-sidebar", "section-rail", "talk-header", "assistant-panel", "status-bar", "editor-toolbar"]
+      label: copy.ai[0],
+      description: copy.ai[1],
+      visiblePanels: presetPanels.ai
   },
   rehearsal: {
-    label: "Répétition",
-    description: "Structure, durée et passage vers Speaking Mode.",
-    visiblePanels: ["app-sidebar", "section-rail", "talk-header", "metadata-bar", "status-bar", "export-actions", "speaking-actions"]
+      label: copy.rehearsal[0],
+      description: copy.rehearsal[1],
+      visiblePanels: presetPanels.rehearsal
   },
   minimal: {
-    label: "Minimal",
-    description: "Lecture et correction presque sans panneaux.",
-    visiblePanels: ["talk-header", "status-bar"]
-  }
-};
+      label: copy.minimal[0],
+      description: copy.minimal[1],
+      visiblePanels: presetPanels.minimal
+    }
+  };
+}
+
+export const editorLayoutPresets: Record<EditorLayoutPreset, EditorPresetDefinition> = getEditorLayoutPresets(defaultLocale);
 
 export function createEditorLayoutFromPreset(preset: EditorLayoutPreset, focusModeEnabled = preset === "focus"): EditorLayoutConfig {
   return {
     preset,
     focusModeEnabled,
     updatedAt: new Date().toISOString(),
-    panels: createEditorPanels(editorLayoutPresets[preset].visiblePanels)
+    panels: createEditorPanels(presetPanels[preset])
   };
 }
 

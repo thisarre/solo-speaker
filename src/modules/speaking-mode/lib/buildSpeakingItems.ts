@@ -16,7 +16,7 @@ function makeItem(input: Omit<SpeakingItem, "segments" | "estimatedSeconds">): S
   };
 }
 
-export function buildSpeakingItems(talk: Talk): SpeakingItem[] {
+export function buildSpeakingItems(talk: Talk, fallbackTitle: string): SpeakingItem[] {
   return talk.sections.flatMap((section, sectionIndex) => {
     const items: SpeakingItem[] = [
       makeItem({
@@ -24,7 +24,7 @@ export function buildSpeakingItems(talk: Talk): SpeakingItem[] {
         sectionId: section.id,
         sectionIndex,
         kind: "heading",
-        text: `${sectionIndex + 1} · ${section.heading || "Sans titre"}`
+        text: `${sectionIndex + 1} · ${section.heading || fallbackTitle}`
       })
     ];
 

@@ -1,33 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, HelpCircle, Home, LogOut, Plus, Search, Settings } from "lucide-react";
+import { CalendarClock, FileText, HelpCircle, Home, LogOut, Plus, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { CommandPalette } from "./CommandPalette";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
 import { RestartGuidedOnboardingButton } from "@/modules/onboarding/components/restart-guided-onboarding-button";
+import type { TrialReminder } from "@/modules/billing/trial";
+import { getMessages } from "@/i18n/messages";
+import { getPathWithoutLocale, localizedPath, type Locale } from "@/i18n/routing";
 
-function getNavItems(talkCount: number) {
+function getNavItems(talkCount: number, locale: Locale) {
+  const navigation = getMessages(locale).navigation;
   return [
-    { href: "/dashboard", label: "Dashboard", icon: Home },
-    { href: "/talks", label: "Talks", icon: FileText, count: talkCount },
-    { href: "/talks/new", label: "Nouveau talk", icon: Plus },
-    { href: "/settings", label: "Réglages", icon: Settings }
+    { href: localizedPath("/dashboard", locale), label: navigation.dashboard, icon: Home },
+    { href: localizedPath("/talks", locale), label: navigation.talks, icon: FileText, count: talkCount },
+    { href: localizedPath("/talks/new", locale), label: navigation.newTalk, icon: Plus },
+    { href: localizedPath("/settings", locale), label: navigation.settings, icon: Settings }
   ];
 }
 
 function isActiveNavItem(pathname: string, href: string) {
-  if (href === "/dashboard") return pathname === "/dashboard";
-  if (href === "/talks/new") return pathname === "/talks/new";
-  if (href === "/talks") return pathname === "/talks" || (pathname.startsWith("/talks/") && pathname !== "/talks/new");
-  if (href === "/settings") return pathname === "/settings";
-  return pathname === href;
+  const normalizedPathname = getPathWithoutLocale(pathname);
+  const normalizedHref = getPathWithoutLocale(href);
+  if (normalizedHref === "/dashboard") return normalizedPathname === "/dashboard";
+  if (normalizedHref === "/talks/new") return normalizedPathname === "/talks/new";
+  if (normalizedHref === "/talks") return normalizedPathname === "/talks" || (normalizedPathname.startsWith("/talks/") && normalizedPathname !== "/talks/new");
+  if (normalizedHref === "/settings") return normalizedPathname === "/settings";
+  return normalizedPathname === normalizedHref;
 }
 
-export function Sidebar({ talkCount, userName }: { talkCount: number; userName: string }) {
+export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale: Locale; talkCount: number; trialReminder: TrialReminder | null; userName: string }) {
   const pathname = usePathname();
-  const navItems = getNavItems(talkCount);
+  const messages = getMessages(locale);
+  const navItems = getNavItems(talkCount, locale);
   const helpHref = "mailto:support@solo-speaker.app?subject=Besoin%20d'aide%20Solo%20Speaker";
+  const trialHref = trialReminder?.href.startsWith("/") ? localizedPath(trialReminder.href, locale) : (trialReminder?.href ?? "/pricing");
 
   return (
     <>
@@ -35,12 +45,8 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
         <div className="flex justify-center pb-4 lg:block lg:px-2">
           <Logo compact />
         </div>
-        <div className="mb-[18px] hidden items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-2 text-[12.5px] text-faint lg:flex">
-          <Search className="size-4" />
-          <span>Search</span>
-          <span className="ml-auto rounded-[5px] bg-panel px-1.5 py-0.5 font-mono text-[10.5px]">⌘K</span>
-        </div>
-        <p className="hidden px-2 pb-2 font-mono text-[10px] uppercase tracking-[.12em] text-faint lg:block">Studio</p>
+        <CommandPalette locale={locale} talkCount={talkCount} />
+        <p className="hidden px-2 pb-2 font-mono text-[10px] uppercase tracking-[.12em] text-faint lg:block">{messages.navigation.studio}</p>
         <nav className="flex flex-col gap-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -68,12 +74,28 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
           href={helpHref}
         >
           <HelpCircle className="size-4" />
-          Besoin d&apos;aide
+          {messages.common.help}
         </a>
         <RestartGuidedOnboardingButton />
+        {trialReminder ? (
+          <Link
+            className="mt-3 hidden rounded-[10px] border border-[color-mix(in_oklab,var(--accent)_18%,var(--line))] bg-surface p-3 text-left transition hover:border-[color-mix(in_oklab,var(--accent)_36%,var(--line))] hover:bg-panel lg:block"
+            href={trialHref}
+          >
+            <span className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[.12em] text-faint">
+              <CalendarClock className="size-3.5 text-accent-ink" />
+              {trialReminder.label}
+            </span>
+            <span className="block text-[12.5px] font-[550] leading-5 text-foreground">{trialReminder.message}</span>
+            <span className="mt-2 block text-[12px] font-[550] text-accent-ink">{trialReminder.ctaLabel}</span>
+          </Link>
+        ) : null}
         <div className="mt-auto border-t border-line pt-3">
           <div className="mb-3 flex justify-center lg:justify-start lg:px-2">
             <ThemeToggle className="w-[92px] lg:w-[96px]" />
+          </div>
+          <div className="mb-3 flex justify-center lg:justify-start lg:px-2">
+            <LanguageSwitcher currentLocale={locale} />
           </div>
           <div className="flex items-center justify-center gap-2.5 lg:justify-start lg:px-2">
             <div className="flex size-6 items-center justify-center rounded-full bg-accent-bg text-[11px] font-semibold text-accent-ink">
@@ -81,15 +103,15 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
             </div>
             <div className="hidden min-w-0 lg:block">
               <p className="m-0 truncate text-[12.5px] font-medium">{userName}</p>
-              <p className="m-0 truncate text-[11px] text-faint">Studio owner</p>
+              <p className="m-0 truncate text-[11px] text-faint">{messages.navigation.studioOwner}</p>
             </div>
-            <Link aria-label="Logout" className="ml-auto hidden size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink lg:flex" href="/logout">
+            <Link aria-label={messages.common.logout} className="ml-auto hidden size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink lg:flex" href="/logout">
               <LogOut className="size-4" />
             </Link>
           </div>
         </div>
         <div className="mt-2 flex justify-center lg:hidden">
-          <Link aria-label="Logout" className="flex size-8 items-center justify-center rounded-[8px] text-faint transition hover:bg-surface hover:text-ink" href="/logout">
+          <Link aria-label={messages.common.logout} className="flex size-8 items-center justify-center rounded-[8px] text-faint transition hover:bg-surface hover:text-ink" href="/logout">
             <LogOut className="size-4" />
           </Link>
         </div>
@@ -115,11 +137,16 @@ export function Sidebar({ talkCount, userName }: { talkCount: number; userName: 
           );
         })}
         <ThemeToggle className="w-[92px]" />
-        <a aria-label="Aide" className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href={helpHref}>
+        <a aria-label={messages.common.help} className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href={helpHref}>
           <HelpCircle className="size-4" />
         </a>
         <RestartGuidedOnboardingButton compact />
-        <Link aria-label="Logout" className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href="/logout">
+        {trialReminder ? (
+          <Link aria-label={trialReminder.label} className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href={trialHref} title={trialReminder.message}>
+            <CalendarClock className="size-4" />
+          </Link>
+        ) : null}
+        <Link aria-label={messages.common.logout} className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href="/logout">
           <LogOut className="size-4" />
         </Link>
       </nav>

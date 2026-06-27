@@ -7,6 +7,7 @@ import {
   onboardingTourRestartEvent,
   onboardingTourStorageKey
 } from "@/modules/onboarding/tour";
+import { useI18n } from "@/i18n/client";
 
 type RestartGuidedOnboardingButtonProps = {
   compact?: boolean;
@@ -14,6 +15,8 @@ type RestartGuidedOnboardingButtonProps = {
 };
 
 export function RestartGuidedOnboardingButton({ compact = false, inline = false }: RestartGuidedOnboardingButtonProps) {
+  const { messages } = useI18n();
+
   function restartTour() {
     const nextState = getRestartedOnboardingTourState();
     window.localStorage.removeItem(onboardingTourStorageKey);
@@ -23,7 +26,7 @@ export function RestartGuidedOnboardingButton({ compact = false, inline = false 
 
   return (
     <button
-      aria-label="Relancer la visite guidée"
+      aria-label={messages.onboarding.restartTour}
       className={
         compact
           ? "flex size-10 cursor-pointer items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink"
@@ -35,7 +38,7 @@ export function RestartGuidedOnboardingButton({ compact = false, inline = false 
       type="button"
     >
       <Compass className="size-4" />
-      {compact ? null : "Visite guidée"}
+      {compact ? null : messages.onboarding.guidedTour}
     </button>
   );
 }

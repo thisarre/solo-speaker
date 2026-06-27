@@ -7,17 +7,18 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TalkCard } from "@/components/talks/TalkCard";
+import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
 import { talkStatusLabels, talkTypeLabels, type Talk } from "@/types/talk";
 import type { DashboardWidgetId } from "./types";
 
-export const dashboardWidgetLabels: Record<DashboardWidgetId, string> = {
-  "resume-talk": "Talk à reprendre",
-  "recent-talks": "Talks récents",
-  "quick-actions": "Raccourcis",
-  "preparation-summary": "Préparation",
-  "status-distribution": "Répartition par statut",
-  "type-distribution": "Répartition par type"
-};
+function formatDashboardCount(template: string, count: number) {
+  return template.replace("{count}", String(count)).replace("{plural}", count > 1 ? "s" : "");
+}
+
+export function getDashboardWidgetLabels(messages: ReturnType<typeof import("@/i18n/messages").getMessages>): Record<DashboardWidgetId, string> {
+  return messages.dashboard.widgetLabels;
+}
 
 export type DashboardWidgetData = {
   activeTalks: Talk[];
@@ -47,18 +48,20 @@ export function renderDashboardWidget(id: DashboardWidgetId, data: DashboardWidg
 
 function ResumeTalkWidget({ data }: { data: DashboardWidgetData }) {
   const { currentTalk } = data;
+  const { locale, messages } = useI18n();
+  const dashboard = messages.dashboard;
 
   if (!currentTalk) {
     return (
       <EmptyState
         action={
-          <Link href="/talks/new">
-            <Button leftIcon={<Plus />} variant="primary">Créer un talk</Button>
+          <Link href={localizedPath("/talks/new", locale)}>
+            <Button leftIcon={<Plus />} variant="primary">{dashboard.createTalk}</Button>
           </Link>
         }
         icon={<Plus />}
-        title="Aucun talk pour le moment"
-        description="Créez votre premier talk pour préparer, améliorer et répéter une prise de parole."
+        title={dashboard.emptyTalkTitle}
+        description={dashboard.emptyTalkBody}
       />
     );
   }
@@ -67,18 +70,18 @@ function ResumeTalkWidget({ data }: { data: DashboardWidgetData }) {
     <Card className="flex flex-wrap items-center gap-6 p-5 md:p-6">
       <div className="min-w-60 flex-1">
         <span className="rounded-md bg-accent-bg px-2 py-1 font-mono text-[10px] uppercase tracking-[.09em] text-accent-ink">
-          Prochain travail · {talkTypeLabels[currentTalk.type]}
+          {dashboard.nextWork} · {talkTypeLabels[currentTalk.type]}
         </span>
         <h2 className="mb-1.5 mt-2.5 text-[20px] font-semibold tracking-[0]">{currentTalk.title}</h2>
         <div className="flex flex-wrap gap-3.5 font-mono text-[11px] text-faint">
           <span>{currentTalk.durationMinutes} min</span>
-          <span>{currentTalk.audience || "Audience à préciser"}</span>
+          <span>{currentTalk.audience || dashboard.audienceMissing}</span>
           <span>{currentTalk.updatedAtLabel}</span>
         </div>
       </div>
       <div className="w-full min-w-[150px] md:w-[190px]">
         <div className="mb-2 flex justify-between gap-2 font-mono text-[10.5px] text-faint">
-          <span>Préparation</span>
+          <span>{dashboard.preparation}</span>
           <span>{currentTalk.sections.length}</span>
         </div>
         <div className="h-1 overflow-hidden rounded-full bg-line2">
@@ -86,11 +89,11 @@ function ResumeTalkWidget({ data }: { data: DashboardWidgetData }) {
         </div>
       </div>
       <div className="flex gap-2">
-        <Link href={`/talks/${currentTalk.id}`}>
-          <Button variant="primary">Éditer</Button>
+        <Link href={localizedPath(`/talks/${currentTalk.id}`, locale)}>
+          <Button variant="primary">{dashboard.edit}</Button>
         </Link>
-        <Link href={`/talks/${currentTalk.id}/speak`}>
-          <Button leftIcon={<Mic2 />} variant="ghost">Répéter</Button>
+        <Link href={localizedPath(`/talks/${currentTalk.id}/speak`, locale)}>
+          <Button leftIcon={<Mic2 />} variant="ghost">{dashboard.rehearse}</Button>
         </Link>
       </div>
     </Card>
@@ -98,12 +101,15 @@ function ResumeTalkWidget({ data }: { data: DashboardWidgetData }) {
 }
 
 function RecentTalksWidget({ data }: { data: DashboardWidgetData }) {
+  const { locale, messages } = useI18n();
+  const dashboard = messages.dashboard;
+
   return (
     <section>
       <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="m-0 text-sm font-semibold tracking-[0]">Talks récents</h2>
-        <Link className="flex items-center gap-1 text-[12.5px] text-mute hover:text-ink" href="/talks">
-          Voir tout <ArrowRight className="size-3.5" />
+        <h2 className="m-0 text-sm font-semibold tracking-[0]">{dashboard.recentTalks}</h2>
+        <Link className="flex items-center gap-1 text-[12.5px] text-mute hover:text-ink" href={localizedPath("/talks", locale)}>
+          {dashboard.viewAll} <ArrowRight className="size-3.5" />
         </Link>
       </div>
       <div className="grid gap-3.5 md:grid-cols-2 xl:grid-cols-3">
@@ -113,13 +119,13 @@ function RecentTalksWidget({ data }: { data: DashboardWidgetData }) {
           <div className="md:col-span-2 xl:col-span-3">
             <EmptyState
               action={
-                <Link href="/talks/new">
-                  <Button leftIcon={<Plus />} variant="primary">Créer un talk</Button>
+                <Link href={localizedPath("/talks/new", locale)}>
+                  <Button leftIcon={<Plus />} variant="primary">{dashboard.createTalk}</Button>
                 </Link>
               }
               icon={<Plus />}
-              title="Aucun talk récent"
-              description="Vos derniers brouillons et talks prêts apparaîtront ici."
+              title={dashboard.emptyRecentTitle}
+              description={dashboard.emptyRecentBody}
             />
           </div>
         )}
@@ -129,21 +135,24 @@ function RecentTalksWidget({ data }: { data: DashboardWidgetData }) {
 }
 
 function QuickActionsWidget() {
+  const { locale, messages } = useI18n();
+  const dashboard = messages.dashboard;
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-baseline justify-between gap-3">
-        <h2 className="m-0 text-sm font-semibold tracking-[0]">Raccourcis</h2>
-        <span className="font-mono text-[10.5px] text-faint">Studio</span>
+        <h2 className="m-0 text-sm font-semibold tracking-[0]">{dashboard.shortcuts}</h2>
+        <span className="font-mono text-[10.5px] text-faint">{dashboard.studio}</span>
       </div>
       <div className="grid gap-2">
-        <Link href="/talks/new">
-          <Button className="w-full justify-start" leftIcon={<Plus />} variant="ghost">Créer un talk</Button>
+        <Link href={localizedPath("/talks/new", locale)}>
+          <Button className="w-full justify-start" leftIcon={<Plus />} variant="ghost">{dashboard.createTalk}</Button>
         </Link>
-        <Link href="/talks">
-          <Button className="w-full justify-start" leftIcon={<FileText />} variant="ghost">Voir les talks</Button>
+        <Link href={localizedPath("/talks", locale)}>
+          <Button className="w-full justify-start" leftIcon={<FileText />} variant="ghost">{dashboard.viewTalks}</Button>
         </Link>
-        <Link href="/progression">
-          <Button className="w-full justify-start" leftIcon={<Wand2 />} variant="quiet">Voir la progression</Button>
+        <Link href={localizedPath("/progression", locale)}>
+          <Button className="w-full justify-start" leftIcon={<Wand2 />} variant="quiet">{dashboard.viewProgress}</Button>
         </Link>
       </div>
     </Card>
@@ -151,27 +160,32 @@ function QuickActionsWidget() {
 }
 
 function PreparationSummaryWidget({ data }: { data: DashboardWidgetData }) {
+  const { messages } = useI18n();
+  const dashboard = messages.dashboard;
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-baseline justify-between gap-3">
-        <h2 className="m-0 text-sm font-semibold tracking-[0]">Préparation</h2>
-        <span className="font-mono text-[10.5px] text-faint">{data.talks.length} talks</span>
+        <h2 className="m-0 text-sm font-semibold tracking-[0]">{dashboard.preparation}</h2>
+        <span className="font-mono text-[10.5px] text-faint">{formatDashboardCount(dashboard.talkCount, data.talks.length)}</span>
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <PreparationStat label="Prêts" value={data.readyTalks.length} />
-        <PreparationStat label="À finaliser" value={data.draftTalks.length} />
-        <PreparationStat label="Temps" value={`${data.totalMinutes}m`} />
+        <PreparationStat label={dashboard.ready} value={data.readyTalks.length} />
+        <PreparationStat label={messages.dashboard.toFinish.replace("{count}", "")} value={data.draftTalks.length} />
+        <PreparationStat label={dashboard.time} value={`${data.totalMinutes}m`} />
       </div>
     </Card>
   );
 }
 
 function StatusDistributionWidget({ data }: { data: DashboardWidgetData }) {
+  const { messages } = useI18n();
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-baseline justify-between gap-3">
-        <h2 className="m-0 text-sm font-semibold tracking-[0]">Statuts</h2>
-        <span className="font-mono text-[10.5px] text-faint">{data.talks.length} talks</span>
+        <h2 className="m-0 text-sm font-semibold tracking-[0]">{messages.dashboard.statuses}</h2>
+        <span className="font-mono text-[10.5px] text-faint">{formatDashboardCount(messages.dashboard.talkCount, data.talks.length)}</span>
       </div>
       <div className="grid gap-2">
         {data.statusRows.map((row) => (
@@ -183,17 +197,19 @@ function StatusDistributionWidget({ data }: { data: DashboardWidgetData }) {
 }
 
 function TypeDistributionWidget({ data }: { data: DashboardWidgetData }) {
+  const { locale, messages } = useI18n();
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-baseline justify-between gap-3">
-        <h2 className="m-0 text-sm font-semibold tracking-[0]">Types</h2>
+        <h2 className="m-0 text-sm font-semibold tracking-[0]">{messages.dashboard.types}</h2>
         <span className="font-mono text-[10.5px] text-faint">{data.totalSections} sections</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {data.typeCounts.map((item) => (
           <Link
             className="rounded-[7px] border border-line bg-bg px-2 py-1 text-[11.5px] font-[550] text-mute transition hover:bg-panel hover:text-ink"
-            href={`/talks?type=${item.type}`}
+            href={localizedPath(`/talks?type=${item.type}`, locale)}
             key={item.type}
           >
             {item.label} · {item.count}

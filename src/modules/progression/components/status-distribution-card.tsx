@@ -1,10 +1,13 @@
 import { Card } from "@/components/ui/Card";
 import type { StatusDistribution } from "@/modules/progression/types";
+import { useI18n } from "@/i18n/client";
 
 export function StatusDistributionCard({ rows }: { rows: StatusDistribution[] }) {
+  const { messages } = useI18n();
+
   return (
     <Card className="min-w-0 p-5">
-      <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-ink">Répartition par statut</h2>
+      <h2 className="m-0 text-[15px] font-semibold tracking-[0] text-ink">{messages.progression.statusDistribution}</h2>
       <div className="mt-4 grid gap-3">
         {rows.map((row) => (
           <DistributionRow count={row.count} key={row.status} label={row.label} percent={row.percent} />

@@ -2,6 +2,9 @@
 
 import type { AssistantGenerateRequest, AssistantGenerateResponse, AssistantGenerateResult } from "@/modules/assistant/types";
 import { createClient } from "@/lib/supabase/browser";
+import { getMessages } from "@/i18n/messages";
+
+const assistantCopy = getMessages("fr").assistant;
 
 export async function generateAssistantContent(input: AssistantGenerateRequest): Promise<AssistantGenerateResult> {
   const supabase = createClient();
@@ -10,7 +13,7 @@ export async function generateAssistantContent(input: AssistantGenerateRequest):
   } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    throw new Error("Session navigateur Supabase introuvable. Déconnecte-toi puis reconnecte-toi sur http://localhost:3000.");
+    throw new Error(assistantCopy.sessionMissingError);
   }
 
   const response = await fetch("/api/ai/generate", {
@@ -28,13 +31,13 @@ export async function generateAssistantContent(input: AssistantGenerateRequest):
   try {
     payload = (await response.json()) as AssistantGenerateResponse;
   } catch {
-    throw new Error("Réponse IA invalide.");
+    throw new Error(assistantCopy.invalidResponseError);
   }
 
   if (!response.ok || !payload.ok) {
     const authReason = response.status === 401 ? response.headers.get("x-assistant-auth") : null;
     const suffix = authReason ? ` (${authReason})` : "";
-    throw new Error(`${payload.ok ? "Génération IA impossible." : payload.error}${suffix}`);
+    throw new Error(`${payload.ok ? assistantCopy.generationError : payload.error}${suffix}`);
   }
 
   return payload.result;

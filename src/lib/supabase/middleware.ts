@@ -1,10 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv } from "./env";
+import { isProtectedAppPath } from "@/modules/auth/security";
+import { addLocaleToPath, defaultLocale, pickLocaleFromPath } from "@/i18n/routing";
 import type { Database } from "./database.types";
 
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
+  let response = NextResponse.next({ request: { headers: requestHeaders ?? request.headers } });
   const { url, anonKey } = getSupabaseEnv();
 
   const supabase = createServerClient<Database>(url, anonKey, {
@@ -14,7 +16,7 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        response = NextResponse.next({ request: { headers: requestHeaders ?? request.headers } });
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       }
     }
@@ -24,14 +26,12 @@ export async function updateSession(request: NextRequest) {
     data: { user }
   } = await supabase.auth.getUser();
 
-  const protectedPath =
-    request.nextUrl.pathname === "/dashboard" ||
-    request.nextUrl.pathname === "/talks" ||
-    request.nextUrl.pathname.startsWith("/talks/");
+  const protectedPath = isProtectedAppPath(request.nextUrl.pathname);
 
   if (!user && protectedPath) {
+    const locale = pickLocaleFromPath(request.nextUrl.pathname) ?? defaultLocale;
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
+    redirectUrl.pathname = addLocaleToPath("/login", locale);
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }

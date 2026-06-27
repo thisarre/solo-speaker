@@ -1,6 +1,6 @@
 import type { Talk, TalkSection, TalkStatus, TalkType } from "@/types/talk";
 
-export type ProgressionScoreLabel = "À structurer" | "En préparation" | "Presque prêt" | "Prêt à présenter";
+export type ProgressionScoreLabel = string;
 export type DurationStatus = "too_short" | "good" | "too_long";
 
 export type ProgressionMetric = {

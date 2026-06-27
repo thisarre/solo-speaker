@@ -8,14 +8,16 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { assistantFeatureDefinitions, getEnabledAssistantFeatures } from "@/modules/assistant/feature-registry";
+import { getAssistantFeatureDefinitions, getEnabledAssistantFeatures } from "@/modules/assistant/feature-registry";
 import { useAssistantFeatureSettings } from "@/modules/assistant/feature-settings";
 import { getOnboardingAssistantFeatureSettings, type GuidedTalkSuggestion } from "@/modules/onboarding/personalization";
 import { createTalk } from "@/modules/talks/actions";
 import { VoiceMemoRecorder } from "@/modules/voice-memo/components/voice-memo-recorder";
-import { talkTypeLabels, type TalkType } from "@/types/talk";
+import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
+import type { TalkType } from "@/types/talk";
 
-const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
+const talkTypes: TalkType[] = ["sermon", "conference", "training", "pitch", "speech"];
 
 type NewTalkFormProps = {
   error?: string;
@@ -23,6 +25,9 @@ type NewTalkFormProps = {
 };
 
 export function NewTalkForm({ error, guide }: NewTalkFormProps) {
+  const { locale, messages } = useI18n();
+  const talks = messages.talks;
+  const assistantFeatureDefinitions = getAssistantFeatureDefinitions(locale);
   const [title, setTitle] = useState("");
   const [brief, setBrief] = useState("");
   const [clientError, setClientError] = useState("");
@@ -48,7 +53,7 @@ export function NewTalkForm({ error, guide }: NewTalkFormProps) {
       onSubmit={(event) => {
         if (!title.trim()) {
           event.preventDefault();
-          setClientError("Ajoute un titre pour créer le brouillon.");
+          setClientError(talks.missingTitle);
         }
       }}
     >
@@ -58,19 +63,19 @@ export function NewTalkForm({ error, guide }: NewTalkFormProps) {
 
       <Input
         id="title"
-        label="Titre"
+        label={talks.titleLabel}
         name="title"
         onChange={(event) => {
           setTitle(event.target.value);
           if (clientError) setClientError("");
         }}
-        placeholder={guide?.titlePlaceholder ?? "Ex. L'art de capter une salle en 90 secondes"}
+        placeholder={guide?.titlePlaceholder ?? talks.titlePlaceholder}
         required
         value={title}
       />
-      <Input id="audience" label="Audience" name="audience" placeholder="Managers · ~80 pers." />
+      <Input id="audience" label={talks.audienceLabel} name="audience" placeholder={talks.audiencePlaceholder} />
       <div>
-        <p className="mb-2 text-xs font-[550] text-muted">Type</p>
+        <p className="mb-2 text-xs font-[550] text-muted">{talks.typeLabel}</p>
         <div className="flex flex-wrap gap-1.5">
           {talkTypes.map((type) => (
             <label className="cursor-pointer" key={type}>
@@ -82,14 +87,14 @@ export function NewTalkForm({ error, guide }: NewTalkFormProps) {
                 type="radio"
                 value={type}
               />
-              <span className="studio-chip inline-flex h-8 items-center rounded-[8px] border border-border bg-surface px-3 font-[550] text-muted shadow-[0_1px_2px_rgba(20,20,25,.02)] transition hover:text-foreground peer-checked:border-transparent peer-checked:bg-foreground peer-checked:text-background">
-                {talkTypeLabels[type]}
+              <span className="studio-chip studio-chip-choice inline-flex h-8 items-center rounded-[8px] border border-border bg-surface px-3 font-[550] text-muted shadow-[0_1px_2px_rgba(20,20,25,.02)] transition hover:text-foreground">
+                {talks.types[type]}
               </span>
             </label>
           ))}
         </div>
         <div className="mt-3 rounded-[10px] border border-border bg-panel p-3">
-          <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">Modules actifs</p>
+          <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{talks.activeModules}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {Array.from(enabledFeatures).map((featureId) => {
               const feature = assistantFeatureDefinitions.find((item) => item.id === featureId);
@@ -104,10 +109,10 @@ export function NewTalkForm({ error, guide }: NewTalkFormProps) {
       </div>
       <Textarea
         id="brief"
-        label="Brief"
+        label={talks.briefLabel}
         name="brief"
         onChange={(event) => setBrief(event.target.value)}
-        placeholder={guide?.briefPlaceholder ?? "Décris l'objectif, le contexte, le ton et la durée cible."}
+        placeholder={guide?.briefPlaceholder ?? talks.briefPlaceholder}
         value={brief}
       />
       <VoiceMemoRecorder
@@ -120,21 +125,21 @@ export function NewTalkForm({ error, guide }: NewTalkFormProps) {
         }}
       />
       <div className="flex flex-wrap justify-end gap-2 pt-1">
-        <Link href="/talks">
-          <Button variant="ghost">Annuler</Button>
+        <Link href={localizedPath("/talks", locale)}>
+          <Button variant="ghost">{talks.cancel}</Button>
         </Link>
-        <SubmitButton />
+        <SubmitButton creatingLabel={talks.creating} idleLabel={talks.createDraft} />
       </div>
     </form>
   );
 }
 
-function SubmitButton() {
+function SubmitButton({ creatingLabel, idleLabel }: { creatingLabel: string; idleLabel: string }) {
   const { pending } = useFormStatus();
 
   return (
     <Button disabled={pending} leftIcon={pending ? <Loader2 className="animate-spin" /> : undefined} type="submit" variant="primary">
-      {pending ? "Création..." : "Créer le brouillon"}
+      {pending ? creatingLabel : idleLabel}
     </Button>
   );
 }

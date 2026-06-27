@@ -3,8 +3,8 @@ import type { ProviderHealth } from "./provider-health";
 import type { TranscriptQuality } from "./transcript-quality";
 import type { VoiceActivityStatus } from "./voice-pace-engine";
 
-export type VoiceFollowProvider = "browser" | "realtime" | "unsupported";
-export type VoiceFollowProviderMode = "auto" | "browser" | "realtime";
+export type VoiceFollowProvider = "browser" | "deepgram" | "unsupported";
+export type VoiceFollowProviderMode = "auto" | "browser" | "deepgram";
 
 export type VoiceFollowStatus = "idle" | "unsupported" | "requesting" | "listening" | "following" | "uncertain" | "lost" | "paused" | "error";
 

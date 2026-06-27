@@ -42,22 +42,6 @@ export function LandingMotion() {
         );
       });
 
-      gsap.utils.toArray<HTMLElement>("[data-progress-line]").forEach((element) => {
-        gsap.fromTo(
-          element,
-          { scaleX: 0 },
-          {
-            duration: 0.9,
-            ease: "power2.out",
-            scaleX: 1,
-            scrollTrigger: {
-              once: true,
-              start: "top 76%",
-              trigger: element
-            }
-          }
-        );
-      });
     });
 
     return () => context.revert();

@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getOnboardingTourProgress, getRestartedOnboardingTourState, onboardingTourSteps, resolveOnboardingTourStepHref } from "./tour";
+import { getOnboardingTourProgress, getRestartedOnboardingTourState, getStepIndexForPath, onboardingTourSteps, resolveOnboardingTourStepHref } from "./tour";
 
-test("guided onboarding starts on the dashboard and walks through the core workflow", () => {
-  assert.equal(onboardingTourSteps[0].href, "/dashboard");
+test("guided onboarding starts by creating the first talk and walks through the core workflow", () => {
+  assert.equal(onboardingTourSteps[0].href, "/talks/new?guided=1&welcome=1");
   assert.deepEqual(onboardingTourSteps.map((step) => step.id), [
-    "dashboard",
     "new-talk",
     "editor",
     "prompter",
+    "dashboard",
     "settings"
   ]);
   assert.equal(onboardingTourSteps.every((step) => step.target), true);
@@ -29,4 +29,9 @@ test("tour can be restarted on demand", () => {
 test("prompter step links to the latest talk speaking screen when available", () => {
   const prompterStep = onboardingTourSteps.find((step) => step.id === "prompter");
   assert.equal(resolveOnboardingTourStepHref(prompterStep!, { latestTalkId: "talk-123" }), "/talks/talk-123/speak");
+});
+
+test("tour progress recognizes the first guided talk screen as the first step", () => {
+  assert.equal(getStepIndexForPath("/talks/new", 4), 0);
+  assert.equal(getStepIndexForPath("/dashboard", 0), 3);
 });

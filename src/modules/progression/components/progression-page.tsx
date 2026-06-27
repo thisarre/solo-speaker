@@ -10,17 +10,22 @@ import { StatusDistributionCard } from "./status-distribution-card";
 import { TalksToFinishList } from "./talks-to-finish-list";
 import { TypeDistributionCard } from "./type-distribution-card";
 import type { GlobalProgressionReport } from "@/modules/progression/types";
+import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
 
 export function ProgressionPage({ report }: { report: GlobalProgressionReport }) {
+  const { locale, messages } = useI18n();
+  const copy = messages.progression;
+
   return (
     <main className="studio-scroll h-screen min-w-0 overflow-y-auto overflow-x-hidden px-6 py-8 md:px-11">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="m-0 text-[30px] font-semibold leading-tight tracking-[0] text-ink">Progression</h1>
-          <p className="m-0 mt-1 text-[14px] leading-6 text-mute">Vue globale de votre préparation.</p>
+          <h1 className="m-0 text-[30px] font-semibold leading-tight tracking-[0] text-ink">{copy.title}</h1>
+          <p className="m-0 mt-1 text-[14px] leading-6 text-mute">{copy.subtitle}</p>
         </div>
-        <Link href="/talks/new">
-          <Button leftIcon={<Plus />} variant="primary">Créer un talk</Button>
+        <Link href={localizedPath("/talks/new", locale)}>
+          <Button leftIcon={<Plus />} variant="primary">{copy.createTalk}</Button>
         </Link>
       </header>
 
@@ -47,13 +52,13 @@ export function ProgressionPage({ report }: { report: GlobalProgressionReport })
         <div className="mt-7">
           <EmptyState
             action={
-              <Link href="/talks/new">
-                <Button leftIcon={<Plus />} variant="primary">Créer un talk</Button>
+              <Link href={localizedPath("/talks/new", locale)}>
+                <Button leftIcon={<Plus />} variant="primary">{copy.createTalk}</Button>
               </Link>
             }
             icon={<Plus />}
-            title="Aucun talk à suivre"
-            description="Créez un premier talk pour commencer à mesurer votre préparation globale."
+            title={copy.emptyTitle}
+            description={copy.emptyBody}
           />
         </div>
       )}

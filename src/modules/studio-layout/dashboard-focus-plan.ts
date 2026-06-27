@@ -1,11 +1,13 @@
 import type { Talk } from "@/types/talk";
+import { getMessages } from "@/i18n/messages";
+import type { Locale } from "@/i18n/routing";
 
 export type DashboardFocusPlan = {
-  label: "Démarrage" | "Focus" | "Répétition";
+  label: string;
   title: string;
   description: string;
   href: string;
-  status: "À lancer" | "À clarifier" | "Prêt";
+  status: string;
   progress: number;
 };
 
@@ -17,7 +19,10 @@ function readinessPercent(talk: Talk) {
   return Math.max(10, Math.min(100, Math.round(sectionScore + audienceScore + durationScore + statusScore)));
 }
 
-export function buildDashboardFocusPlan(talks: Talk[]): DashboardFocusPlan {
+const fallbackLocale: Locale = "fr";
+
+export function buildDashboardFocusPlan(talks: Talk[], locale: Locale = fallbackLocale): DashboardFocusPlan {
+  const copy = getMessages(locale).dashboard.focusPlan;
   const activeTalks = talks.filter((talk) => talk.status !== "archived");
   const draftToFinish = activeTalks
     .filter((talk) => talk.status === "draft")
@@ -25,34 +30,36 @@ export function buildDashboardFocusPlan(talks: Talk[]): DashboardFocusPlan {
 
   if (!activeTalks.length) {
     return {
-      label: "Démarrage",
-      title: "Créer le premier talk",
-      description: "Lancez un brouillon guidé pour transformer l'idée en plan présentable.",
+      label: copy.start[0],
+      title: copy.start[1],
+      description: copy.start[2],
       href: "/talks/new?guided=1",
-      status: "À lancer",
+      status: copy.start[3],
       progress: 0
     };
   }
 
   if (draftToFinish) {
+    const title = draftToFinish.title || copy.focus[4];
     return {
-      label: "Focus",
-      title: `Finaliser ${draftToFinish.title || "le talk en cours"}`,
-      description: "Complétez l'audience, la durée et les sections avant de passer en répétition.",
+      label: copy.focus[0],
+      title: copy.focus[1].replace("{title}", title),
+      description: copy.focus[2],
       href: `/talks/${draftToFinish.id}`,
-      status: "À clarifier",
+      status: copy.focus[3],
       progress: readinessPercent(draftToFinish)
     };
   }
 
   const readyTalk = activeTalks.find((talk) => talk.status === "ready") ?? activeTalks[0];
 
+  const title = readyTalk.title || copy.rehearse[4];
   return {
-    label: "Répétition",
-    title: `Répéter ${readyTalk.title || "le prochain talk"}`,
-    description: "Passez en mode speaking pour vérifier le rythme, les transitions et le temps réel.",
+    label: copy.rehearse[0],
+    title: copy.rehearse[1].replace("{title}", title),
+    description: copy.rehearse[2],
     href: `/talks/${readyTalk.id}/speak`,
-    status: "Prêt",
+    status: copy.rehearse[3],
     progress: readinessPercent(readyTalk)
   };
 }

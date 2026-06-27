@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -123,6 +124,24 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  let rateLimit;
+
+  try {
+    rateLimit = await consumeAiRateLimit({
+      identity: {
+        ip: getRequestIp(request.headers),
+        userId: auth.user.id
+      },
+      route: "transcribe"
+    });
+  } catch {
+    return errorResponse("Protection anti-abus indisponible. Réessaie dans un instant.", 503);
+  }
+
+  if (!rateLimit.allowed) {
+    return errorResponse("Trop de transcriptions. Réessaie dans un instant.", 429, rateLimit.headers);
+  }
+
   let formData: FormData;
 
   try {
@@ -197,5 +216,5 @@ export async function POST(request: NextRequest) {
     return errorResponse("Aucun texte détecté dans ce mémo.", 502);
   }
 
-  return NextResponse.json({ ok: true, text });
+  return NextResponse.json({ ok: true, text }, { headers: rateLimit.headers });
 }

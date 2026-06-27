@@ -12,6 +12,9 @@ export type Database = {
           onboarding_completed_at: string | null;
           onboarding_help_requested: boolean;
           onboarding_support_note: string;
+          billing_plan: "trial" | "studio" | "team";
+          team_id: string | null;
+          ai_credits_used: number;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +26,9 @@ export type Database = {
           onboarding_completed_at?: string | null;
           onboarding_help_requested?: boolean;
           onboarding_support_note?: string;
+          billing_plan?: "trial" | "studio" | "team";
+          team_id?: string | null;
+          ai_credits_used?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,8 +40,65 @@ export type Database = {
           onboarding_completed_at?: string | null;
           onboarding_help_requested?: boolean;
           onboarding_support_note?: string;
+          billing_plan?: "trial" | "studio" | "team";
+          team_id?: string | null;
+          ai_credits_used?: number;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      teams: {
+        Row: {
+          id: string;
+          owner_id: string;
+          name: string;
+          max_seats: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          name?: string;
+          max_seats?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          name?: string;
+          max_seats?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      team_invitations: {
+        Row: {
+          id: string;
+          team_id: string;
+          email: string;
+          token: string;
+          status: "pending" | "active" | "revoked";
+          invited_at: string;
+          accepted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          email: string;
+          token?: string;
+          status?: "pending" | "active" | "revoked";
+          invited_at?: string;
+          accepted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          email?: string;
+          token?: string;
+          status?: "pending" | "active" | "revoked";
+          invited_at?: string;
+          accepted_at?: string | null;
         };
         Relationships: [];
       };
