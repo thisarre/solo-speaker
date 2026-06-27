@@ -1,0 +1,76 @@
+# Production stack for Solo Speaker on a Hostinger VPS.
+# Deployed by the `hostinger/deploy-on-vps@v2` GitHub Action, which writes the
+# environment variables (from the workflow) into a .env file next to this compose
+# file — Docker Compose reads it both for ${VAR} interpolation below and for the
+# container runtime environment.
+services:
+  web:
+    build:
+      context: .
+      args:
+        # build-time (inlined into the client bundle)
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+        NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN}
+        NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
+        NEXT_PUBLIC_DEEPGRAM_MODEL: ${NEXT_PUBLIC_DEEPGRAM_MODEL}
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+      # public (also needed server-side for SSR)
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN}
+      NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
+      NEXT_PUBLIC_DEEPGRAM_MODEL: ${NEXT_PUBLIC_DEEPGRAM_MODEL}
+      # server-only secrets
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_ADMIN_SIGNUPS: ${SUPABASE_ADMIN_SIGNUPS:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5-mini}
+      OPENAI_TRANSCRIPTION_MODEL: ${OPENAI_TRANSCRIPTION_MODEL:-gpt-4o-mini-transcribe}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PRICE_STUDIO_MONTHLY: ${STRIPE_PRICE_STUDIO_MONTHLY}
+      STRIPE_PRICE_STUDIO_YEARLY: ${STRIPE_PRICE_STUDIO_YEARLY}
+      STRIPE_PRICE_TEAM_MONTHLY: ${STRIPE_PRICE_TEAM_MONTHLY}
+      STRIPE_PRICE_TEAM_YEARLY: ${STRIPE_PRICE_TEAM_YEARLY}
+      # AI rate limiting (safe defaults if unset)
+      AI_RATE_LIMIT_ENABLED: ${AI_RATE_LIMIT_ENABLED:-true}
+      AI_RATE_LIMIT_STRICT: ${AI_RATE_LIMIT_STRICT:-true}
+      AI_RATE_LIMIT_WINDOW_SECONDS: ${AI_RATE_LIMIT_WINDOW_SECONDS:-60}
+      AI_RATE_LIMIT_GENERATE: ${AI_RATE_LIMIT_GENERATE:-12}
+      AI_RATE_LIMIT_SPEAK: ${AI_RATE_LIMIT_SPEAK:-8}
+      AI_RATE_LIMIT_TRANSCRIBE: ${AI_RATE_LIMIT_TRANSCRIBE:-6}
+      AI_RATE_LIMIT_HELP_CHAT: ${AI_RATE_LIMIT_HELP_CHAT:-20}
+      AI_RATE_LIMIT_DEEPGRAM_TOKEN: ${AI_RATE_LIMIT_DEEPGRAM_TOKEN:-30}
+
+  # Reverse proxy with automatic HTTPS (Let's Encrypt) for the domain.
+  # Requires DOMAIN's DNS A record to point at the VPS IP and ports 80/443 free.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:

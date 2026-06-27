@@ -1,0 +1,10 @@
+# Automatic HTTPS reverse proxy for Solo Speaker.
+# DOMAIN and ACME_EMAIL are provided by docker-compose (from the deploy env).
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}

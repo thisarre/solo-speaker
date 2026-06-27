@@ -1,0 +1,47 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Hostinger
+        uses: hostinger/deploy-on-vps@v2
+        with:
+          api-key: ${{ secrets.HOSTINGER_API_KEY }}
+          virtual-machine: ${{ vars.HOSTINGER_VM_ID }}
+          # KEY=value, one per line. Written to a .env on the VPS that
+          # docker-compose reads (build args + container runtime).
+          environment-variables: |
+            DOMAIN=${{ vars.DOMAIN }}
+            ACME_EMAIL=${{ vars.ACME_EMAIL }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+            NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=${{ secrets.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN }}
+            NEXT_PUBLIC_POSTHOG_HOST=${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+            NEXT_PUBLIC_DEEPGRAM_MODEL=${{ vars.NEXT_PUBLIC_DEEPGRAM_MODEL }}
+            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+            SUPABASE_ADMIN_SIGNUPS=${{ vars.SUPABASE_ADMIN_SIGNUPS }}
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            OPENAI_MODEL=${{ vars.OPENAI_MODEL }}
+            OPENAI_TRANSCRIPTION_MODEL=${{ vars.OPENAI_TRANSCRIPTION_MODEL }}
+            DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
+            ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+            STRIPE_PRICE_STUDIO_MONTHLY=${{ vars.STRIPE_PRICE_STUDIO_MONTHLY }}
+            STRIPE_PRICE_STUDIO_YEARLY=${{ vars.STRIPE_PRICE_STUDIO_YEARLY }}
+            STRIPE_PRICE_TEAM_MONTHLY=${{ vars.STRIPE_PRICE_TEAM_MONTHLY }}
+            STRIPE_PRICE_TEAM_YEARLY=${{ vars.STRIPE_PRICE_TEAM_YEARLY }}
