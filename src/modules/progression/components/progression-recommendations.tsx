@@ -3,9 +3,10 @@ import { ArrowRight, Lightbulb } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import type { ProgressionRecommendation } from "@/modules/progression/types";
 import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
 
 export function ProgressionRecommendations({ recommendations }: { recommendations: ProgressionRecommendation[] }) {
-  const { messages } = useI18n();
+  const { locale, messages } = useI18n();
 
   return (
     <Card className="p-5">
@@ -21,7 +22,7 @@ export function ProgressionRecommendations({ recommendations }: { recommendation
               <p className="m-0 min-w-0 flex-1 text-[13px] leading-5 text-ink">{recommendation.message}</p>
             </div>
             {recommendation.href && recommendation.actionLabel ? (
-              <Link className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-[550] text-accent-ink hover:text-accent" href={recommendation.href}>
+              <Link className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-[550] text-accent-ink hover:text-accent" href={recommendation.href.startsWith("/") ? localizedPath(recommendation.href, locale) : recommendation.href}>
                 {recommendation.actionLabel}
                 <ArrowRight className="size-3.5" />
               </Link>

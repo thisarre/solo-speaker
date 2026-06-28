@@ -19,6 +19,9 @@ import { localizedPath } from "@/i18n/routing";
 export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfile | null; talks: Talk[] }) {
   const { locale, messages } = useI18n();
   const dashboard = messages.dashboard;
+  // Generated hrefs (focus plan, recommendations) are raw paths — localize internal ones so navigation
+  // keeps the /<locale>/ prefix (an unprefixed link triggers a locale redirect that drops the session).
+  const loc = (href: string) => (href.startsWith("/") ? localizedPath(href, locale) : href);
   const [customizing, setCustomizing] = useState(false);
   const { layout, reset, updateWidgets } = useDashboardLayout();
   const data = buildDashboardWidgetData(talks);
@@ -101,7 +104,7 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
               <div className="h-2 overflow-hidden rounded-full bg-line2">
                 <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),color-mix(in_oklab,var(--ok)_65%,var(--accent)))]" style={{ width: `${focusPlan.progress}%` }} />
               </div>
-              <Link className={buttonClassName({ className: "mt-3", variant: focusPlan.progress >= 80 ? "ghost" : "primary" })} href={focusPlan.href}>
+              <Link className={buttonClassName({ className: "mt-3", variant: focusPlan.progress >= 80 ? "ghost" : "primary" })} href={loc(focusPlan.href)}>
                 <span className="flex [&_svg]:size-4"><ArrowRight /></span>
                 {dashboard.nextAction}
               </Link>
@@ -131,7 +134,7 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
             <div className="flex shrink-0 flex-wrap gap-2">
               <RestartGuidedOnboardingButton inline />
               {supportRecommendation.href ? (
-                <a className="inline-flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-[8px] bg-accent px-3 py-2 text-[12.5px] font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(20,20,25,.12)]" href={supportRecommendation.href}>
+                <a className="inline-flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-[8px] bg-accent px-3 py-2 text-[12.5px] font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(20,20,25,.12)]" href={loc(supportRecommendation.href)}>
                   {supportRecommendation.actionLabel ?? dashboard.contactHelp}
                   <ArrowRight className="size-3.5" />
                 </a>
@@ -175,7 +178,7 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
                 {content}
               </a>
             ) : recommendation.href ? (
-              <Link className="cursor-pointer" href={recommendation.href} key={recommendation.id}>
+              <Link className="cursor-pointer" href={loc(recommendation.href)} key={recommendation.id}>
                 {content}
               </Link>
             ) : (

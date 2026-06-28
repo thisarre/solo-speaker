@@ -22,6 +22,7 @@ import {
   readPrompterThemePreference
 } from "@/modules/settings/studio-preferences";
 import { useI18n } from "@/i18n/client";
+import { localizedPath } from "@/i18n/routing";
 
 const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4];
 const fontSizes = [32, 40, 48, 56];
@@ -38,7 +39,7 @@ function nearestIndex<T>(items: T[], value: T) {
 }
 
 export function SpeakingMode({ talk }: SpeakingModeProps) {
-  const { messages } = useI18n();
+  const { locale, messages } = useI18n();
   const copy = messages.speakingMode;
   const router = useRouter();
   const items = useMemo(() => buildSpeakingItems(talk, messages.editor.untitled), [messages.editor.untitled, talk]);
@@ -59,8 +60,8 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const classicAutoScrollEnabled = isPlaying && !voiceFollowActive;
 
   const handleExit = useCallback(() => {
-    router.push(`/talks/${talk.id}`);
-  }, [router, talk.id]);
+    router.push(localizedPath(`/talks/${talk.id}`, locale));
+  }, [router, talk.id, locale]);
 
   const stopPlaying = useCallback(() => setIsPlaying(false), []);
 
@@ -334,7 +335,7 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
     >
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="grid h-[54px] shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-b border-[var(--speaking-line)] px-4 font-mono text-[10px] uppercase tracking-[.08em] text-[var(--speaking-soft)] sm:px-6 sm:text-[11px]">
-          <Link className="min-w-0 truncate transition hover:text-[var(--speaking-strong)]" href={`/talks/${talk.id}`}>
+          <Link className="min-w-0 truncate transition hover:text-[var(--speaking-strong)]" href={localizedPath(`/talks/${talk.id}`, locale)}>
             {talk.title}
           </Link>
           <div className="flex items-baseline justify-center gap-2 whitespace-nowrap text-[14px] tracking-[.04em] text-[var(--speaking-strong)] sm:text-[15px]">
