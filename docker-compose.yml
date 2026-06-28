@@ -54,9 +54,11 @@ services:
       AI_RATE_LIMIT_DEEPGRAM_TOKEN: ${AI_RATE_LIMIT_DEEPGRAM_TOKEN:-30}
 
   # Reverse proxy with automatic HTTPS (Let's Encrypt) for the domain.
-  # Requires DOMAIN's DNS A record to point at the VPS IP and ports 80/443 free.
+  # Config is baked into the image (caddy/Dockerfile) to avoid a fragile
+  # single-file bind mount. Requires DOMAIN's DNS A record to point at the VPS
+  # IP and ports 80/443 free. Certs persist in the caddy_data volume.
   caddy:
-    image: caddy:2-alpine
+    build: ./caddy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -65,7 +67,6 @@ services:
       DOMAIN: ${DOMAIN}
       ACME_EMAIL: ${ACME_EMAIL}
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
