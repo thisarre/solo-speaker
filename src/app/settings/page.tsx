@@ -33,7 +33,7 @@ export async function SettingsPageView({ locale: routeLocale }: { locale?: Local
 
   return (
     <AppShell locale={locale}>
-      <div className="studio-scroll h-[100svh] overflow-y-auto bg-background px-5 pb-28 pt-7 md:px-10 md:py-8">
+      <div className="studio-scroll h-[100svh] overflow-x-hidden overflow-y-auto bg-background px-5 pb-28 pt-7 md:px-10 md:py-8">
         <div className="mx-auto w-full max-w-[1480px]">
           <PageHeader
             eyebrow={settings.title}
