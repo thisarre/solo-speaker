@@ -21,6 +21,9 @@ export async function updateSession(request: NextRequest, locale: string) {
   const { url, anonKey } = getSupabaseEnv();
 
   const supabase = createServerClient<Database>(url, anonKey, {
+    // Behind Caddy, Next sees HTTP and drops the Secure flag; force it in production so the
+    // HTTPS site's session cookie is accepted (and re-set) by the browser.
+    cookieOptions: { secure: process.env.NODE_ENV === "production" },
     cookies: {
       getAll() {
         return request.cookies.getAll();

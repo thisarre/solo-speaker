@@ -6,5 +6,9 @@ import type { Database } from "./database.types";
 
 export function createClient() {
   const { url, anonKey } = getSupabaseEnv();
-  return createBrowserClient<Database>(url, anonKey);
+  // Behind the reverse proxy Next sees HTTP, so @supabase/ssr omits the Secure flag — but the
+  // site is HTTPS, where browsers (Brave/Safari) reject a non-Secure session cookie. Force it.
+  return createBrowserClient<Database>(url, anonKey, {
+    cookieOptions: { secure: process.env.NODE_ENV === "production" }
+  });
 }

@@ -8,6 +8,9 @@ export async function createClient() {
   const { url, anonKey } = getSupabaseEnv();
 
   return createServerClient<Database>(url, anonKey, {
+    // Behind Caddy, Next sees HTTP and drops the Secure flag; force it in production so the
+    // HTTPS site's session cookie is accepted by the browser.
+    cookieOptions: { secure: process.env.NODE_ENV === "production" },
     cookies: {
       getAll() {
         return cookieStore.getAll();
