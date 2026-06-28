@@ -8,6 +8,8 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { getMessages } from "@/i18n/messages";
 import { isLocale, localizedPath } from "@/i18n/routing";
 import { resolveServerLocale } from "@/i18n/server";
+import { sendEmail } from "@/lib/email/send";
+import { renderWelcomeEmail } from "@/lib/email/templates";
 import { authErrorMessage, buildOAuthRedirectTo, buildPasswordRecoveryRedirectTo, firstLoginDestination, passwordValidationError, safeNext } from "./security";
 import { getCheckoutPlan } from "@/modules/billing/checkout";
 import { acceptPendingTeamInvitation } from "@/modules/team/accept-invitation";
@@ -306,6 +308,16 @@ export async function completeOnboarding(formData: FormData) {
 
   if (error) {
     redirectWithError("/onboarding", error.message, { next });
+  }
+
+  // Welcome email (best-effort — never block onboarding completion).
+  if (user.email) {
+    try {
+      const fullName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
+      await sendEmail({ to: user.email, ...renderWelcomeEmail({ name: fullName }) });
+    } catch {
+      // ignore — email is non-critical
+    }
   }
 
   const { count } = await supabase

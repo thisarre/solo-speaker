@@ -45,3 +45,10 @@ jobs:
             STRIPE_PRICE_STUDIO_YEARLY=${{ vars.STRIPE_PRICE_STUDIO_YEARLY }}
             STRIPE_PRICE_TEAM_MONTHLY=${{ vars.STRIPE_PRICE_TEAM_MONTHLY }}
             STRIPE_PRICE_TEAM_YEARLY=${{ vars.STRIPE_PRICE_TEAM_YEARLY }}
+            SMTP_HOST=${{ vars.SMTP_HOST }}
+            SMTP_PORT=${{ vars.SMTP_PORT }}
+            SMTP_USER=${{ vars.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            EMAIL_FROM=${{ vars.EMAIL_FROM }}
+            EMAIL_FROM_NAME=${{ vars.EMAIL_FROM_NAME }}
+            CRON_SECRET=${{ secrets.CRON_SECRET }}

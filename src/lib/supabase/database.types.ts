@@ -15,6 +15,7 @@ export type Database = {
           billing_plan: "trial" | "studio" | "team";
           team_id: string | null;
           ai_credits_used: number;
+          trial_reminders_sent: string[];
           created_at: string;
           updated_at: string;
         };
@@ -29,6 +30,7 @@ export type Database = {
           billing_plan?: "trial" | "studio" | "team";
           team_id?: string | null;
           ai_credits_used?: number;
+          trial_reminders_sent?: string[];
           created_at?: string;
           updated_at?: string;
         };
@@ -43,6 +45,7 @@ export type Database = {
           billing_plan?: "trial" | "studio" | "team";
           team_id?: string | null;
           ai_credits_used?: number;
+          trial_reminders_sent?: string[];
           created_at?: string;
           updated_at?: string;
         };

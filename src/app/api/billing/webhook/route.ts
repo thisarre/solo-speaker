@@ -1,6 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { BillingPlan } from "@/modules/billing/entitlements";
+import { sendEmail } from "@/lib/email/send";
+import {
+  renderStudioConfirmedEmail,
+  renderSubscriptionCancelledEmail,
+  renderTeamConfirmedEmail,
+  type RenderedEmail
+} from "@/lib/email/templates";
+
+// Best-effort lifecycle email for a subscriber. Never throws (a failed email must not
+// cause Stripe to retry the webhook).
+async function emailSubscriber(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  render: (name: string | null) => RenderedEmail
+): Promise<void> {
+  try {
+    const { data } = await admin.auth.admin.getUserById(userId);
+    const user = data?.user;
+    if (!user?.email) return;
+    const { data: profile } = await admin.from("profiles").select("full_name").eq("id", userId).maybeSingle();
+    const metaName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
+    await sendEmail({ to: user.email, ...render(profile?.full_name ?? metaName) });
+  } catch {
+    // ignore — email is non-critical
+  }
+}
 
 export const runtime = "nodejs";
 
@@ -103,10 +129,17 @@ export async function POST(request: NextRequest) {
     if (billingPlan === "team") {
       await admin.from("teams").upsert({ owner_id: userId }, { onConflict: "owner_id", ignoreDuplicates: true });
     }
+
+    // Confirmation email only on the INITIAL subscription (created), never on every update/renewal.
+    if (type === "customer.subscription.created" && isActive) {
+      if (billingPlan === "studio") await emailSubscriber(admin, userId, (name) => renderStudioConfirmedEmail({ name }));
+      else if (billingPlan === "team") await emailSubscriber(admin, userId, (name) => renderTeamConfirmedEmail({ name }));
+    }
   }
 
   if (type === "customer.subscription.deleted") {
     await admin.from("profiles").update({ billing_plan: "trial" }).eq("id", userId);
+    await emailSubscriber(admin, userId, (name) => renderSubscriptionCancelledEmail({ name }));
   }
 
   return NextResponse.json({ received: true });
