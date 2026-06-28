@@ -5,8 +5,19 @@ import { isProtectedAppPath } from "@/modules/auth/security";
 import { addLocaleToPath, defaultLocale, pickLocaleFromPath } from "@/i18n/routing";
 import type { Database } from "./database.types";
 
-export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
-  let response = NextResponse.next({ request: { headers: requestHeaders ?? request.headers } });
+export async function updateSession(request: NextRequest, locale: string) {
+  // Build the downstream request headers freshly each time so they carry BOTH the
+  // x-locale hint and any session cookies refreshed below (official @supabase/ssr
+  // pattern). A stale header copy here makes Server Components miss the refreshed
+  // token, retrigger a refresh that rotates-and-invalidates it, and log the user
+  // out on the next navigation.
+  const buildHeaders = () => {
+    const headers = new Headers(request.headers);
+    headers.set("x-locale", locale);
+    return headers;
+  };
+
+  let response = NextResponse.next({ request: { headers: buildHeaders() } });
   const { url, anonKey } = getSupabaseEnv();
 
   const supabase = createServerClient<Database>(url, anonKey, {
@@ -16,7 +27,7 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request: { headers: requestHeaders ?? request.headers } });
+        response = NextResponse.next({ request: { headers: buildHeaders() } });
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       }
     }

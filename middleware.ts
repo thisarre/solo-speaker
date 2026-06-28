@@ -12,10 +12,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-locale", pickLocaleFromPath(pathname) ?? defaultLocale);
+  const locale = pickLocaleFromPath(pathname) ?? defaultLocale;
 
-  return updateSession(request, requestHeaders);
+  return updateSession(request, locale);
 }
 
 export const config = {

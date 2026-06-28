@@ -65,7 +65,7 @@ export function PricingCards({ cards, labels, locale }: PricingCardsProps) {
               <TrackedLinkButton
                 className="mt-5 h-10 w-full rounded-[8px]"
                 event="pricing_cta_clicked"
-                href={localizedPath(card.isTrial ? "/signup?plan=trial" : `/signup?plan=${card.id}&cycle=${cycle}`, locale)}
+                href={card.isTrial ? localizedPath("/signup?plan=trial", locale) : `/api/billing/checkout?plan=${card.id}_${cycle}&locale=${locale}`}
                 properties={{ cycle, location: "pricing_preview", plan: card.id }}
                 variant={card.highlighted ? "primary" : undefined}
               >
