@@ -1,6 +1,22 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getSupabaseEnv } from "@/lib/supabase/env";
 import { buildAuthCallbackRedirect } from "@/modules/auth/security";
+import type { Database } from "@/lib/supabase/database.types";
+
+type CapturedCookie = { name: string; value: string; options?: Record<string, unknown> };
+
+function parseCookieHeader(header: string): { name: string; value: string }[] {
+  return header
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const eq = part.indexOf("=");
+      if (eq < 0) return { name: part, value: "" };
+      return { name: part.slice(0, eq), value: decodeURIComponent(part.slice(eq + 1)) };
+    });
+}
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -11,26 +27,47 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get("next");
 
   if (code) {
-    const supabase = await createClient();
+    const { url, anonKey } = getSupabaseEnv();
+    const requestCookies = parseCookieHeader(request.headers.get("cookie") ?? "");
+    // Capture the cookies @supabase/ssr wants to write and apply them DIRECTLY to the redirect
+    // response below. The next/headers cookie store (used by the shared server client) does NOT
+    // reliably propagate to a returned NextResponse from supabase-js's deferred auth-event write,
+    // which is why Google logins authenticated server-side but no session cookie reached the
+    // browser. This mirrors the middleware's response-based cookie pattern. See [[auth-live-cookie-gotchas]].
+    const captured = new Map<string, CapturedCookie>();
+    const supabase = createServerClient<Database>(url, anonKey, {
+      cookieOptions: { secure: process.env.NODE_ENV === "production" },
+      cookies: {
+        // tokens-only: keep the user object out of the cookie so it never chunks (matches the
+        // browser/server/middleware clients).
+        encode: "tokens-only",
+        getAll() {
+          return requestCookies;
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach((cookie) => captured.set(cookie.name, cookie));
+        }
+      }
+    });
+
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.session) {
-      // Google sessions carry provider_token / provider_refresh_token, which bloat the auth
-      // cookie past the 3180-char chunk threshold so @supabase/ssr splits it into
-      // sb-<ref>-auth-token.0/.1 — and chunked cookies get dropped on client-side navigation,
-      // signing the user out. We never call Google APIs on the user's behalf, so re-set the
-      // session from ONLY the access + refresh tokens: the persisted cookie is then built
-      // without the provider tokens and stays a single, un-chunked cookie.
+      // Drop provider_token / provider_refresh_token (we never call Google APIs) so the cookie is
+      // built from only the access + refresh tokens — smaller and never chunked.
       await supabase.auth.setSession({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token
       });
-      // supabase-js >= 2.91.0 defers its SIGNED_IN event (which triggers the @supabase/ssr
-      // cookie write) onto a setTimeout(0). In a route handler the redirect would otherwise be
-      // sent before that callback runs, so NO cookie gets written and login silently fails.
-      // Flushing the timer queue lets the cookie write complete before we redirect.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      return NextResponse.redirect(buildAuthCallbackRedirect(base, next));
+      // supabase-js >= 2.91.0 defers the cookie write onto a timer; let it run so `captured` is
+      // populated before we apply it to the redirect response.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const response = NextResponse.redirect(buildAuthCallbackRedirect(base, next));
+      for (const { name, value, options } of captured.values()) {
+        response.cookies.set(name, value, options);
+      }
+      return response;
     }
   }
 
