@@ -22,7 +22,7 @@ export async function AppShell({ children, locale }: { children: ReactNode; loca
     : getTrialReminder({ copy: messages.trial, trialStartedAt: profile?.created_at ?? null });
 
   return (
-    <div className="flex min-h-screen bg-bg text-ink">
+    <div className="flex min-h-[100svh] bg-bg text-ink">
       {user ? <PostHogIdentify email={user.email} name={profile?.full_name ?? undefined} userId={user.id} /> : null}
       <OnboardingPreferenceSync profile={profile} />
       <GuidedOnboardingTour enabled={Boolean(profile?.onboarding_completed_at)} latestTalkId={latestTalkId} />

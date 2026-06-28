@@ -18,7 +18,7 @@ export function ProgressionPage({ report }: { report: GlobalProgressionReport })
   const copy = messages.progression;
 
   return (
-    <main className="studio-scroll h-screen min-w-0 overflow-y-auto overflow-x-hidden px-6 py-8 md:px-11">
+    <main className="studio-scroll h-[100svh] min-w-0 overflow-y-auto overflow-x-hidden px-6 py-8 md:px-11">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="m-0 text-[30px] font-semibold leading-tight tracking-[0] text-ink">{copy.title}</h1>

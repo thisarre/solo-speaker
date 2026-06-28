@@ -14,7 +14,7 @@ export default async function TalkNotFoundPage() {
 
   return (
     <AppShell>
-      <main className="studio-scroll flex h-screen items-center justify-center overflow-y-auto px-6 py-8 md:px-11">
+      <main className="studio-scroll flex h-[100svh] items-center justify-center overflow-y-auto px-6 py-8 md:px-11">
         <div className="w-full max-w-xl">
           <EmptyState
             action={
