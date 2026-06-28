@@ -12,9 +12,19 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Google OAuth sessions carry bulky provider_token / provider_refresh_token we never use.
+      // They push the auth cookie past the chunking threshold (split into .0/.1), and chunked
+      // cookies were signing users out on client-side navigation. Re-store the session with just
+      // the access/refresh tokens so it stays a single, un-chunked cookie.
+      if (data.session?.access_token && data.session.refresh_token) {
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+      }
       return NextResponse.redirect(buildAuthCallbackRedirect(base, next));
     }
   }
