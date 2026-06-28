@@ -14,6 +14,18 @@ export async function middleware(request: NextRequest) {
 
   const locale = pickLocaleFromPath(pathname) ?? defaultLocale;
 
+  // Prefetch requests must NOT trigger a Supabase token refresh. Next prefetches several links at
+  // once; each would refresh the session concurrently, and the refresh-token rotation race
+  // invalidates it — signing the user out on the next real navigation. Let prefetches pass through
+  // untouched (they never need an auth redirect; the real navigation handles that).
+  const isPrefetch =
+    request.headers.get("next-router-prefetch") === "1" || request.headers.get("purpose") === "prefetch";
+  if (isPrefetch) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-locale", locale);
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   return updateSession(request, locale);
 }
 
