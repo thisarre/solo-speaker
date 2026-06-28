@@ -36,10 +36,11 @@ body {
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 html {
+  overflow-x: clip;
   scroll-behavior: smooth;
 }
 

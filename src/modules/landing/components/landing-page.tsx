@@ -42,26 +42,35 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <a className="transition hover:text-foreground" href="#use-cases">{navigation.useCases}</a>
             <a className="transition hover:text-foreground" href="#pricing-preview">{navigation.pricing}</a>
           </nav>
-          <div className="flex items-center gap-2">
-            <details className="relative md:hidden">
-              <summary aria-label={common.menu} className="flex size-9 cursor-pointer list-none items-center justify-center rounded-[8px] border border-line bg-surface text-muted transition hover:text-foreground [&::-webkit-details-marker]:hidden">
-                <Menu className="size-4" />
-              </summary>
-              <div className="absolute right-0 top-11 z-40 grid w-[220px] gap-1 rounded-[12px] border border-line bg-background p-2 shadow-[0_18px_50px_rgba(20,20,25,.18)]">
-                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#solution">{navigation.studio}</a>
-                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#features">{navigation.features}</a>
-                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#use-cases">{navigation.useCases}</a>
-                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#pricing-preview">{navigation.pricing}</a>
-              </div>
-            </details>
+          <div className="flex min-w-0 items-center gap-2">
             <ThemeToggle className="hidden w-[92px] sm:inline-grid" />
             <LanguageSwitcher className="hidden sm:inline-grid" currentLocale={locale} />
             <Link className="hidden sm:block" href={localizedPath("/login", locale)}>
               <span className="inline-flex h-8 items-center rounded-[7px] px-3 text-[13px] font-[550] text-muted transition hover:text-foreground">{navigation.login}</span>
             </Link>
-            <TrackedLinkButton event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ location: "header", cta: "create_talk" }} variant="primary">
+            <TrackedLinkButton className="hidden sm:inline-flex" event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ location: "header", cta: "create_talk" }} variant="primary">
               {common.createTalk}
             </TrackedLinkButton>
+            <details className="relative md:hidden">
+              <summary aria-label={common.menu} className="flex size-9 cursor-pointer list-none items-center justify-center rounded-[8px] border border-line bg-surface text-muted transition hover:text-foreground [&::-webkit-details-marker]:hidden">
+                <Menu className="size-4" />
+              </summary>
+              <div className="absolute right-0 top-11 z-40 grid w-[240px] max-w-[calc(100vw-2.5rem)] gap-1 rounded-[12px] border border-line bg-background p-2 shadow-[0_18px_50px_rgba(20,20,25,.18)]">
+                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#solution">{navigation.studio}</a>
+                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#features">{navigation.features}</a>
+                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#use-cases">{navigation.useCases}</a>
+                <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#pricing-preview">{navigation.pricing}</a>
+                <div aria-hidden="true" className="my-1 h-px bg-line" />
+                <Link className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href={localizedPath("/login", locale)}>{navigation.login}</Link>
+                <TrackedLinkButton className="mt-1 w-full justify-center" event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ cta: "create_talk", location: "header_mobile" }} variant="primary">
+                  {common.createTalk}
+                </TrackedLinkButton>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <ThemeToggle className="w-[92px]" />
+                  <LanguageSwitcher currentLocale={locale} />
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </header>
