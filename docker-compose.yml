@@ -43,6 +43,14 @@ services:
       STRIPE_PRICE_STUDIO_YEARLY: ${STRIPE_PRICE_STUDIO_YEARLY}
       STRIPE_PRICE_TEAM_MONTHLY: ${STRIPE_PRICE_TEAM_MONTHLY}
       STRIPE_PRICE_TEAM_YEARLY: ${STRIPE_PRICE_TEAM_YEARLY}
+      # transactional email (Hostinger SMTP) + cron
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM_NAME: "${EMAIL_FROM_NAME:-Solo Speaker}"
+      CRON_SECRET: ${CRON_SECRET}
       # AI rate limiting (safe defaults if unset)
       AI_RATE_LIMIT_ENABLED: ${AI_RATE_LIMIT_ENABLED:-true}
       AI_RATE_LIMIT_STRICT: ${AI_RATE_LIMIT_STRICT:-true}
