@@ -23,6 +23,13 @@ function getString(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+// supabase-js >= 2.91.0 defers its SIGNED_IN event (which triggers the @supabase/ssr cookie write)
+// onto a setTimeout(0). Yield a macrotask after establishing a session so that write completes
+// before we send a redirect response — otherwise the fresh session cookie may not be persisted.
+function flushDeferredCookieWrite() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 function redirectWithError(path: string, message: string, params?: Record<string, string>): never {
   const query = new URLSearchParams(params);
   query.set("error", message);
@@ -96,6 +103,8 @@ export async function signUp(formData: FormData) {
       redirectWithError("/login", authErrorMessage(loginError.message), { email });
     }
 
+    await flushDeferredCookieWrite();
+
     if (createdUser.user) {
       getPostHogClient().capture({
         distinctId: createdUser.user.id,
@@ -131,6 +140,8 @@ export async function signUp(formData: FormData) {
     );
   }
 
+  await flushDeferredCookieWrite();
+
   if (data.user) {
     getPostHogClient().capture({
       distinctId: data.user.id,
@@ -158,6 +169,8 @@ export async function login(formData: FormData) {
   if (error) {
     redirectWithError("/login", authErrorMessage(error.message));
   }
+
+  await flushDeferredCookieWrite();
 
   if (loginData.user) {
     getPostHogClient().capture({
