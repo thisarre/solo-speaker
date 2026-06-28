@@ -24,7 +24,7 @@ import {
 import { useI18n } from "@/i18n/client";
 import { localizedPath } from "@/i18n/routing";
 
-const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4];
+const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4];
 const fontSizes = [32, 40, 48, 56];
 const readingPositions: ReadingPosition[] = ["high", "center", "low"];
 const readingPositionRatios: Record<ReadingPosition, number> = {

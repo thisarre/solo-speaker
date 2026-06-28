@@ -174,6 +174,10 @@ export function useAutoScroll({
 
     let animationFrame = 0;
     let last = performance.now();
+    // Accumulate the scroll position as a float. The browser rounds element.scrollTop to an
+    // integer, so reading it back as the base each frame discards sub-pixel progress — which
+    // stalls slow speeds (< ~1px/frame, e.g. 0.75x) entirely while the timer keeps running.
+    let scrollFloat = getScrollContainer(containerRef)?.scrollTop ?? 0;
 
     function loop(now: number) {
       const activeContainer = getScrollContainer(containerRef);
@@ -189,18 +193,22 @@ export function useAutoScroll({
           scrollTop: activeContainer.scrollTop,
           voiceFollowActive
         })) {
-          const next = nextScrollTop({
+          // Re-baseline if the reader manually scrolled (diverged beyond integer-rounding noise).
+          if (Math.abs(activeContainer.scrollTop - scrollFloat) > 2) {
+            scrollFloat = activeContainer.scrollTop;
+          }
+          scrollFloat = nextScrollTop({
             clientHeight: activeContainer.clientHeight,
             deltaSeconds,
             scrollHeight: activeContainer.scrollHeight,
-            scrollTop: activeContainer.scrollTop,
+            scrollTop: scrollFloat,
             speedMultiplier: speed
           });
-          activeContainer.scrollTop = next;
-          scrollOffsetRef.current = next;
-          setScrollOffset(next);
-          setProgress(maxScroll > 0 ? next / maxScroll : 0);
-          if (next >= maxScroll - 1) onEnd?.();
+          activeContainer.scrollTop = scrollFloat;
+          scrollOffsetRef.current = scrollFloat;
+          setScrollOffset(scrollFloat);
+          setProgress(maxScroll > 0 ? scrollFloat / maxScroll : 0);
+          if (scrollFloat >= maxScroll - 1) onEnd?.();
         } else {
           setProgress(maxScroll > 0 ? activeContainer.scrollTop / maxScroll : 0);
         }

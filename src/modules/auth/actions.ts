@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { getMessages } from "@/i18n/messages";
 import { isLocale, localizedPath } from "@/i18n/routing";
+import { resolveServerLocale } from "@/i18n/server";
 import { authErrorMessage, buildOAuthRedirectTo, buildPasswordRecoveryRedirectTo, firstLoginDestination, passwordValidationError, safeNext } from "./security";
 import { getCheckoutPlan } from "@/modules/billing/checkout";
 import { acceptPendingTeamInvitation } from "@/modules/team/accept-invitation";
@@ -114,7 +115,7 @@ export async function signUp(formData: FormData) {
     }
 
     await autoAcceptTeamInvitation(createdUser.user);
-    redirect(checkoutRedirect || `/onboarding?next=${encodeURIComponent(firstLoginDestination(""))}`);
+    redirect(checkoutRedirect || localizedPath(`/onboarding?next=${encodeURIComponent(firstLoginDestination(""))}`, locale));
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -151,7 +152,7 @@ export async function signUp(formData: FormData) {
   }
 
   await autoAcceptTeamInvitation(data.user);
-  redirect(checkoutRedirect || `/onboarding?next=${encodeURIComponent(firstLoginDestination(""))}`);
+  redirect(checkoutRedirect || localizedPath(`/onboarding?next=${encodeURIComponent(firstLoginDestination(""))}`, locale));
 }
 
 export async function login(formData: FormData) {
@@ -181,8 +182,9 @@ export async function login(formData: FormData) {
   }
 
   await autoAcceptTeamInvitation(loginData.user);
+  const locale = resolveServerLocale((await headers()).get("x-locale"));
   const destination = firstLoginDestination(next);
-  redirect(`/onboarding?next=${encodeURIComponent(destination)}`);
+  redirect(localizedPath(`/onboarding?next=${encodeURIComponent(destination)}`, locale));
 }
 
 export async function loginWithGoogle(formData: FormData) {
@@ -288,7 +290,7 @@ export async function completeOnboarding(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect("/login?next=/onboarding");
+    redirect(`${localizedPath("/login", locale)}?next=${encodeURIComponent(localizedPath("/onboarding", locale))}`);
   }
 
   const { error } = await supabase
