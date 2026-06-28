@@ -16,6 +16,7 @@ export type Database = {
           team_id: string | null;
           ai_credits_used: number;
           trial_reminders_sent: string[];
+          locale: string;
           created_at: string;
           updated_at: string;
         };
@@ -31,6 +32,7 @@ export type Database = {
           team_id?: string | null;
           ai_credits_used?: number;
           trial_reminders_sent?: string[];
+          locale?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -46,6 +48,7 @@ export type Database = {
           team_id?: string | null;
           ai_credits_used?: number;
           trial_reminders_sent?: string[];
+          locale?: string;
           created_at?: string;
           updated_at?: string;
         };

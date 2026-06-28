@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
-import { renderTrialReminderEmail } from "@/lib/email/templates";
+import { normalizeEmailLocale, renderTrialReminderEmail } from "@/lib/email/templates";
 
 export const runtime = "nodejs";
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   // Only trial users created 11–14 days ago (trial ends within ~3 days).
   const { data: candidates, error } = await admin
     .from("profiles")
-    .select("id, full_name, created_at, trial_reminders_sent")
+    .select("id, full_name, created_at, trial_reminders_sent, locale")
     .eq("billing_plan", "trial")
     .gte("created_at", new Date(now - TRIAL_DAYS * DAY_MS).toISOString())
     .lte("created_at", new Date(now - (TRIAL_DAYS - 3) * DAY_MS).toISOString());
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     const result = await sendEmail({
       to: user.email,
-      ...renderTrialReminderEmail({ name: profile.full_name ?? metaName, daysLeft: Math.max(1, remaining) })
+      ...renderTrialReminderEmail({ name: profile.full_name ?? metaName, daysLeft: Math.max(1, remaining), locale: normalizeEmailLocale(profile.locale) })
     });
 
     if (result.sent) {

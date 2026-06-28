@@ -302,6 +302,7 @@ export async function completeOnboarding(formData: FormData) {
       primary_talk_type: primaryTalkType,
       onboarding_help_requested: helpRequested,
       onboarding_support_note: supportNote,
+      locale,
       onboarding_completed_at: new Date().toISOString()
     })
     .eq("id", user.id);
@@ -314,7 +315,7 @@ export async function completeOnboarding(formData: FormData) {
   if (user.email) {
     try {
       const fullName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
-      await sendEmail({ to: user.email, ...renderWelcomeEmail({ name: fullName }) });
+      await sendEmail({ to: user.email, ...renderWelcomeEmail({ name: fullName, locale }) });
     } catch {
       // ignore — email is non-critical
     }

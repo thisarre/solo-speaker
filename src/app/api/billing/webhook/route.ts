@@ -3,9 +3,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { BillingPlan } from "@/modules/billing/entitlements";
 import { sendEmail } from "@/lib/email/send";
 import {
+  normalizeEmailLocale,
   renderStudioConfirmedEmail,
   renderSubscriptionCancelledEmail,
   renderTeamConfirmedEmail,
+  type EmailLocale,
   type RenderedEmail
 } from "@/lib/email/templates";
 
@@ -14,15 +16,15 @@ import {
 async function emailSubscriber(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
-  render: (name: string | null) => RenderedEmail
+  render: (name: string | null, locale: EmailLocale) => RenderedEmail
 ): Promise<void> {
   try {
     const { data } = await admin.auth.admin.getUserById(userId);
     const user = data?.user;
     if (!user?.email) return;
-    const { data: profile } = await admin.from("profiles").select("full_name").eq("id", userId).maybeSingle();
+    const { data: profile } = await admin.from("profiles").select("full_name, locale").eq("id", userId).maybeSingle();
     const metaName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
-    await sendEmail({ to: user.email, ...render(profile?.full_name ?? metaName) });
+    await sendEmail({ to: user.email, ...render(profile?.full_name ?? metaName, normalizeEmailLocale(profile?.locale)) });
   } catch {
     // ignore — email is non-critical
   }
@@ -132,14 +134,14 @@ export async function POST(request: NextRequest) {
 
     // Confirmation email only on the INITIAL subscription (created), never on every update/renewal.
     if (type === "customer.subscription.created" && isActive) {
-      if (billingPlan === "studio") await emailSubscriber(admin, userId, (name) => renderStudioConfirmedEmail({ name }));
-      else if (billingPlan === "team") await emailSubscriber(admin, userId, (name) => renderTeamConfirmedEmail({ name }));
+      if (billingPlan === "studio") await emailSubscriber(admin, userId, (name, locale) => renderStudioConfirmedEmail({ name, locale }));
+      else if (billingPlan === "team") await emailSubscriber(admin, userId, (name, locale) => renderTeamConfirmedEmail({ name, locale }));
     }
   }
 
   if (type === "customer.subscription.deleted") {
     await admin.from("profiles").update({ billing_plan: "trial" }).eq("id", userId);
-    await emailSubscriber(admin, userId, (name) => renderSubscriptionCancelledEmail({ name }));
+    await emailSubscriber(admin, userId, (name, locale) => renderSubscriptionCancelledEmail({ name, locale }));
   }
 
   return NextResponse.json({ received: true });
