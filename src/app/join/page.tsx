@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getMessages } from "@/i18n/messages";
 import { resolveServerLocale } from "@/i18n/server";
+import { localizedPath, type Locale } from "@/i18n/routing";
 
 type JoinCopy = ReturnType<typeof getMessages>["join"];
 
@@ -13,7 +14,7 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
   const copy = getMessages(locale).join;
 
   const { token } = await searchParams;
-  if (!token) return <JoinError copy={copy} message={copy.missingToken} />;
+  if (!token) return <JoinError copy={copy} locale={locale} message={copy.missingToken} />;
 
   const admin = createAdminClient();
 
@@ -32,23 +33,24 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
     loadError = `${copy.unexpectedErrorPrefix}${String(e)}`;
   }
 
-  if (loadError) return <JoinError copy={copy} message={loadError} />;
-  if (!invitation) return <JoinError copy={copy} message={copy.notFound} />;
+  if (loadError) return <JoinError copy={copy} locale={locale} message={loadError} />;
+  if (!invitation) return <JoinError copy={copy} locale={locale} message={copy.notFound} />;
   if (invitation.status !== "pending") {
-    return <JoinError copy={copy} message={invitation.status === "active" ? copy.alreadyAccepted : copy.alreadyRevoked} />;
+    return <JoinError copy={copy} locale={locale} message={invitation.status === "active" ? copy.alreadyAccepted : copy.alreadyRevoked} />;
   }
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?next=${encodeURIComponent(`/join?token=${token}`)}`);
+    redirect(localizedPath(`/login?next=${encodeURIComponent(`/join?token=${token}`)}`, locale));
   }
 
   if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
     return (
       <JoinError
         copy={copy}
+        locale={locale}
         message={copy.wrongAccount.replace("{intended}", invitation.email).replace("{current}", user.email ?? "")}
       />
     );
@@ -59,15 +61,15 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
     admin.from("team_invitations").update({ status: "active", accepted_at: new Date().toISOString() }).eq("id", invitation.id)
   ]);
 
-  redirect("/dashboard");
+  redirect(localizedPath("/dashboard", locale));
 }
 
-function JoinError({ copy, message }: { copy: JoinCopy; message: string }) {
+function JoinError({ copy, locale, message }: { copy: JoinCopy; locale: Locale; message: string }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-8 text-center">
       <p className="text-[15px] font-[550] text-foreground">{copy.title}</p>
       <p className="max-w-sm text-[13px] text-faint">{message}</p>
-      <Link className="text-[13px] text-accent underline" href="/dashboard">{copy.back}</Link>
+      <Link className="text-[13px] text-accent underline" href={localizedPath("/dashboard", locale)}>{copy.back}</Link>
     </div>
   );
 }

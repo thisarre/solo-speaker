@@ -1,12 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/modules/auth/queries";
 import { canCreateTalk, type BillingPlan } from "@/modules/billing/entitlements";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { getMessages } from "@/i18n/messages";
+import { localizedPath } from "@/i18n/routing";
+import { resolveServerLocale } from "@/i18n/server";
 import type { TalkStatus, TalkType } from "@/types/talk";
 
 const copy = getMessages("fr");
@@ -48,6 +51,7 @@ async function assertOwnTalk(talkId: string) {
 export async function createTalk(formData: FormData) {
   const user = await requireUser();
   const supabase = await createClient();
+  const locale = resolveServerLocale((await headers()).get("x-locale"));
 
   const title = getString(formData, "title");
   const typeValue = getString(formData, "type") as TalkType;
@@ -55,7 +59,7 @@ export async function createTalk(formData: FormData) {
   const brief = getString(formData, "brief");
 
   if (!title || !talkTypes.has(typeValue)) {
-    redirect(`/talks/new?error=${encodeURIComponent(copy.errors.titleAndTypeRequired)}`);
+    redirect(localizedPath(`/talks/new?error=${encodeURIComponent(copy.errors.titleAndTypeRequired)}`, locale));
   }
 
   const [{ count, error: countError }, { data: profileData }] = await Promise.all([
@@ -64,13 +68,13 @@ export async function createTalk(formData: FormData) {
   ]);
 
   if (countError) {
-    redirect(`/talks/new?error=${encodeURIComponent(countError.message)}`);
+    redirect(localizedPath(`/talks/new?error=${encodeURIComponent(countError.message)}`, locale));
   }
 
   const billingPlan = (profileData?.billing_plan ?? "trial") as BillingPlan;
   const entitlement = canCreateTalk({ currentTalkCount: count ?? 0, plan: billingPlan });
   if (!entitlement.allowed) {
-    redirect(`/pricing?error=${encodeURIComponent(entitlement.reason)}`);
+    redirect(localizedPath(`/pricing?error=${encodeURIComponent(entitlement.reason)}`, locale));
   }
 
   const { data: talk, error } = await supabase
@@ -87,7 +91,7 @@ export async function createTalk(formData: FormData) {
     .single();
 
   if (error) {
-    redirect(`/talks/new?error=${encodeURIComponent(error.message)}`);
+    redirect(localizedPath(`/talks/new?error=${encodeURIComponent(error.message)}`, locale));
   }
 
   const sections = brief
@@ -97,7 +101,7 @@ export async function createTalk(formData: FormData) {
   const { error: sectionError } = await supabase.from("talk_sections").insert(sections);
 
   if (sectionError) {
-    redirect(`/talks/new?error=${encodeURIComponent(sectionError.message)}`);
+    redirect(localizedPath(`/talks/new?error=${encodeURIComponent(sectionError.message)}`, locale));
   }
 
   getPostHogClient().capture({
@@ -108,7 +112,7 @@ export async function createTalk(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/talks");
-  redirect(`/talks/${talk.id}`);
+  redirect(localizedPath(`/talks/${talk.id}`, locale));
 }
 
 export async function updateTalk(input: {
@@ -160,6 +164,7 @@ export async function updateTalk(input: {
 
 export async function deleteTalk(talkId: string) {
   const { user, supabase } = await assertOwnTalk(talkId);
+  const locale = resolveServerLocale((await headers()).get("x-locale"));
 
   const { error } = await supabase.from("talks").delete().eq("id", talkId).eq("user_id", user.id);
 
@@ -174,7 +179,7 @@ export async function deleteTalk(talkId: string) {
 
   revalidatePath("/dashboard");
   revalidatePath("/talks");
-  redirect("/talks");
+  redirect(localizedPath("/talks", locale));
 }
 
 export async function createTalkSection(talkId: string) {

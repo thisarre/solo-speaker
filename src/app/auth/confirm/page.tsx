@@ -12,25 +12,26 @@ export default function AuthConfirmPage() {
   const router = useRouter();
 
   useEffect(() => {
+    const locale = document.documentElement.lang === "fr" ? "fr" : "en";
     const env = getSupabaseEnv();
     const supabase = createBrowserClient(env.url, env.anonKey);
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) {
-        router.replace("/login");
+        router.replace(`/${locale}/login`);
         return;
       }
 
       const email = session.user.email;
       if (!email) {
-        router.replace("/dashboard");
+        router.replace(`/${locale}/dashboard`);
         return;
       }
 
       // Accept pending invitation via admin route (bypasses RLS)
       await fetch("/api/team/accept", { method: "POST" });
 
-      router.replace("/dashboard");
+      router.replace(`/${locale}/dashboard`);
     });
   }, [router]);
 
