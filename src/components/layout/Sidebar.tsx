@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarClock, FileText, HelpCircle, Home, LogOut, Plus, Settings } from "lucide-react";
+import { CalendarClock, FileText, HelpCircle, Home, LogOut, MoreHorizontal, Plus, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { CommandPalette } from "./CommandPalette";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
@@ -117,7 +117,7 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
         </div>
       </aside>
 
-      <nav className="fixed inset-x-3 bottom-3 z-40 flex h-14 items-center justify-between gap-1 rounded-[14px] border border-line bg-panel/96 px-2 shadow-[0_12px_40px_rgba(20,20,25,.18)] backdrop-blur md:hidden">
+      <nav className="fixed inset-x-3 bottom-3 z-40 flex h-14 items-center justify-around gap-1 rounded-[14px] border border-line bg-panel/96 px-2 shadow-[0_12px_40px_rgba(20,20,25,.18)] backdrop-blur md:hidden">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActiveNavItem(pathname, item.href);
@@ -136,19 +136,32 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
             </Link>
           );
         })}
-        <ThemeToggle className="w-[92px]" />
-        <a aria-label={messages.common.help} className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href={helpHref}>
-          <HelpCircle className="size-4" />
-        </a>
-        <RestartGuidedOnboardingButton compact />
-        {trialReminder ? (
-          <Link aria-label={trialReminder.label} className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href={trialHref} title={trialReminder.message}>
-            <CalendarClock className="size-4" />
-          </Link>
-        ) : null}
-        <Link aria-label={messages.common.logout} className="flex size-10 items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink" href="/logout">
-          <LogOut className="size-4" />
-        </Link>
+        <details className="relative">
+          <summary aria-label={messages.common.menu} className="flex size-10 cursor-pointer list-none items-center justify-center rounded-[10px] text-mute transition hover:bg-surface/70 hover:text-ink [&::-webkit-details-marker]:hidden">
+            <MoreHorizontal className="size-4" />
+          </summary>
+          <div className="absolute bottom-full right-0 z-50 mb-2 grid w-[232px] max-w-[calc(100vw-1.5rem)] gap-1 rounded-[12px] border border-line bg-background p-2 shadow-[0_18px_50px_rgba(20,20,25,.18)]">
+            {trialReminder ? (
+              <Link className="flex items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href={trialHref} title={trialReminder.message}>
+                <CalendarClock className="size-4 text-accent-ink" />
+                {trialReminder.label}
+              </Link>
+            ) : null}
+            <a className="flex items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href={helpHref}>
+              <HelpCircle className="size-4" />
+              {messages.common.help}
+            </a>
+            <RestartGuidedOnboardingButton inline />
+            <Link className="flex items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="/logout">
+              <LogOut className="size-4" />
+              {messages.common.logout}
+            </Link>
+            <div className="mt-1 flex items-center justify-between gap-2 border-t border-line pt-2">
+              <ThemeToggle className="w-[92px]" />
+              <LanguageSwitcher currentLocale={locale} />
+            </div>
+          </div>
+        </details>
       </nav>
     </>
   );
