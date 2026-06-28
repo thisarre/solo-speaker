@@ -12,6 +12,9 @@ export async function createClient() {
     // HTTPS site's session cookie is accepted by the browser.
     cookieOptions: { secure: process.env.NODE_ENV === "production" },
     cookies: {
+      // encode "tokens-only": keep the user object out of the cookie so it never chunks. Must
+      // match the browser + middleware clients. See [[auth-live-cookie-gotchas]].
+      encode: "tokens-only",
       getAll() {
         return cookieStore.getAll();
       },

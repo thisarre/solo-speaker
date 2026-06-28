@@ -25,6 +25,9 @@ export async function updateSession(request: NextRequest, locale: string) {
     // HTTPS site's session cookie is accepted (and re-set) by the browser.
     cookieOptions: { secure: process.env.NODE_ENV === "production" },
     cookies: {
+      // encode "tokens-only": keep the user object out of the cookie so the per-request refresh
+      // here never re-chunks it. Must match the browser + server clients. See [[auth-live-cookie-gotchas]].
+      encode: "tokens-only",
       getAll() {
         return request.cookies.getAll();
       },
@@ -47,7 +50,11 @@ export async function updateSession(request: NextRequest, locale: string) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = addLocaleToPath("/login", locale);
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(redirectUrl);
+    // Carry any cookies a getUser()-triggered refresh just wrote onto `response` over to the
+    // redirect, so an in-flight token refresh/rotation is not dropped on the way to /login.
+    const redirect = NextResponse.redirect(redirectUrl);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
   }
 
   return response;
