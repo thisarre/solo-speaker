@@ -8,6 +8,7 @@ import { getTrialReminder } from "@/modules/billing/trial";
 import { getLatestTalkId, getTalkCount } from "@/modules/talks/queries";
 import { PostHogIdentify } from "@/components/analytics/PostHogIdentify";
 import { HelpAssistantWidget } from "@/modules/help/components/help-assistant-widget";
+import { StripProviderTokens } from "@/modules/auth/components/strip-provider-tokens";
 import { getMessages } from "@/i18n/messages";
 import { defaultLocale, isLocale, type Locale } from "@/i18n/routing";
 
@@ -24,6 +25,7 @@ export async function AppShell({ children, locale }: { children: ReactNode; loca
   return (
     <div className="flex min-h-[100svh] bg-bg text-ink">
       {user ? <PostHogIdentify email={user.email} name={profile?.full_name ?? undefined} userId={user.id} /> : null}
+      <StripProviderTokens />
       <OnboardingPreferenceSync profile={profile} />
       <GuidedOnboardingTour enabled={Boolean(profile?.onboarding_completed_at)} latestTalkId={latestTalkId} />
       <Sidebar locale={activeLocale} talkCount={talkCount} trialReminder={trialReminder} userName={profile?.full_name ?? messages.common.brandShort} />
