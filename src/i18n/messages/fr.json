@@ -27,22 +27,22 @@
     "studioOwner": "Propriétaire du studio"
   },
   "landing": {
-    "heroBadge": "Préparation plus rapide",
-    "heroTitle": "Passez de vos notes à un plan prêt à répéter en quelques minutes.",
-    "heroSubtitle": "Solo Speaker Studio transforme une idée, un mémo vocal ou un brouillon en sections claires, avec durée estimée, réécriture orale et prompteur intégré.",
-    "heroDefinition": "Vous gagnez du temps là où il se perd d’habitude : organiser les idées, reformuler pour l’oral, vérifier la durée et préparer la répétition.",
+    "heroBadge": "De l’idée à la scène",
+    "heroTitle": "Transformez vos idées en prises de parole qui captivent.",
+    "heroSubtitle": "Solo Speaker Studio transforme une idée, un mémo vocal ou un brouillon en une intervention structurée — réécriture orale par IA, durée maîtrisée et prompteur qui suit votre voix.",
+    "heroDefinition": "Fini la page blanche et le stress de dernière minute : vous montez sur scène préparé, minuté et confiant.",
     "timeProofs": [
       ["Notes → plan", "Plus besoin de trier une page blanche à la main."],
       ["Plan → sections", "Chaque partie se développe sans casser le reste."],
       ["Sections → prompteur", "La répétition démarre sans export ni remise en forme."]
     ],
-    "trialEyebrow": "Essai gratuit",
-    "trialTitle": "Mesurez le temps gagné sur vos 5 prochaines prises de parole.",
-    "trialDescription": "Pendant 14 jours, testez le vrai flux : notez une idée, générez un plan, améliorez les sections, puis répétez sans changer d’outil.",
+    "trialEyebrow": "Essai gratuit · 14 jours",
+    "trialTitle": "Vos 5 prochaines prises de parole, prêtes plus vite que jamais.",
+    "trialDescription": "Pendant 14 jours, vivez le flux complet : capturez une idée, générez un plan, sublimez vos sections avec l’IA, puis répétez — le tout au même endroit, sans engagement.",
     "trialHighlights": ["14 jours gratuits", "5 prises de parole incluses", "Plan, IA, prompteur et mémos vocaux"],
-    "videoDemoEyebrow": "Démonstration",
-    "videoDemoTitle": "Voyez où le temps est gagné : du brouillon au prompteur.",
-    "videoDemoBody": "Deux séquences courtes montrent le raccourci essentiel : clarifier les notes, structurer les sections, puis répéter dans le même espace.",
+    "videoDemoEyebrow": "En action",
+    "videoDemoTitle": "De la première idée au prompteur, en un seul flux.",
+    "videoDemoBody": "Deux démos courtes montrent comment Solo Speaker clarifie vos notes, structure vos sections et vous fait répéter — sans jamais changer d’outil.",
     "videoDemos": [
       ["Du désordre au plan", "Les notes dispersées deviennent des sections exploitables, sans repartir d’une page blanche."],
       ["Du plan au prompteur", "La préparation reste dans le même flux jusqu’à la répétition, sans copier-coller entre plusieurs outils."]
@@ -52,25 +52,25 @@
       ["IA", "Texte plus oral"],
       ["Direct", "Prompteur concentré"]
     ],
-    "problemEyebrow": "Problème",
-    "problemTitle": "Le temps se perd avant même que le texte soit bon.",
-    "problemBody": "Une prise de parole demande plus qu’un brouillon : il faut trier les idées, décider d’un ordre, rendre les phrases parlables, estimer la durée et préparer la répétition. C’est cette préparation invisible qui prend le plus de temps.",
+    "problemEyebrow": "Le vrai défi",
+    "problemTitle": "Préparer une prise de parole, c’est épuisant — bien avant de monter sur scène.",
+    "problemBody": "Trier ses idées, trouver le bon ordre, rendre les phrases naturelles à l’oral, tenir le temps, répéter encore et encore… Cette préparation invisible décourage et dévore des heures. Solo Speaker s’en charge pour vous.",
     "problemItems": [
       "Les idées restent dispersées entre notes, documents, messages et mémos vocaux.",
       "Vous perdez du temps à déplacer, reformuler et réorganiser les mêmes passages.",
       "La répétition arrive trop tard, quand la structure devrait déjà être claire."
     ],
-    "solutionEyebrow": "Solution",
-    "solutionTitle": "Un flux court pour gagner du temps à chaque étape.",
-    "solutionBody": "Solo Speaker Studio relie les notes, le plan, l’amélioration IA, la répétition et la présentation. Chaque prise de parole avance par sections, ce qui évite de réécrire tout le document dès qu’une partie change.",
+    "solutionEyebrow": "La solution",
+    "solutionTitle": "Un seul espace, de l’idée à la scène.",
+    "solutionBody": "Notes, plan, réécriture par IA, répétition et présentation : tout est relié. Vous avancez section par section et restez concentré sur l’essentiel — votre message et votre public.",
     "workflowFeatures": [
       ["Plan exploitable dès le départ", "Partez d’une idée, d’une audience ou d’un mémo vocal, puis obtenez des sections déjà prêtes à travailler."],
       ["Réécriture sans repartir de zéro", "Développez, raccourcissez ou rendez une section plus orale sans casser le reste de la prise de parole."],
       ["Répétition dans le même outil", "Passez au prompteur avec la durée estimée, le défilement automatique et le suivi vocal déjà prêts."]
     ],
     "featuresEyebrow": "Mode prompteur",
-    "featuresTitle": "Répétez plus tôt, sans préparer un deuxième document.",
-    "featuresBody": "Le prompteur utilise directement vos sections. Vous gardez le rythme avec le minuteur, le défilement automatique et le suivi vocal, sans exporter puis remettre en forme ailleurs.",
+    "featuresTitle": "Un prompteur qui suit votre voix, pas l’inverse.",
+    "featuresBody": "Vos sections deviennent directement votre prompteur : minuteur, défilement automatique et suivi vocal en temps réel. Vous répétez et présentez avec assurance, sans rien réimporter.",
     "featureList": ["Génération de plan IA", "Éditeur par sections", "Réécriture orale", "Durée estimée", "Mode prompteur", "Défilement automatique", "Mémos vocaux", "Export PDF"],
     "previewPlan": "Plan",
     "previewPlanItems": ["Ouverture", "Idée", "Preuve", "Appel"],
@@ -83,8 +83,8 @@
     ],
     "previewSteps": ["Vous parlez", "Le texte se cale", "L’écran suit"],
     "useCasesEyebrow": "Cas d’usage",
-    "useCasesTitle": "Conçu pour celles et ceux qui prennent souvent la parole.",
-    "useCasesBody": "Le même espace s’adapte aux sermons, conférences, formations, argumentaires de fondateurs et discours préparés.",
+    "useCasesTitle": "Pensé pour celles et ceux qui montent régulièrement sur scène.",
+    "useCasesBody": "Sermons, conférences, formations, argumentaires de fondateurs ou discours : le même espace s’adapte à chaque prise de parole.",
     "useCases": [
       ["Pasteurs et préparation de sermons", "Transformez une idée biblique en plan de sermon, développez les sections, estimez la durée et répétez avant dimanche.", "/use-cases/sermon-preparation"],
       ["Conférenciers et conférences", "Préparez discours d’ouverture, interventions et prises de parole publiques avec une structure facile à porter en direct.", "/use-cases/public-speaking"],
@@ -92,16 +92,16 @@
       ["Fondateurs et argumentaires", "Transformez notes produit, idées investisseurs et récits fondateurs en argumentaires plus nets et plus oraux.", "/features/ai-speech-writer"]
     ],
     "comparisonEyebrow": "Comparaison",
-    "comparisonTitle": "Solo Speaker Studio face aux apps d’écriture et aux prompteurs classiques.",
-    "comparisonBody": "Solo Speaker Studio ne remplace pas tous les documents. Il remplace l’espace brouillon entre écrire une prise de parole et être prêt à la présenter.",
+    "comparisonTitle": "Plus qu’un éditeur de texte, plus qu’un prompteur.",
+    "comparisonBody": "Solo Speaker ne remplace pas tous vos outils : il comble le vrai manque, tout ce qui se passe entre « j’ai une idée » et « je suis prêt à la présenter ».",
     "comparisonRows": [
       ["Google Docs", "Très utile pour écrire du texte", "Pas de structure de prise de parole, de répétition, de mémo vocal ou de prompteur intégré."],
       ["Notion", "Très utile pour organiser des notes", "Pas pensé pour le minutage, l’oralisation, la scène ou la lecture en direct."],
       ["Prompteurs classiques", "Très utiles pour lire un script final", "Souvent séparés de la préparation, de l’IA, de l’édition et de l’export."]
     ],
-    "pricingEyebrow": "Aperçu des tarifs",
-    "pricingTitle": "Testez 14 jours et gardez-le seulement s’il vous fait vraiment gagner du temps.",
-    "pricingBody": "L’essai inclut jusqu’à 5 prises de parole pour comparer votre ancienne méthode avec un flux complet : notes, plan, IA, prompteur et export. Studio annuel est à 99 EUR/an, soit 45 EUR d’économie face au mensuel.",
+    "pricingEyebrow": "Tarifs",
+    "pricingTitle": "Essayez gratuitement. Adoptez-le quand il vous convainc.",
+    "pricingBody": "14 jours d’essai et jusqu’à 5 prises de parole pour tout tester : notes, plan, IA, prompteur et export PDF. Studio à 99 EUR/an, soit 45 EUR d’économie face au mensuel.",
     "pricingBullets": [
       "Essai : 14 jours, 5 prises de parole maximum, IA limitée, prompteur et mémos vocaux.",
       "Studio mensuel : 12 EUR/mois pour les orateurs réguliers.",
@@ -109,7 +109,7 @@
       "Équipe : 29 EUR/mois pour petites équipes, églises et groupes de formateurs."
     ],
     "faqEyebrow": "FAQ",
-    "faqTitle": "Les questions fréquentes avant de tester Solo Speaker Studio."
+    "faqTitle": "Tout ce que vous voulez savoir avant de vous lancer."
   },
   "auth": {
     "loginTitle": "Retour au studio",
