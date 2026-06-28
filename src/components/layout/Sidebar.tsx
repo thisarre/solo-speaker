@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CalendarClock, FileText, HelpCircle, Home, LogOut, MoreHorizontal, Plus, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { CommandPalette } from "./CommandPalette";
+import { LogoutButton } from "./LogoutButton";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Logo } from "@/components/ui/Logo";
@@ -105,15 +106,15 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
               <p className="m-0 truncate text-[12.5px] font-medium">{userName}</p>
               <p className="m-0 truncate text-[11px] text-faint">{messages.navigation.studioOwner}</p>
             </div>
-            <Link aria-label={messages.common.logout} className="ml-auto hidden size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink lg:flex" href="/logout">
+            <LogoutButton ariaLabel={messages.common.logout} className="ml-auto hidden size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink lg:flex">
               <LogOut className="size-4" />
-            </Link>
+            </LogoutButton>
           </div>
         </div>
         <div className="mt-2 flex justify-center lg:hidden">
-          <Link aria-label={messages.common.logout} className="flex size-8 items-center justify-center rounded-[8px] text-faint transition hover:bg-surface hover:text-ink" href="/logout">
+          <LogoutButton ariaLabel={messages.common.logout} className="flex size-8 items-center justify-center rounded-[8px] text-faint transition hover:bg-surface hover:text-ink">
             <LogOut className="size-4" />
-          </Link>
+          </LogoutButton>
         </div>
       </aside>
 
@@ -152,10 +153,10 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
               {messages.common.help}
             </a>
             <RestartGuidedOnboardingButton inline />
-            <Link className="flex items-center gap-2 rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="/logout">
+            <LogoutButton className="flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-left text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground">
               <LogOut className="size-4" />
               {messages.common.logout}
-            </Link>
+            </LogoutButton>
             <div className="mt-1 flex items-center justify-between gap-2 border-t border-line pt-2">
               <ThemeToggle className="w-[92px]" />
               <LanguageSwitcher currentLocale={locale} />
