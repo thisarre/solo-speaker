@@ -4,7 +4,13 @@
 	email {$ACME_EMAIL}
 }
 
+# Canonical host serves the app.
 {$DOMAIN} {
 	encode zstd gzip
 	reverse_proxy web:3000
+}
+
+# www permanently redirects to the canonical apex (matches NEXT_PUBLIC_SITE_URL).
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
 }
