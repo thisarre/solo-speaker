@@ -51,22 +51,26 @@ export async function GET(request: Request) {
     });
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    console.log("[oauth-callback] exchange:", { hasSession: !!data?.session, error: error?.message ?? null });
 
     if (!error && data.session) {
       // Drop provider_token / provider_refresh_token (we never call Google APIs) so the cookie is
       // built from only the access + refresh tokens — smaller and never chunked.
-      await supabase.auth.setSession({
+      const setRes = await supabase.auth.setSession({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token
       });
+      console.log("[oauth-callback] setSession:", { error: setRes.error?.message ?? null, capturedAfterSet: [...captured.keys()] });
       // supabase-js >= 2.91.0 defers the cookie write onto a timer; let it run so `captured` is
       // populated before we apply it to the redirect response.
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      console.log("[oauth-callback] captured after flush:", [...captured.keys()].map((k) => `${k}:${captured.get(k)?.value?.length ?? 0}`));
 
       const response = NextResponse.redirect(buildAuthCallbackRedirect(base, next));
       for (const { name, value, options } of captured.values()) {
         response.cookies.set(name, value, options);
       }
+      console.log("[oauth-callback] applied", captured.size, "cookies to redirect");
       return response;
     }
   }
