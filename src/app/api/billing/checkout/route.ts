@@ -6,6 +6,9 @@ import { localizedPath, type Locale } from "@/i18n/routing";
 export const runtime = "nodejs";
 
 function requestOrigin(request: NextRequest) {
+  // Prefer the configured public URL so Stripe success/cancel URLs are always correct behind the proxy.
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configured) return configured.replace(/\/+$/, "");
   const forwardedHost = request.headers.get("x-forwarded-host");
   const host = forwardedHost ?? request.headers.get("host") ?? "localhost:3000";
   const protocol = request.headers.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");

@@ -4,7 +4,9 @@ import { getSupabaseEnv } from "@/lib/supabase/env";
 import type { Database } from "@/lib/supabase/database.types";
 
 export async function GET(request: NextRequest) {
-  const response = NextResponse.redirect(new URL(`/login?message=${encodeURIComponent("Déconnexion effectuée.")}`, request.url));
+  // Behind the reverse proxy request.url is the internal origin (0.0.0.0:3000); prefer the public site URL.
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? request.url;
+  const response = NextResponse.redirect(new URL(`/login?message=${encodeURIComponent("Déconnexion effectuée.")}`, base));
   const { url, anonKey } = getSupabaseEnv();
   const supabase = createServerClient<Database>(url, anonKey, {
     cookies: {
