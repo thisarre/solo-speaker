@@ -260,6 +260,22 @@ export function LandingPage({ locale }: { locale: Locale }) {
         </div>
       </section>
 
+      <section className="border-b border-line py-14 md:py-18" id="founder">
+        <div className="mx-auto w-full max-w-[760px] px-5 md:px-8" data-scroll-reveal>
+          <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{landing.founderEyebrow}</p>
+          <figure className="m-0 mt-5">
+            <blockquote className="m-0 border-l-2 border-accent pl-5 md:pl-6">
+              {landing.founderParagraphs.map((paragraph) => (
+                <p className="m-0 mb-4 text-[17px] leading-8 text-foreground last:mb-0 md:text-[19px]" key={paragraph.slice(0, 32)}>
+                  {paragraph}
+                </p>
+              ))}
+            </blockquote>
+            <figcaption className="mt-5 pl-5 text-[14px] font-semibold text-muted md:pl-6">{landing.founderSignature}</figcaption>
+          </figure>
+        </div>
+      </section>
+
       <section className="border-b border-line py-14 text-foreground md:py-18" id="pricing-preview">
         <div className="mx-auto w-full max-w-[1480px] px-5 md:px-8">
           <div className="max-w-2xl" data-scroll-reveal>

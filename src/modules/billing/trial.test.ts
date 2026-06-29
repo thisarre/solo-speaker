@@ -13,10 +13,10 @@ test("getTrialReminder shows remaining days during the 14 day trial", () => {
   });
 
   assert.deepEqual(reminder, {
-    ctaLabel: "Voir l’abonnement",
+    ctaLabel: "Garder mon accès",
     href: "/pricing",
     label: "Essai gratuit",
-    message: "5 jours restants avant l’abonnement."
+    message: "Plus que 5 jours pour garder vos prises de parole illimitées et l’IA complète."
   });
 });
 
@@ -27,7 +27,7 @@ test("getTrialReminder handles trial end without hiding billing context", () => 
     trialStartedAt: "2026-06-01T12:00:00.000Z"
   });
 
-  assert.equal(reminder.message, "Essai terminé. Choisissez un abonnement pour garder l’accès.");
+  assert.equal(reminder.message, "Votre essai est terminé — ne perdez pas vos prises de parole. Repassez en illimité.");
 });
 
 test("getTrialReminder falls back when the profile creation date is missing", () => {
