@@ -21,7 +21,7 @@ test("getPasswordPolicyError reports the first failing rule", () => {
   assert.equal(getPasswordPolicyError("short7!"), "min");
   assert.equal(getPasswordPolicyError("abcdefghij"), "lettersNumbers");
   assert.equal(getPasswordPolicyError("password1"), "common");
-  assert.equal(getPasswordPolicyError("test1234"), "weak");
+  assert.equal(getPasswordPolicyError("test1234"), null);
   assert.equal(getPasswordPolicyError("Test1234"), null);
   assert.equal(getPasswordPolicyError("Sunrise7Path"), null);
 });

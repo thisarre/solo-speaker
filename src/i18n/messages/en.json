@@ -857,7 +857,6 @@
     "invalidTalkValue": "Invalid talk value.",
     "passwordMinLength": "The password must contain at least 8 characters.",
     "passwordLettersNumbers": "Add at least one letter and one number to the password.",
-    "passwordTooWeak": "Password too weak. Make it longer or add an uppercase letter, a number or a symbol.",
     "passwordTooCommon": "This password is too common or too close to your email. Please choose another one.",
     "invalidCredentials": "Incorrect email or password.",
     "accountExists": "An account already exists with this email. Log in or use forgot password.",

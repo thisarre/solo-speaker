@@ -6,7 +6,7 @@ export const PASSWORD_STRONG_LENGTH = 12;
 
 export type PasswordStrength = "weak" | "medium" | "strong";
 
-export type PasswordPolicyCode = "min" | "lettersNumbers" | "common" | "weak";
+export type PasswordPolicyCode = "min" | "lettersNumbers" | "common";
 
 export type PasswordChecks = {
   length: boolean;
@@ -98,11 +98,13 @@ export function scorePassword(password: string, email?: string): { score: number
 }
 
 // Hard gate used by both the server action and the client submit guard.
-// Returns the first failing rule, or null when the password is acceptable.
+// Intentionally lenient: a simple 8-char letters+numbers password is accepted.
+// We only block what is genuinely unsafe (too short, no letter/number mix, or a
+// common / sequential / email-derived password). The live meter nudges toward
+// stronger passwords without forcing it. Returns the first failing rule, or null.
 export function getPasswordPolicyError(password: string, email?: string): PasswordPolicyCode | null {
   if (password.length < PASSWORD_MIN_LENGTH) return "min";
   if (!hasLetter(password) || !hasNumber(password)) return "lettersNumbers";
   if (isWeakOrCommon(password, email)) return "common";
-  if (scorePassword(password, email).strength === "weak") return "weak";
   return null;
 }

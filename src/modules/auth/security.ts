@@ -37,8 +37,6 @@ export function passwordValidationError(password: string, email?: string) {
       return errors.passwordLettersNumbers;
     case "common":
       return errors.passwordTooCommon;
-    case "weak":
-      return errors.passwordTooWeak;
     default:
       return null;
   }

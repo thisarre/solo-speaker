@@ -29,11 +29,12 @@ test("isProtectedAppPath covers private studio sections", () => {
   assert.equal(isProtectedAppPath("/login"), false);
 });
 
-test("passwordValidationError enforces the stronger password policy", () => {
+test("passwordValidationError stays lenient but blocks unsafe passwords", () => {
   assert.equal(passwordValidationError("short7!"), errors.passwordMinLength);
   assert.equal(passwordValidationError("abcdefghij"), errors.passwordLettersNumbers);
   assert.equal(passwordValidationError("password1"), errors.passwordTooCommon);
-  assert.equal(passwordValidationError("test1234"), errors.passwordTooWeak);
+  assert.equal(passwordValidationError("12345678"), errors.passwordLettersNumbers);
+  assert.equal(passwordValidationError("test1234"), null);
   assert.equal(passwordValidationError("Sunrise7Path"), null);
 });
 
