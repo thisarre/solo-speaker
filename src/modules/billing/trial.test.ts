@@ -27,7 +27,7 @@ test("getTrialReminder handles trial end without hiding billing context", () => 
     trialStartedAt: "2026-06-01T12:00:00.000Z"
   });
 
-  assert.equal(reminder.message, "Votre essai est terminé — ne perdez pas vos prises de parole. Repassez en illimité.");
+  assert.equal(reminder.message, "Votre essai est terminé. Ne perdez pas vos prises de parole. Repassez en illimité.");
 });
 
 test("getTrialReminder falls back when the profile creation date is missing", () => {

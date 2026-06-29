@@ -21,7 +21,7 @@ type LayoutInput = {
 };
 
 function layout({ locale, heading, intro, bullets, cta, footnote }: LayoutInput): string {
-  const signoff = locale === "en" ? "— The Solo Speaker team" : "— L'équipe Solo Speaker";
+  const signoff = locale === "en" ? "The Solo Speaker team" : "L'équipe Solo Speaker";
   const bulletsHtml = bullets?.length
     ? `<tr><td style="padding:14px 32px 0 32px;"><ul style="margin:0;padding-left:20px;color:#17171b;font-size:14.5px;line-height:1.75;">${bullets
         .map((b) => `<li style="margin:0 0 4px 0;">${b}</li>`)
@@ -64,7 +64,7 @@ export type RenderedEmail = { subject: string; html: string };
 const greet = (locale: EmailLocale, name: string, fr: string, en: string) =>
   name ? (locale === "en" ? `${en} ${name}` : `${fr} ${name}`) : locale === "en" ? en : fr;
 
-/** Sent after onboarding — explains how the product works. */
+/** Sent after onboarding: explains how the product works. */
 export function renderWelcomeEmail(input: { name?: string | null; locale?: EmailLocale }): RenderedEmail {
   const locale = input.locale ?? "fr";
   const name = cleanName(input.name);
@@ -77,10 +77,10 @@ export function renderWelcomeEmail(input: { name?: string | null; locale?: Email
         intro:
           "Solo Speaker turns an idea, a voice memo or a rough draft into a talk that's ready to deliver. Here's how to get the most out of it:",
         bullets: [
-          "<strong>1. Create a talk</strong> — start from an idea or a brief, and the AI generates a structured outline.",
-          "<strong>2. Work section by section</strong> — rewrite for the spoken word and watch the estimated duration live.",
-          "<strong>3. Rehearse on the teleprompter</strong> — auto-scroll plus voice-follow that tracks your speech.",
-          "<strong>4. Voice memos & PDF export</strong> — capture ideas by voice, export whenever you want."
+          "<strong>1. Create a talk</strong>: start from an idea or a brief, and the AI generates a structured outline.",
+          "<strong>2. Work section by section</strong>: rewrite for the spoken word and watch the estimated duration live.",
+          "<strong>3. Rehearse on the teleprompter</strong>: auto-scroll plus voice-follow that tracks your speech.",
+          "<strong>4. Voice memos & PDF export</strong>: capture ideas by voice, export whenever you want."
         ],
         cta: { label: "Create my first talk", url: `${SITE}/en/talks/new` },
         footnote: "You have a 14-day trial with up to 5 talks. Questions? Just reply to this email."
@@ -95,10 +95,10 @@ export function renderWelcomeEmail(input: { name?: string | null; locale?: Email
       intro:
         "Solo Speaker transforme une idée, un mémo vocal ou un brouillon en une prise de parole prête à présenter. Voici comment en tirer le meilleur :",
       bullets: [
-        "<strong>1. Crée une prise de parole</strong> — pars d'une idée ou d'un brief, l'IA génère un plan structuré.",
-        "<strong>2. Travaille par sections</strong> — réécris à l'oral, et vois la durée estimée en direct.",
-        "<strong>3. Répète au prompteur</strong> — défilement automatique et suivi vocal qui suit ta voix.",
-        "<strong>4. Mémos vocaux & export PDF</strong> — capture tes idées à la voix, exporte quand tu veux."
+        "<strong>1. Crée une prise de parole</strong> : pars d'une idée ou d'un brief, l'IA génère un plan structuré.",
+        "<strong>2. Travaille par sections</strong> : réécris à l'oral, et vois la durée estimée en direct.",
+        "<strong>3. Répète au prompteur</strong> : défilement automatique et suivi vocal qui suit ta voix.",
+        "<strong>4. Mémos vocaux & export PDF</strong> : capture tes idées à la voix, exporte quand tu veux."
       ],
       cta: { label: "Créer ma première prise de parole", url: `${SITE}/fr/talks/new` },
       footnote: "Tu as 14 jours d'essai avec jusqu'à 5 prises de parole. Une question ? Réponds simplement à cet email."
@@ -205,7 +205,7 @@ export function renderSubscriptionCancelledEmail(input: { name?: string | null; 
         intro:
           "Your subscription has been cancelled and you're back on the free plan. Your talks stay accessible within the free plan's limits. We'd love to see you back whenever you're ready.",
         cta: { label: "Reactivate a plan", url: `${SITE}/en/pricing` },
-        footnote: "Any feedback on what didn't work? Reply to this email — it really helps us improve."
+        footnote: "Any feedback on what didn't work? Reply to this email, it really helps us improve."
       })
     };
   }
@@ -235,7 +235,7 @@ export function renderTrialReminderEmail(input: { name?: string | null; daysLeft
         heading: tomorrow ? "Your trial ends tomorrow ⏳" : `${input.daysLeft} days left in your trial ⏳`,
         intro:
           (name ? `${name}, your` : "Your") +
-          " free trial ends soon. To keep unlimited talks, the full AI assistant and the voice-follow teleprompter, upgrade to Studio — €12/month or €99/year.",
+          " free trial ends soon. To keep unlimited talks, the full AI assistant and the voice-follow teleprompter, upgrade to Studio: €12/month or €99/year.",
         cta: { label: "Choose my plan", url: `${SITE}/en/pricing` },
         footnote: "You can stay on the free plan, but you'll be limited to 5 talks."
       })
@@ -248,7 +248,7 @@ export function renderTrialReminderEmail(input: { name?: string | null; daysLeft
       heading: tomorrow ? "Ton essai se termine demain ⏳" : `Plus que ${input.daysLeft} jours d'essai ⏳`,
       intro:
         (name ? `${name}, ton` : "Ton") +
-        " essai gratuit se termine bientôt. Pour garder tes prises de parole illimitées, l'assistant IA complet et le prompteur vocal, passe à Studio — 12 €/mois ou 99 €/an.",
+        " essai gratuit se termine bientôt. Pour garder tes prises de parole illimitées, l'assistant IA complet et le prompteur vocal, passe à Studio : 12 €/mois ou 99 €/an.",
       cta: { label: "Choisir mon offre", url: `${SITE}/fr/pricing` },
       footnote: "Tu peux continuer en gratuit, mais tu seras limité à 5 prises de parole."
     })

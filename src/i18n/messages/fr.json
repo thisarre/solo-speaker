@@ -29,7 +29,7 @@
   "landing": {
     "heroBadge": "De l’idée à la scène",
     "heroTitle": "Transformez vos idées en prises de parole qui captivent.",
-    "heroSubtitle": "Solo Speaker Studio transforme une idée, un mémo vocal ou un brouillon en une intervention structurée — réécriture pour l’oral par IA, durée maîtrisée et prompteur qui suit votre voix.",
+    "heroSubtitle": "Solo Speaker Studio transforme une idée, un mémo vocal ou un brouillon en une intervention structurée : réécriture pour l’oral par IA, durée maîtrisée et prompteur qui suit votre voix.",
     "heroDefinition": "Fini la page blanche et le stress de dernière minute : vous montez sur scène préparé, minuté et confiant.",
     "timeProofs": [
       ["Notes → plan", "Plus besoin de trier une page blanche à la main."],
@@ -38,11 +38,11 @@
     ],
     "trialEyebrow": "Essai gratuit · 14 jours",
     "trialTitle": "Vos 5 prochaines prises de parole, prêtes plus vite que jamais.",
-    "trialDescription": "Pendant 14 jours, vivez le flux complet : capturez une idée, générez un plan, peaufinez vos sections avec l’IA, puis répétez — le tout au même endroit, sans engagement.",
+    "trialDescription": "Pendant 14 jours, vivez le flux complet : capturez une idée, générez un plan, peaufinez vos sections avec l’IA, puis répétez, le tout au même endroit, sans engagement.",
     "trialHighlights": ["14 jours gratuits", "5 prises de parole incluses", "Plan, assistant IA, prompteur et mémos vocaux"],
     "videoDemoEyebrow": "En action",
     "videoDemoTitle": "De la première idée au prompteur, en un seul flux.",
-    "videoDemoBody": "Deux démos courtes montrent comment Solo Speaker clarifie vos notes, structure vos sections et vous fait répéter — sans jamais changer d’outil.",
+    "videoDemoBody": "Deux démos courtes montrent comment Solo Speaker clarifie vos notes, structure vos sections et vous fait répéter, sans jamais changer d’outil.",
     "videoDemos": [
       ["Du désordre au plan", "Les notes dispersées deviennent des sections exploitables, sans repartir d’une page blanche."],
       ["Du plan au prompteur", "La préparation reste dans le même flux jusqu’à la répétition, sans copier-coller entre plusieurs outils."]
@@ -53,7 +53,7 @@
       ["Direct", "Prompteur épuré"]
     ],
     "problemEyebrow": "Le vrai défi",
-    "problemTitle": "Préparer une prise de parole, c’est épuisant — bien avant de monter sur scène.",
+    "problemTitle": "Préparer une prise de parole, c’est épuisant, bien avant de monter sur scène.",
     "problemBody": "Trier ses idées, trouver le bon ordre, rendre les phrases naturelles à l’oral, tenir le temps, répéter encore et encore… Cette préparation invisible décourage et dévore des heures. Solo Speaker rend cette préparation simple et rapide.",
     "problemItems": [
       "Les idées restent dispersées entre notes, documents, messages et mémos vocaux.",
@@ -62,7 +62,7 @@
     ],
     "solutionEyebrow": "La solution",
     "solutionTitle": "Un seul espace, de l’idée à la scène.",
-    "solutionBody": "Notes, plan, réécriture par IA, répétition et présentation : tout est relié. Vous avancez section par section et restez concentré sur l’essentiel — votre message et votre public.",
+    "solutionBody": "Notes, plan, réécriture par IA, répétition et présentation : tout est relié. Vous avancez section par section et restez concentré sur l’essentiel : votre message et votre public.",
     "workflowFeatures": [
       ["Plan exploitable dès le départ", "Partez d’une idée, d’une audience ou d’un mémo vocal, puis obtenez des sections déjà prêtes à travailler."],
       ["Réécriture sans repartir de zéro", "Développez, raccourcissez ou rendez une section plus naturelle à l’oral sans casser le reste de la prise de parole."],
@@ -110,10 +110,10 @@
     ],
     "founderEyebrow": "Le mot du fondateur",
     "founderParagraphs": [
-      "Préparer une prise de parole, ce n’est pas seulement l’écrire. C’est trier ses idées, trouver le bon ordre, rendre le texte naturel à l’oral, tenir le temps et répéter — souvent seul, souvent la veille.",
-      "J’ai créé Solo Speaker pour réunir tout ça au même endroit : de la première idée jusqu’au prompteur qui suit votre voix. L’objectif est simple — que vous montiez sur scène préparé, minuté et confiant, concentré sur ce qui compte vraiment : votre message et votre public."
+      "Préparer une prise de parole, ce n’est pas seulement l’écrire. C’est trier ses idées, trouver le bon ordre, rendre le texte naturel à l’oral, tenir le temps et répéter, souvent seul, souvent la veille.",
+      "J’ai créé Solo Speaker pour réunir tout ça au même endroit : de la première idée jusqu’au prompteur qui suit votre voix. L’objectif est simple : que vous montiez sur scène préparé, minuté et confiant, concentré sur ce qui compte vraiment, votre message et votre public."
     ],
-    "founderSignature": "Thierno SARRÉ — fondateur de Solo Speaker",
+    "founderSignature": "Thierno SARRÉ, fondateur de Solo Speaker",
     "faqEyebrow": "FAQ",
     "faqTitle": "Tout ce que vous voulez savoir avant de vous lancer.",
     "heroSecondaryCta": "Démarrer gratuitement",
@@ -875,11 +875,11 @@
     "ctaLabel": "Garder mon accès",
     "label": "Essai gratuit",
     "defaultMessage": "14 jours gratuits, 5 prises de parole incluses.",
-    "endedMessage": "Votre essai est terminé — ne perdez pas vos prises de parole. Repassez en illimité.",
+    "endedMessage": "Votre essai est terminé. Ne perdez pas vos prises de parole. Repassez en illimité.",
     "remainingMessage": "Plus que {count} jour{plural} pour garder vos prises de parole illimitées et l’IA complète."
   },
   "seo": {
-    "landingTitle": "Solo Speaker Studio — Coach IA et prompteur pour prises de parole",
+    "landingTitle": "Solo Speaker Studio : Coach IA et prompteur pour prises de parole",
     "landingDescription": "Préparez, améliorez, répétez et présentez vos discours, sermons, formations et argumentaires avec Solo Speaker Studio, un espace de travail IA conçu pour les orateurs."
   },
   "seoPages": {
@@ -933,8 +933,8 @@
     "genericError": "Une erreur est survenue.",
     "resendError": "Erreur lors du renvoi.",
     "revokeError": "Erreur lors de la suppression.",
-    "emailFailedManual": "Email non envoyé ({error}) — partage le lien manuellement.",
-    "emailFailedBelow": "Email non envoyé ({error}) — partage le lien ci-dessous.",
+    "emailFailedManual": "Email non envoyé ({error}). Partage le lien manuellement.",
+    "emailFailedBelow": "Email non envoyé ({error}). Partage le lien ci-dessous.",
     "memberActive": "Membre actif",
     "invitationSent": "Invitation envoyée",
     "resendTitle": "Renvoyer l’invitation",
@@ -947,7 +947,7 @@
   "join": {
     "title": "Impossible de rejoindre l’équipe",
     "back": "Retour au tableau de bord",
-    "missingToken": "Lien invalide — token manquant.",
+    "missingToken": "Lien invalide : token manquant.",
     "dbErrorPrefix": "Erreur base de données : ",
     "unexpectedErrorPrefix": "Erreur inattendue : ",
     "notFound": "Invitation introuvable. Elle a peut-être déjà été acceptée ou supprimée.",

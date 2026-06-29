@@ -29,7 +29,7 @@
   "landing": {
     "heroBadge": "From idea to stage",
     "heroTitle": "Turn your ideas into talks that captivate.",
-    "heroSubtitle": "Solo Speaker Studio turns an idea, voice memo or rough draft into a structured talk — AI rewriting for the spoken word, controlled timing and a teleprompter that follows your voice.",
+    "heroSubtitle": "Solo Speaker Studio turns an idea, voice memo or rough draft into a structured talk: AI rewriting for the spoken word, controlled timing and a teleprompter that follows your voice.",
     "heroDefinition": "No more blank page or last-minute stress: you walk on stage prepared, timed and confident.",
     "timeProofs": [
       ["Notes → outline", "No need to sort a blank page by hand."],
@@ -38,11 +38,11 @@
     ],
     "trialEyebrow": "Free trial · 14 days",
     "trialTitle": "Your next 5 talks, ready faster than ever.",
-    "trialDescription": "For 14 days, live the full flow: capture an idea, generate an outline, polish your sections with AI, then rehearse — all in one place, no commitment.",
+    "trialDescription": "For 14 days, live the full flow: capture an idea, generate an outline, polish your sections with AI, then rehearse, all in one place, no commitment.",
     "trialHighlights": ["14-day free trial", "5 talks included", "Outline, AI assistant, teleprompter and voice notes"],
     "videoDemoEyebrow": "In action",
     "videoDemoTitle": "From first idea to teleprompter, in one flow.",
-    "videoDemoBody": "Two short demos show how Solo Speaker clarifies your notes, structures your sections and gets you rehearsing — without ever switching tools.",
+    "videoDemoBody": "Two short demos show how Solo Speaker clarifies your notes, structures your sections and gets you rehearsing, without ever switching tools.",
     "videoDemos": [
       ["From scattered notes to outline", "Loose notes become usable sections without starting from a blank page."],
       ["From outline to teleprompter", "Preparation stays in one flow through rehearsal, without copy-pasting across tools."]
@@ -53,7 +53,7 @@
       ["Live", "Distraction-free teleprompter"]
     ],
     "problemEyebrow": "The real challenge",
-    "problemTitle": "Preparing a talk is exhausting — long before you reach the stage.",
+    "problemTitle": "Preparing a talk is exhausting, long before you reach the stage.",
     "problemBody": "Sorting ideas, finding the right order, making sentences natural to say out loud, hitting your time, rehearsing again and again… That invisible prep is discouraging and eats up hours. Solo Speaker makes that prep simple and fast.",
     "problemItems": [
       "Ideas stay scattered across notes, documents, messages and voice memos.",
@@ -62,7 +62,7 @@
     ],
     "solutionEyebrow": "The solution",
     "solutionTitle": "One workspace, from idea to stage.",
-    "solutionBody": "Notes, outline, AI rewriting, rehearsal and delivery: everything is connected. You move section by section and stay focused on what matters — your message and your audience.",
+    "solutionBody": "Notes, outline, AI rewriting, rehearsal and delivery: everything is connected. You move section by section and stay focused on what matters: your message and your audience.",
     "workflowFeatures": [
       ["Usable outline from the start", "Start from an idea, audience note or voice memo and get sections that are ready to refine."],
       ["Rewrite without starting over", "Develop, shorten or make one section sound more natural out loud without breaking the rest of the talk."],
@@ -93,7 +93,7 @@
     ],
     "comparisonEyebrow": "Comparison",
     "comparisonTitle": "More than a text editor, more than a teleprompter.",
-    "comparisonBody": "Solo Speaker doesn’t replace all your tools — it fills the real gap: everything between “I have an idea” and “I’m ready to deliver it.”",
+    "comparisonBody": "Solo Speaker doesn’t replace all your tools, it fills the real gap: everything between “I have an idea” and “I’m ready to deliver it.”",
     "comparisonRows": [
       ["Google Docs", "Good for writing text", "No talk structure, rehearsal flow, voice notes or teleprompter workflow."],
       ["Notion", "Good for organizing notes", "Not designed for timing, adapting text for the spoken word, stage delivery or live reading."],
@@ -110,10 +110,10 @@
     ],
     "founderEyebrow": "A note from the founder",
     "founderParagraphs": [
-      "Preparing a talk isn’t just writing it. It’s sorting your ideas, finding the right order, making the words sound natural out loud, keeping to time, and rehearsing — often alone, often the night before.",
-      "I built Solo Speaker to bring all of that into one place: from the first idea to a teleprompter that follows your voice. The goal is simple — to help you walk on stage prepared, on time, and confident, focused on what truly matters: your message and your audience."
+      "Preparing a talk isn’t just writing it. It’s sorting your ideas, finding the right order, making the words sound natural out loud, keeping to time, and rehearsing, often alone, often the night before.",
+      "I built Solo Speaker to bring all of that into one place: from the first idea to a teleprompter that follows your voice. The goal is simple. Help you walk on stage prepared, on time, and confident, focused on what truly matters: your message and your audience."
     ],
-    "founderSignature": "Thierno SARRÉ — founder of Solo Speaker",
+    "founderSignature": "Thierno SARRÉ, founder of Solo Speaker",
     "faqEyebrow": "FAQ",
     "faqTitle": "Everything you want to know before you start.",
     "heroSecondaryCta": "Start for free",
@@ -876,11 +876,11 @@
     "ctaLabel": "Keep my access",
     "label": "Free trial",
     "defaultMessage": "14 days free, 5 talks included.",
-    "endedMessage": "Your trial is over — don't lose your talks. Go back to unlimited.",
+    "endedMessage": "Your trial is over. Don't lose your talks. Go back to unlimited.",
     "remainingMessage": "Only {count} day{plural} left to keep your unlimited talks and the full AI."
   },
   "seo": {
-    "landingTitle": "Solo Speaker Studio — AI Speech Coach and Teleprompter for Speakers",
+    "landingTitle": "Solo Speaker Studio: AI Speech Coach and Teleprompter for Speakers",
     "landingDescription": "Prepare, improve, rehearse and deliver better talks with Solo Speaker Studio, an AI-powered workspace for speakers, pastors, trainers and founders."
   },
   "seoPages": {
@@ -934,8 +934,8 @@
     "genericError": "Something went wrong.",
     "resendError": "Couldn’t resend the invitation.",
     "revokeError": "Couldn’t remove the member.",
-    "emailFailedManual": "Email not sent ({error}) — share the link manually.",
-    "emailFailedBelow": "Email not sent ({error}) — share the link below.",
+    "emailFailedManual": "Email not sent ({error}). Share the link manually.",
+    "emailFailedBelow": "Email not sent ({error}). Share the link below.",
     "memberActive": "Active member",
     "invitationSent": "Invitation sent",
     "resendTitle": "Resend invitation",
@@ -948,7 +948,7 @@
   "join": {
     "title": "Couldn’t join the team",
     "back": "Back to dashboard",
-    "missingToken": "Invalid link — missing token.",
+    "missingToken": "Invalid link: missing token.",
     "dbErrorPrefix": "Database error: ",
     "unexpectedErrorPrefix": "Unexpected error: ",
     "notFound": "Invitation not found. It may have already been accepted or removed.",
