@@ -34,7 +34,11 @@ const HELP = [
   "• `état prod` — santé du site + erreurs",
   "• `déploie` — redéployer la prod (avec confirmation)",
   "• `rollback` — revenir au dernier état (avec confirmation)",
-  "• `logs` — dernières lignes de logs"
+  "• `logs` — dernières lignes de logs",
+  "",
+  "*Marketing* (résultats dans #analytics) :",
+  "• `analyse le funnel` — données PostHog + insights",
+  "• `idées d'A/B test` — propositions d'expériences"
 ].join("\n");
 
 function ok() {
@@ -114,6 +118,17 @@ export async function POST(request: NextRequest) {
         ]
       });
     }
+    return ok();
+  }
+
+  if (route.type === "marketing") {
+    const dispatched = await dispatchWorkflow("slack-marketing", { question: route.question, channel, thread_ts: threadTs ?? "" });
+    const analyticsRef = process.env.SLACK_ANALYTICS_CHANNEL ? `<#${process.env.SLACK_ANALYTICS_CHANNEL}>` : "#analytics";
+    await postSlackMessage({
+      channel,
+      thread_ts: threadTs,
+      text: dispatched.ok ? `📊 J'analyse les données PostHog… le résultat arrive dans ${analyticsRef}.` : `❌ Lancement impossible : ${dispatched.error}`
+    });
     return ok();
   }
 

@@ -23,6 +23,15 @@ test("routeSlackCommand detects logs and help", () => {
   assert.deepEqual(routeSlackCommand(""), { type: "help" });
 });
 
+test("routeSlackCommand detects marketing analytics", () => {
+  assert.deepEqual(routeSlackCommand("analyse le funnel"), { type: "marketing", question: "analyse le funnel" });
+  assert.deepEqual(routeSlackCommand("idées d'A/B test"), { type: "marketing", question: "idées d'A/B test" });
+  assert.deepEqual(routeSlackCommand("montre les inscriptions de la semaine"), { type: "marketing", question: "montre les inscriptions de la semaine" });
+  assert.equal(routeSlackCommand("combien de conversions ce mois-ci").type, "marketing");
+  // "améliore la conversion" is a build task, not an analysis → dev
+  assert.equal(routeSlackCommand("améliore la conversion du bouton signup").type, "dev");
+});
+
 test("routeSlackCommand routes dev tasks and splits feature vs fix", () => {
   // fixes go straight Dev -> QA (no infra false positive on "déploiement")
   assert.deepEqual(routeSlackCommand("corrige le bug dans le déploiement automatique"), {

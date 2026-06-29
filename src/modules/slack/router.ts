@@ -7,7 +7,8 @@
 export type SlackRoute =
   | { type: "help" }
   | { type: "dev"; prompt: string; track: "feature" | "fix" }
-  | { type: "infra"; action: "status" | "deploy" | "rollback" | "logs" };
+  | { type: "infra"; action: "status" | "deploy" | "rollback" | "logs" }
+  | { type: "marketing"; question: string };
 
 function normalize(text: string | undefined | null): string {
   return (text ?? "")
@@ -29,6 +30,14 @@ export function routeSlackCommand(rawText: string | undefined | null): SlackRout
   if (/^(deploie|deploy|deploiement|redeploie)( (la )?prod)?$/.test(t) || /^(mets?|met) en prod$/.test(t)) return { type: "infra", action: "deploy" };
   if (/^(rollback|revert)( (la )?prod)?$/.test(t) || /^(retour arriere|reviens en arriere|annule le (dernier )?deploiement)$/.test(t)) return { type: "infra", action: "rollback" };
   if (/^(logs?|journaux|journal)( (prod|du site))?$/.test(t)) return { type: "infra", action: "logs" };
+
+  // Marketing analytics: an analysis verb + a marketing noun (so "améliore la
+  // conversion" stays a dev task, while "analyse la conversion" is marketing).
+  const analysisVerb = /\b(analyse|analyser|montre|affiche|donne|rapport|combien|quel|quels|quelle|propose)\b/.test(t);
+  const marketingNoun = /\b(funnels?|tunnels?|conversions?|retention|churn|acquisitions?|trafic|analytics|posthog|inscriptions?|signups?|metriques?|kpis?)\b|a\/?b/.test(t);
+  if ((analysisVerb && marketingNoun) || /^(funnel|metriques|analytics|kpi)$/.test(t) || /idees? (d['e] ?)?(a\/?b|ab)/.test(t)) {
+    return { type: "marketing", question: original };
+  }
 
   // A quick fix skips Marketing/PO and goes straight Dev -> QA.
   const isFix = /(^|\b)(fix|hotfix|corrige|corriger|repare|reparer|bug|typo|regression)(\b|:)/.test(t);

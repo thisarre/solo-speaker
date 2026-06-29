@@ -1,0 +1,82 @@
+name: Marketing agent (analytics)
+
+on:
+  repository_dispatch:
+    types: [slack-marketing]
+
+permissions:
+  contents: read
+
+jobs:
+  marketing:
+    runs-on: ubuntu-latest
+    env:
+      QUESTION: ${{ github.event.client_payload.question }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      ANALYTICS_CHANNEL: ${{ vars.SLACK_ANALYTICS_CHANNEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Pull PostHog data
+        env:
+          POSTHOG_API_HOST: ${{ vars.POSTHOG_API_HOST }}
+          POSTHOG_PROJECT_ID: ${{ vars.POSTHOG_PROJECT_ID }}
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+        run: |
+          HOST="${POSTHOG_API_HOST:-https://us.posthog.com}"
+          hog() {
+            [ -z "$POSTHOG_PERSONAL_API_KEY" ] && { echo "n/a"; return; }
+            curl -s -m 30 -X POST "$HOST/api/projects/$POSTHOG_PROJECT_ID/query/" \
+              -H "Authorization: Bearer $POSTHOG_PERSONAL_API_KEY" -H "content-type: application/json" \
+              --data "$(jq -n --arg q "$1" '{query:{kind:"HogQLQuery", query:$q}}')" | jq -c '.results // "n/a"'
+          }
+          {
+            echo "Signups 30j: $(hog "SELECT count() FROM events WHERE event='user_signed_up' AND timestamp > now() - INTERVAL 30 DAY")"
+            echo "Signups 7j: $(hog "SELECT count() FROM events WHERE event='user_signed_up' AND timestamp > now() - INTERVAL 7 DAY")"
+            echo "Onboarding completes 30j: $(hog "SELECT count() FROM events WHERE event='onboarding_completed' AND timestamp > now() - INTERVAL 30 DAY")"
+            echo "Pageviews 7j: $(hog "SELECT count() FROM events WHERE event='\$pageview' AND timestamp > now() - INTERVAL 7 DAY")"
+            echo "Exceptions 24h: $(hog "SELECT count() FROM events WHERE event='\$exception' AND timestamp > now() - INTERVAL 1 DAY")"
+            echo "Top events 7j: $(hog "SELECT event, count() AS c FROM events WHERE timestamp > now() - INTERVAL 7 DAY GROUP BY event ORDER BY c DESC LIMIT 12")"
+          } > "$RUNNER_TEMP/data.txt"
+          cat "$RUNNER_TEMP/data.txt"
+
+      - name: Marketing analysis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          npm install -g @anthropic-ai/claude-code
+          DATA=$(cat "$RUNNER_TEMP/data.txt")
+          ANALYSIS_PROMPT="Tu es analyste growth/marketing pour Solo Speaker (SaaS IA de prepa de prise de parole, essai 14j puis Studio/Team). Donnees PostHog (events: user_signed_up, onboarding_completed, \$pageview, \$exception, language_changed) :
+          $DATA
+
+          QUESTION: $QUESTION
+
+          Reponds en francais, markdown simple, CONCIS (~1500 caracteres max) :
+          1) Lecture des chiffres (funnel pageview -> signup -> onboarding si possible, taux de conversion).
+          2) 2-3 problemes ou opportunites.
+          3) 2-3 idees d'A/B test concretes : hypothese + variation + metrique a suivre.
+          Si les volumes sont faibles/nuls (produit recent), dis-le clairement et indique quoi instrumenter en priorite. Tu peux lire le code (read-only) pour le contexte produit."
+          claude -p "$ANALYSIS_PROMPT" \
+            --dangerously-skip-permissions \
+            --allowedTools "Read,Glob,Grep" \
+            --model claude-sonnet-4-6 \
+            --max-turns 15 | tee "$RUNNER_TEMP/marketing.txt"
+
+      - name: Post analysis to #analytics
+        if: always()
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$ANALYTICS_CHANNEL" ]; then exit 0; fi
+          RESULT=$(head -c 3500 "$RUNNER_TEMP/marketing.txt" 2>/dev/null)
+          [ -z "$RESULT" ] && RESULT="(analyse indisponible, reessaie)"
+          TEXT=$(printf '📊 *Analyse marketing* — _%s_\n\n%s' "$QUESTION" "$RESULT")
+          PAYLOAD=$(jq -n --arg ch "$ANALYTICS_CHANNEL" --arg txt "$TEXT" '{channel:$ch, text:$txt}')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            --data "$PAYLOAD" > /dev/null
