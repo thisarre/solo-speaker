@@ -62,6 +62,10 @@ services:
       TELEGRAM_OWNER_CHAT_ID: ${TELEGRAM_OWNER_CHAT_ID:-}
       GH_DISPATCH_TOKEN: ${GH_DISPATCH_TOKEN:-}
       GH_REPO: ${GH_REPO:-}
+      # slack multi-agent bridge (optional)
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET:-}
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
+      SLACK_ALLOWED_USER_ID: ${SLACK_ALLOWED_USER_ID:-}
       # AI rate limiting (safe defaults if unset)
       AI_RATE_LIMIT_ENABLED: ${AI_RATE_LIMIT_ENABLED:-true}
       AI_RATE_LIMIT_STRICT: ${AI_RATE_LIMIT_STRICT:-true}

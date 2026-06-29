@@ -1,0 +1,118 @@
+name: Slack coding agent (Dev)
+
+on:
+  repository_dispatch:
+    types: [slack-code]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      PROMPT: ${{ github.event.client_payload.prompt }}
+      CHANNEL: ${{ github.event.client_payload.channel }}
+      THREAD_TS: ${{ github.event.client_payload.thread_ts }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run Claude Code on the task
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude -p "$PROMPT" \
+            --dangerously-skip-permissions \
+            --allowedTools "Edit,Write,Read,Bash,Glob,Grep" \
+            --model claude-sonnet-4-6 \
+            --max-turns 40 | tee claude-output.log
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then echo "changed=true" >> "$GITHUB_OUTPUT"; else echo "changed=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Validate (tests, typecheck, build)
+        id: validate
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set +e
+          npm test > /dev/null 2>&1;        echo "test=$?"  >> "$GITHUB_OUTPUT"
+          npm run typecheck > /dev/null 2>&1; echo "tc=$?"   >> "$GITHUB_OUTPUT"
+          npm run build > /dev/null 2>&1;    echo "build=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Commit, push and open PR
+        id: pr
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "Solo Speaker Bot"
+          git config user.email "bot@solospeaker.com"
+          BRANCH="slack/${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "slack: $(printf '%s' "$PROMPT" | head -c 70)"
+          git push origin "$BRANCH"
+          URL="$(gh pr create --base main --head "$BRANCH" --title "$(printf '%s' "$PROMPT" | head -c 70)" --body "$(printf 'Tache Slack:\n\n> %s\n\nValidation: tests=%s typecheck=%s build=%s' "$PROMPT" "${{ steps.validate.outputs.test }}" "${{ steps.validate.outputs.tc }}" "${{ steps.validate.outputs.build }}")")"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "number=$(gh pr view "$BRANCH" --json number -q .number)" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Slack
+        if: always()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          CHANGED: ${{ steps.changes.outputs.changed }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+          T: ${{ steps.validate.outputs.test }}
+          TC: ${{ steps.validate.outputs.tc }}
+          B: ${{ steps.validate.outputs.build }}
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$CHANNEL" ]; then exit 0; fi
+
+          if [ "$CHANGED" = "false" ]; then
+            TEXT=$(printf 'ℹ️ Tâche terminée, aucun changement de code produit.\n\n> %s' "$PROMPT")
+            PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" \
+              '{channel:$ch, text:$txt} | if $tts=="" then . else .+{thread_ts:$tts} end')
+          elif [ -n "$PR_URL" ]; then
+            if [ "$T" = "0" ] && [ "$TC" = "0" ] && [ "$B" = "0" ]; then
+              HEAD="✅ *PR prête* (tout est vert)"
+            else
+              HEAD="⚠️ *PR ouverte* — validation en échec (tests=$T typecheck=$TC build=$B)"
+            fi
+            TEXT=$(printf '%s\n%s' "$HEAD" "$PR_URL")
+            PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" --arg pr "$PR_NUM" --arg rej "$PR_NUM:$BRANCH" \
+              '{channel:$ch, text:$txt,
+                blocks:[
+                  {type:"section", text:{type:"mrkdwn", text:$txt}},
+                  {type:"actions", elements:[
+                    {type:"button", text:{type:"plain_text", text:"Merger + déployer"}, style:"primary", action_id:"merge_pr", value:$pr},
+                    {type:"button", text:{type:"plain_text", text:"Rejeter"}, style:"danger", action_id:"reject_pr", value:$rej}
+                  ]}
+                ]}
+               | if $tts=="" then . else .+{thread_ts:$tts} end')
+          else
+            TEXT="❌ La tâche a échoué avant l'ouverture de la PR. Voir les logs GitHub Actions."
+            PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" \
+              '{channel:$ch, text:$txt} | if $tts=="" then . else .+{thread_ts:$tts} end')
+          fi
+
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            -d "$PAYLOAD" > /dev/null
