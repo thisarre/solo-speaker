@@ -29,10 +29,16 @@ test("isProtectedAppPath covers private studio sections", () => {
   assert.equal(isProtectedAppPath("/login"), false);
 });
 
-test("passwordValidationError requires a stronger password than the Supabase minimum", () => {
+test("passwordValidationError enforces the stronger password policy", () => {
   assert.equal(passwordValidationError("short7!"), errors.passwordMinLength);
-  assert.equal(passwordValidationError("abcdefgh"), errors.passwordLettersNumbers);
-  assert.equal(passwordValidationError("abc12345"), null);
+  assert.equal(passwordValidationError("abcdefghij"), errors.passwordLettersNumbers);
+  assert.equal(passwordValidationError("password1"), errors.passwordTooCommon);
+  assert.equal(passwordValidationError("test1234"), errors.passwordTooWeak);
+  assert.equal(passwordValidationError("Sunrise7Path"), null);
+});
+
+test("passwordValidationError rejects passwords too close to the email", () => {
+  assert.equal(passwordValidationError("Thierno2026", "thierno@example.com"), errors.passwordTooCommon);
 });
 
 test("authErrorMessage keeps signup failures actionable", () => {

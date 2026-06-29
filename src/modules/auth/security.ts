@@ -1,5 +1,6 @@
 import { getMessages } from "@/i18n/messages";
 import { getPathWithoutLocale } from "@/i18n/routing";
+import { getPasswordPolicyError } from "./password-strength";
 
 const errors = getMessages("fr").errors;
 
@@ -28,16 +29,19 @@ export function isProtectedAppPath(pathname: string) {
   );
 }
 
-export function passwordValidationError(password: string) {
-  if (password.length < 8) {
-    return errors.passwordMinLength;
+export function passwordValidationError(password: string, email?: string) {
+  switch (getPasswordPolicyError(password, email)) {
+    case "min":
+      return errors.passwordMinLength;
+    case "lettersNumbers":
+      return errors.passwordLettersNumbers;
+    case "common":
+      return errors.passwordTooCommon;
+    case "weak":
+      return errors.passwordTooWeak;
+    default:
+      return null;
   }
-
-  if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
-    return errors.passwordLettersNumbers;
-  }
-
-  return null;
 }
 
 export function authErrorMessage(message: string) {

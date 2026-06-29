@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Alert } from "@/components/ui/Alert";
 import { AuthSubmitButton } from "@/components/auth/AuthSubmitButton";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { PasswordFields } from "@/components/auth/PasswordFields";
 import { Input } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
 import { getMessages } from "@/i18n/messages";
@@ -101,8 +102,7 @@ export function SignupFormPage({ checkout, email, locale, params, plan }: { chec
           <input name="plan" type="hidden" value={plan ?? ""} />
           <Input id="name" label={auth.name} name="name" placeholder={auth.namePlaceholder} />
           <Input defaultValue={email ?? ""} id="email" label={auth.email} name="email" placeholder={auth.signupEmailPlaceholder} required type="email" />
-          <Input id="password" label={auth.password} minLength={8} name="password" placeholder="••••••••" required type="password" />
-          <AuthSubmitButton idleLabel={auth.createMyAccount} pendingLabel={auth.creating} />
+          <PasswordFields locale={locale} submitIdleLabel={auth.createMyAccount} submitPendingLabel={auth.creating} withConfirm />
         </form>
         <p className="mt-5 text-center text-[12.5px] text-faint">
           {auth.alreadyRegistered}{" "}

@@ -156,7 +156,14 @@
     ,
     "emailPlaceholder": "vous@example.com",
     "signupEmailPlaceholder": "mail@speaker.com",
-    "namePlaceholder": "Thierno"
+    "namePlaceholder": "Thierno",
+    "passwordStrengthLabel": "Sécurité",
+    "passwordStrengthWeak": "Faible",
+    "passwordStrengthMedium": "Moyen",
+    "passwordStrengthStrong": "Fort",
+    "passwordHint": "Au moins 8 caractères, avec lettres et chiffres. Ajoutez une majuscule ou un symbole pour le renforcer.",
+    "passwordsMatch": "Les mots de passe correspondent.",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas."
   },
   "ui": {
     "close": "Fermer",
@@ -849,6 +856,8 @@
     "invalidTalkValue": "Valeur de prise de parole invalide.",
     "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères.",
     "passwordLettersNumbers": "Ajoutez au moins une lettre et un chiffre au mot de passe.",
+    "passwordTooWeak": "Mot de passe trop faible. Allongez-le ou ajoutez une majuscule, un chiffre ou un symbole.",
+    "passwordTooCommon": "Ce mot de passe est trop courant ou trop proche de votre email. Choisissez-en un autre.",
     "invalidCredentials": "Email ou mot de passe incorrect.",
     "accountExists": "Un compte existe déjà avec cet email. Connecte-toi ou utilise mot de passe oublié.",
     "emailNotConfirmed": "Compte créé mais email non confirmé. Confirme l’email ou désactive la confirmation email dans Supabase pour les tests.",

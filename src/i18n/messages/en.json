@@ -157,7 +157,14 @@
     ,
     "emailPlaceholder": "you@example.com",
     "signupEmailPlaceholder": "mail@speaker.com",
-    "namePlaceholder": "Thierno"
+    "namePlaceholder": "Thierno",
+    "passwordStrengthLabel": "Strength",
+    "passwordStrengthWeak": "Weak",
+    "passwordStrengthMedium": "Medium",
+    "passwordStrengthStrong": "Strong",
+    "passwordHint": "At least 8 characters, with letters and numbers. Add an uppercase letter or a symbol to make it stronger.",
+    "passwordsMatch": "Passwords match.",
+    "passwordsDontMatch": "Passwords do not match."
   },
   "ui": {
     "close": "Close",
@@ -850,6 +857,8 @@
     "invalidTalkValue": "Invalid talk value.",
     "passwordMinLength": "The password must contain at least 8 characters.",
     "passwordLettersNumbers": "Add at least one letter and one number to the password.",
+    "passwordTooWeak": "Password too weak. Make it longer or add an uppercase letter, a number or a symbol.",
+    "passwordTooCommon": "This password is too common or too close to your email. Please choose another one.",
     "invalidCredentials": "Incorrect email or password.",
     "accountExists": "An account already exists with this email. Log in or use forgot password.",
     "emailNotConfirmed": "Account created but email not confirmed. Confirm the email or disable email confirmation in Supabase for tests.",

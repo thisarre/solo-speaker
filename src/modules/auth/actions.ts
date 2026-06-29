@@ -69,6 +69,7 @@ export async function signUp(formData: FormData) {
   const fullName = getString(formData, "name");
   const email = getString(formData, "email");
   const password = getString(formData, "password");
+  const confirmPassword = getString(formData, "confirmPassword");
   const checkoutRequested = getString(formData, "checkout") === "1";
   const checkoutPlan = getCheckoutPlan(getString(formData, "plan"));
   const localeValue = getString(formData, "locale");
@@ -79,7 +80,15 @@ export async function signUp(formData: FormData) {
     redirectWithError("/signup", errors.emailPasswordRequired, { email });
   }
 
-  const passwordError = passwordValidationError(password);
+  if (!confirmPassword) {
+    redirectWithError("/signup", errors.passwordConfirmationRequired, { email });
+  }
+
+  if (password !== confirmPassword) {
+    redirectWithError("/signup", errors.passwordMismatch, { email });
+  }
+
+  const passwordError = passwordValidationError(password, email);
   if (passwordError) {
     redirectWithError("/signup", passwordError, { email });
   }

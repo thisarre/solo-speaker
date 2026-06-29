@@ -2,8 +2,7 @@ import Link from "next/link";
 import { updatePassword } from "@/modules/auth/actions";
 import { getUser } from "@/modules/auth/queries";
 import { Alert } from "@/components/ui/Alert";
-import { AuthSubmitButton } from "@/components/auth/AuthSubmitButton";
-import { Input } from "@/components/ui/Input";
+import { PasswordFields } from "@/components/auth/PasswordFields";
 import { Logo } from "@/components/ui/Logo";
 import { getMessages } from "@/i18n/messages";
 import { getLocalizedPathAlternates, localizedPath } from "@/i18n/routing";
@@ -54,9 +53,7 @@ export default async function LocalizedResetPasswordPage({ params, searchParams 
           </div>
         ) : (
           <form action={updatePassword} className="grid gap-3.5">
-            <Input id="password" label={auth.newPassword} minLength={8} name="password" placeholder="••••••••" required type="password" />
-            <Input id="confirmPassword" label={auth.confirmPassword} minLength={8} name="confirmPassword" placeholder="••••••••" required type="password" />
-            <AuthSubmitButton idleLabel={auth.updatePassword} pendingLabel={auth.updatingPassword} />
+            <PasswordFields locale={locale} passwordLabel={auth.newPassword} submitIdleLabel={auth.updatePassword} submitPendingLabel={auth.updatingPassword} withConfirm />
           </form>
         )}
       </div>
