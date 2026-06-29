@@ -14,6 +14,31 @@ export function pickLocaleFromPath(pathname: string): Locale | null {
   return isLocale(segment) ? segment : null;
 }
 
+// Name of the optional functional cookie that remembers a manual language choice.
+export const LOCALE_COOKIE = "NEXT_LOCALE";
+
+// Negotiate the best supported locale from a browser `Accept-Language` header
+// (e.g. "fr-FR,fr;q=0.9,en;q=0.8" -> "fr"). Returns null if none match.
+export function pickLocaleFromAcceptLanguage(header: string | null | undefined): Locale | null {
+  if (!header) return null;
+  const ranked = header
+    .split(",")
+    .map((part) => {
+      const [tag, ...params] = part.trim().split(";");
+      const qParam = params.find((p) => p.trim().startsWith("q="));
+      const q = qParam ? Number(qParam.trim().slice(2)) : 1;
+      return { tag: tag.trim().toLowerCase(), q: Number.isFinite(q) ? q : 1 };
+    })
+    .filter((entry) => entry.tag.length > 0)
+    .sort((a, b) => b.q - a.q);
+
+  for (const { tag } of ranked) {
+    const base = tag.split("-")[0];
+    if (isLocale(base)) return base;
+  }
+  return null;
+}
+
 export function getPathWithoutLocale(pathname: string) {
   const [pathPart, query = ""] = pathname.split("?");
   const parts = pathPart.split("/").filter(Boolean);

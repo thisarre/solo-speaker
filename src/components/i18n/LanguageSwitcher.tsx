@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
 import { getMessages } from "@/i18n/messages";
-import { localizedPath, pickLocaleFromPath, type Locale } from "@/i18n/routing";
+import { localizedPath, LOCALE_COOKIE, pickLocaleFromPath, type Locale } from "@/i18n/routing";
 
 export function resolveLanguageSwitcherLocale(pathname: string, fallbackLocale: Locale) {
   return pickLocaleFromPath(pathname) ?? fallbackLocale;
@@ -24,6 +24,11 @@ export function LanguageSwitcher({ className = "", currentLocale }: { className?
   }
 
   function trackLanguageChange(nextLocale: Locale) {
+    // Remember the manual choice so the visitor keeps this language on later visits to
+    // unprefixed URLs (e.g. "/"). Functional cookie — no consent banner required. Runs in a
+    // click handler (not render), so the immutability rule is a false positive here.
+    // eslint-disable-next-line react-hooks/immutability
+    document.cookie = `${LOCALE_COOKIE}=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
     const previousLocale = activeLocale;
     if (previousLocale !== nextLocale) {
       posthog.capture("language_changed", {
