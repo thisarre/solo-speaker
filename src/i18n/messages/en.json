@@ -437,6 +437,9 @@
       "saved": "Saved",
       "error": "Save error"
     },
+    "share": "Share",
+    "shareCopied": "Link copied!",
+    "shareError": "Unable to share.",
     "exportPdf": "Export PDF",
     "exportingPdf": "Export...",
     "exportPdfError": "PDF export failed.",
