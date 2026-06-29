@@ -14,10 +14,13 @@ test("home page renders with no uncaught JS exception", async ({ page }) => {
 });
 
 test("signup password meter and confirmation react in real time", async ({ page }) => {
-  await page.goto("/fr/signup", { waitUntil: "domcontentloaded" });
+  // networkidle + real keystrokes so the controlled input is reacted to after hydration.
+  await page.goto("/fr/signup", { waitUntil: "networkidle" });
 
   const password = page.locator("#password");
-  await password.fill("test1234");
+  await expect(password).toBeVisible();
+  await password.pressSequentially("test1234", { delay: 25 });
+  await expect(password).toHaveValue("test1234");
   await expect(page.getByText("Faible", { exact: true })).toBeVisible();
 
   await password.fill("Aurore7Soleil!");
