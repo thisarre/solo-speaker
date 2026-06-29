@@ -1,0 +1,84 @@
+name: QA agent (review)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  qa:
+    # Only the Dev agent's PRs (branches like slack/<run_id>).
+    if: startsWith(github.head_ref, 'slack/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Parse Slack context from PR body
+        id: ctx
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "channel=$(printf '%s' "$BODY" | grep -oE 'channel=[A-Z0-9]+' | head -1 | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+          echo "thread=$(printf '%s' "$BODY" | grep -oE 'thread=[0-9.]+' | head -1 | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Independent validation
+        id: validate
+        run: |
+          set +e
+          npm test > /dev/null 2>&1;        echo "test=$?"  >> "$GITHUB_OUTPUT"
+          npm run typecheck > /dev/null 2>&1; echo "tc=$?"   >> "$GITHUB_OUTPUT"
+          npm run build > /dev/null 2>&1;    echo "build=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Adversarial AI review
+        id: review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          npm install -g @anthropic-ai/claude-code
+          git fetch origin main -q
+          PROMPT="Tu es un relecteur QA senior et adversarial. Relis UNIQUEMENT le diff de cette PR (lance: git diff origin/main...HEAD). Cherche bugs, regressions, cas limites non geres, problemes de securite, et incoherences avec le reste du code. Commence ta reponse par exactement une ligne 'VERDICT: LGTM' ou 'VERDICT: CONCERNS' ou 'VERDICT: BLOCK', puis liste 1 a 5 points concrets (fichier:ligne + explication courte). Reste bref et factuel. Tu es en lecture seule, ne modifie rien."
+          claude -p "$PROMPT" \
+            --dangerously-skip-permissions \
+            --allowedTools "Read,Bash,Glob,Grep" \
+            --model claude-sonnet-4-6 \
+            --max-turns 20 | tee "$RUNNER_TEMP/qa.txt"
+          echo "verdict=$(grep -oiE 'VERDICT: ?(LGTM|CONCERNS|BLOCK)' "$RUNNER_TEMP/qa.txt" | head -1 | grep -oiE '(LGTM|CONCERNS|BLOCK)' | tr a-z A-Z)" >> "$GITHUB_OUTPUT"
+
+      - name: Post QA verdict to Slack thread
+        if: always() && steps.ctx.outputs.channel != ''
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          CHANNEL: ${{ steps.ctx.outputs.channel }}
+          THREAD_TS: ${{ steps.ctx.outputs.thread }}
+          VERDICT: ${{ steps.review.outputs.verdict }}
+          T: ${{ steps.validate.outputs.test }}
+          TC: ${{ steps.validate.outputs.tc }}
+          B: ${{ steps.validate.outputs.build }}
+        run: |
+          ICON="✅"; [ "$VERDICT" = "CONCERNS" ] && ICON="⚠️"; [ "$VERDICT" = "BLOCK" ] && ICON="🛑"
+          REVIEW=$(head -c 2500 "$RUNNER_TEMP/qa.txt" 2>/dev/null || echo "(revue indisponible)")
+          TEXT=$(printf '%s *QA — %s*  ·  tests=%s typecheck=%s build=%s\n\n%s' "$ICON" "${VERDICT:-?}" "$T" "$TC" "$B" "$REVIEW")
+          bash scripts/slack-notify.sh "$TEXT"
+
+      - name: Post QA as PR comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+        run: |
+          BODY=$(printf '## 🔎 Revue QA automatique\n\n_tests=%s · typecheck=%s · build=%s_\n\n%s' "${{ steps.validate.outputs.test }}" "${{ steps.validate.outputs.tc }}" "${{ steps.validate.outputs.build }}" "$(head -c 4000 "$RUNNER_TEMP/qa.txt" 2>/dev/null)")
+          gh pr comment ${{ github.event.pull_request.number }} --body "$BODY" || true

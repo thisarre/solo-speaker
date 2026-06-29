@@ -86,7 +86,7 @@ jobs:
           git add -A
           git commit -m "slack: $(printf '%s' "$PROMPT" | head -c 70)"
           git push origin "$BRANCH"
-          URL="$(gh pr create --base main --head "$BRANCH" --title "$(printf '%s' "$PROMPT" | head -c 70)" --body "$(printf 'Tache Slack:\n\n> %s\n\nValidation: tests=%s typecheck=%s build=%s' "$PROMPT" "${{ steps.validate.outputs.test }}" "${{ steps.validate.outputs.tc }}" "${{ steps.validate.outputs.build }}")")"
+          URL="$(gh pr create --base main --head "$BRANCH" --title "$(printf '%s' "$PROMPT" | head -c 70)" --body "$(printf 'Tache Slack:\n\n> %s\n\nValidation: tests=%s typecheck=%s build=%s\n\n<!-- slack-context channel=%s thread=%s -->' "$PROMPT" "${{ steps.validate.outputs.test }}" "${{ steps.validate.outputs.tc }}" "${{ steps.validate.outputs.build }}" "$CHANNEL" "$THREAD_TS")")"
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "number=$(gh pr view "$BRANCH" --json number -q .number)" >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
