@@ -102,6 +102,7 @@ export function scorePassword(password: string, email?: string): { score: number
 // We only block what is genuinely unsafe (too short, no letter/number mix, or a
 // common / sequential / email-derived password). The live meter nudges toward
 // stronger passwords without forcing it. Returns the first failing rule, or null.
+/** Returns the first password policy violation code, or null if the password passes all rules. */
 export function getPasswordPolicyError(password: string, email?: string): PasswordPolicyCode | null {
   if (password.length < PASSWORD_MIN_LENGTH) return "min";
   if (!hasLetter(password) || !hasNumber(password)) return "lettersNumbers";
