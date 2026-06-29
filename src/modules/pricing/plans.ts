@@ -13,12 +13,21 @@ export type PricingPlan = {
   ctaHref: string;
   checkoutPlan?: "studio_monthly" | "studio_yearly" | "team_monthly" | "team_yearly";
   features: string[];
+  monthlyEquivalent?: number;
   secondaryPrice?: {
     badge: string;
     cadence: string;
     price: string;
   };
 };
+
+// Monthly equivalent of an annual price, rounded (e.g. "99 EUR" → 8, "240 EUR" → 20).
+function monthlyEquivalentFromAnnual(price: string, cadence: string): number | undefined {
+  if (!/an|year/i.test(cadence)) return undefined;
+  const amount = Number(price.replace(/[^\d]/g, ""));
+  if (!Number.isFinite(amount) || amount <= 0) return undefined;
+  return Math.round(amount / 12);
+}
 
 export function getPricingPlans(locale: Locale): PricingPlan[] {
   const messages = getMessages(locale);
@@ -48,7 +57,8 @@ export function getPricingPlans(locale: Locale): PricingPlan[] {
       ctaHref: "/api/billing/checkout",
       checkoutPlan: "studio_yearly",
       secondaryPrice: planCopy[1].secondaryPrice,
-      features: planCopy[1].features
+      features: planCopy[1].features,
+      monthlyEquivalent: monthlyEquivalentFromAnnual(planCopy[1].price, planCopy[1].cadence)
     },
     {
       id: "team",
@@ -62,7 +72,8 @@ export function getPricingPlans(locale: Locale): PricingPlan[] {
       ctaHref: "/api/billing/checkout",
       checkoutPlan: "team_yearly",
       secondaryPrice: planCopy[2].secondaryPrice,
-      features: planCopy[2].features
+      features: planCopy[2].features,
+      monthlyEquivalent: monthlyEquivalentFromAnnual(planCopy[2].price, planCopy[2].cadence)
     }
   ];
 }

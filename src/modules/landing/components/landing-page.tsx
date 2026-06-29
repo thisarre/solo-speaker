@@ -117,10 +117,19 @@ export function LandingPage({ locale }: { locale: Locale }) {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-3" data-landing-reveal>
-              <TrackedLinkButton className="h-10 rounded-[8px] px-4" event="pricing_cta_clicked" href={localizedPath("/pricing", locale)} leftIcon={<PanelsTopLeft />} properties={{ location: "hero_secondary" }}>
-                {common.viewPricing}
+              <TrackedLinkButton className="h-10 rounded-[8px] px-4" event="pricing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} leftIcon={<PanelsTopLeft />} properties={{ location: "hero_secondary" }}>
+                {landing.heroSecondaryCta}
               </TrackedLinkButton>
             </div>
+            {/* TODO: real customer testimonials */}
+            <ul className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 p-0 text-[12px] text-faint" data-landing-reveal>
+              {landing.trustStrip.map((chip, index) => (
+                <li className="flex list-none items-center gap-2" key={chip}>
+                  {index > 0 ? <span aria-hidden="true" className="text-line">·</span> : null}
+                  <span>{chip}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div data-landing-reveal>

@@ -109,7 +109,9 @@
       "Équipe : 29 EUR/mois pour petites équipes, églises et groupes de formateurs."
     ],
     "faqEyebrow": "FAQ",
-    "faqTitle": "Tout ce que vous voulez savoir avant de vous lancer."
+    "faqTitle": "Tout ce que vous voulez savoir avant de vous lancer.",
+    "heroSecondaryCta": "Démarrer gratuitement",
+    "trustStrip": ["14 jours gratuits", "Sans engagement", "Annulable en 1 clic", "Vos données restent privées"]
   },
   "auth": {
     "loginTitle": "Retour au studio",
@@ -183,8 +185,10 @@
     "description": "Commencez avec 14 jours pour tester la vraie valeur : 5 prises de parole, prompteur, mémos vocaux et IA incluse. Ensuite, Studio prend le relais.",
     "productionTitle": "Paiement production",
     "productionBody": "Stripe Checkout appliquera l’essai de 14 jours au démarrage, puis l’abonnement mensuel ou annuel si l’utilisateur continue.",
-    "prepareStudio": "Préparer mon studio"
+    "prepareStudio": "Préparer ma prochaine prise de parole"
     ,
+    "perMonthEquivalent": "soit ~{amount} €/mois",
+    "riskReversal": "Sans engagement · annulable en 1 clic · 14 jours gratuits",
     "recommended": "Recommandé",
     "cycleYearly": "Annuel",
     "cycleMonthly": "Mensuel"
@@ -197,7 +201,7 @@
         "price": "14 jours",
         "cadence": "pour tester",
         "description": "Accès assez complet pour mesurer la valeur, avec une limite claire avant de passer à Studio.",
-        "features": ["5 prises de parole maximum", "Assistant IA limité ou crédits IA inclus", "Prompteur disponible", "Export PDF avec filigrane léger ou limité", "Mémos vocaux inclus"]
+        "features": ["5 prises de parole maximum", "Assistant IA inclus (crédits limités)", "Prompteur disponible", "Export PDF (avec filigrane)", "Mémos vocaux inclus"]
       },
       {
         "id": "studio",
@@ -221,7 +225,7 @@
         "price": "240 EUR",
         "cadence": "par an, jusqu’à 5 utilisateurs",
         "description": "Un cadre pour plusieurs intervenants, avec onboarding et accompagnement.",
-        "ctaLabel": "Demander un accès",
+        "ctaLabel": "Démarrer avec mon équipe",
         "secondaryPrice": { "badge": "108 EUR d’économie face au mensuel", "cadence": "par mois", "price": "29 EUR" },
         "features": ["Jusqu’à 5 comptes Studio", "Invitations par lien ou email", "Facturation centralisée", "Accueil guidé", "Aide à la configuration"]
       }
@@ -258,7 +262,7 @@
     "reset": "Réinitialiser",
     "createTalk": "Créer une prise de parole",
     "emptyTalkTitle": "Aucune prise de parole pour le moment",
-    "emptyTalkBody": "Créez votre première prise de parole pour préparer, améliorer et répéter une intervention.",
+    "emptyTalkBody": "Décrivez votre idée en une phrase : Solo Speaker en fait un plan structuré que vous pourrez répéter.",
     "nextWork": "Prochain travail",
     "audienceMissing": "Audience à préciser",
     "preparation": "Préparation",
@@ -724,7 +728,7 @@
     "subtitle": "Vue globale de votre préparation.",
     "createTalk": "Créer une prise de parole",
     "emptyTitle": "Aucune prise de parole à suivre",
-    "emptyBody": "Créez une première prise de parole pour commencer à mesurer votre préparation globale.",
+    "emptyBody": "Créez une première prise de parole : vous verrez aussitôt votre préparation se mesurer.",
     "readyToPresent": "Prêts à présenter",
     "present": "Présenter",
     "noReady": "Aucune prise de parole prête pour le moment.",
@@ -862,11 +866,11 @@
     "transcriptionFailed": "Transcription impossible."
   },
   "trial": {
-    "ctaLabel": "Voir l’abonnement",
+    "ctaLabel": "Garder mon accès",
     "label": "Essai gratuit",
     "defaultMessage": "14 jours gratuits, 5 prises de parole incluses.",
-    "endedMessage": "Essai terminé. Choisissez un abonnement pour garder l’accès.",
-    "remainingMessage": "{count} jour{plural} restants avant l’abonnement."
+    "endedMessage": "Votre essai est terminé — ne perdez pas vos prises de parole. Repassez en illimité.",
+    "remainingMessage": "Plus que {count} jour{plural} pour garder vos prises de parole illimitées et l’IA complète."
   },
   "seo": {
     "landingTitle": "Solo Speaker Studio — Coach IA et prompteur pour prises de parole",

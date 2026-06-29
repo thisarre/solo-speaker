@@ -58,6 +58,11 @@ export function PricingPage({ locale = "en", returnHref = "/" }: { locale?: Loca
                 <p className="m-0 text-[38px] font-semibold leading-none tracking-[0]">{plan.price}</p>
                 <p className="m-0 pb-1 text-[12.5px] text-muted">{plan.cadence}</p>
               </div>
+              {plan.monthlyEquivalent ? (
+                <p className="m-0 mt-1 text-[12px] text-faint">
+                  {pricing.perMonthEquivalent.replace("{amount}", String(plan.monthlyEquivalent))}
+                </p>
+              ) : null}
               {plan.secondaryPrice ? (
                 <div className="mt-3 rounded-[9px] border border-[color-mix(in_oklab,var(--accent)_22%,var(--line))] bg-surface px-3 py-2">
                   <p className="m-0 text-[13px] font-semibold text-foreground">
@@ -91,6 +96,8 @@ export function PricingPage({ locale = "en", returnHref = "/" }: { locale?: Loca
             </article>
           ))}
         </div>
+
+        <p className="mt-5 text-center text-[12.5px] text-faint">{pricing.riskReversal}</p>
 
         <section className="mt-8 rounded-[14px] border border-line bg-panel p-5 md:p-6">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">

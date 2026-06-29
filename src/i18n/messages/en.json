@@ -109,7 +109,9 @@
       "Team: 29 EUR/month for small teams, churches and training groups."
     ],
     "faqEyebrow": "FAQ",
-    "faqTitle": "Everything you want to know before you start."
+    "faqTitle": "Everything you want to know before you start.",
+    "heroSecondaryCta": "Start for free",
+    "trustStrip": ["14 days free", "No commitment", "Cancel in one click", "Your data stays private"]
   },
   "auth": {
     "loginTitle": "Back to the studio",
@@ -184,8 +186,10 @@
     "description": "Start with 14 days to test the real value: 5 talks, teleprompter, voice notes and AI included. Then Studio takes over.",
     "productionTitle": "Production payment",
     "productionBody": "Stripe Checkout will apply the 14-day trial at the start, then monthly or yearly billing if the user continues.",
-    "prepareStudio": "Prepare my studio"
+    "prepareStudio": "Prepare my next talk"
     ,
+    "perMonthEquivalent": "i.e. ~€{amount}/mo",
+    "riskReversal": "No commitment · cancel in one click · 14 days free",
     "recommended": "Recommended",
     "cycleYearly": "Yearly",
     "cycleMonthly": "Monthly"
@@ -198,7 +202,7 @@
         "price": "14 days",
         "cadence": "to test",
         "description": "Enough access to feel the value, with a clear limit before moving to Studio.",
-        "features": ["5 talks maximum", "Limited AI assistant or included AI credits", "Teleprompter available", "PDF export with a light watermark or limits", "Voice notes included"]
+        "features": ["5 talks maximum", "AI assistant included (limited credits)", "Teleprompter available", "PDF export (with watermark)", "Voice notes included"]
       },
       {
         "id": "studio",
@@ -222,7 +226,7 @@
         "price": "240 EUR",
         "cadence": "per year, up to 5 users",
         "description": "A workspace for multiple speakers, with onboarding and support.",
-        "ctaLabel": "Request access",
+        "ctaLabel": "Get started with my team",
         "secondaryPrice": { "badge": "Save 108 EUR vs monthly", "cadence": "per month", "price": "29 EUR" },
         "features": ["Up to 5 Studio seats", "Invite by link or email", "Centralized billing", "Guided onboarding", "Setup help"]
       }
@@ -259,7 +263,7 @@
     "reset": "Reset",
     "createTalk": "Create a talk",
     "emptyTalkTitle": "No talk yet",
-    "emptyTalkBody": "Create your first talk to prepare, improve and rehearse a speaking moment.",
+    "emptyTalkBody": "Describe your idea in one sentence: Solo Speaker turns it into a structured outline you can rehearse.",
     "nextWork": "Next work",
     "audienceMissing": "Audience to define",
     "preparation": "Preparation",
@@ -725,7 +729,7 @@
     "subtitle": "Global view of your preparation.",
     "createTalk": "Create a talk",
     "emptyTitle": "No talk to track",
-    "emptyBody": "Create a first talk to start measuring your global preparation.",
+    "emptyBody": "Create a first talk: you'll see your preparation start to measure right away.",
     "readyToPresent": "Ready to present",
     "present": "Present",
     "noReady": "No talk ready for now.",
@@ -863,11 +867,11 @@
     "transcriptionFailed": "Transcription failed."
   },
   "trial": {
-    "ctaLabel": "View subscription",
+    "ctaLabel": "Keep my access",
     "label": "Free trial",
     "defaultMessage": "14 days free, 5 talks included.",
-    "endedMessage": "Trial ended. Choose a subscription to keep access.",
-    "remainingMessage": "{count} day{plural} left before subscription."
+    "endedMessage": "Your trial is over — don't lose your talks. Go back to unlimited.",
+    "remainingMessage": "Only {count} day{plural} left to keep your unlimited talks and the full AI."
   },
   "seo": {
     "landingTitle": "Solo Speaker Studio — AI Speech Coach and Teleprompter for Speakers",
