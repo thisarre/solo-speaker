@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { closePullRequest, mergePullRequest } from "@/lib/github/repo";
+import { closePullRequest, dispatchWorkflow, mergePullRequest } from "@/lib/github/repo";
 import { respondToSlackAction } from "@/lib/slack/client";
 import { isAuthorizedSlackUser, verifySlackSignature } from "@/modules/slack/verify";
 
@@ -12,6 +12,8 @@ type SlackInteraction = {
   user?: { id?: string };
   response_url?: string;
   actions?: SlackAction[];
+  channel?: { id?: string };
+  message?: { ts?: string; thread_ts?: string };
 };
 
 export async function POST(request: NextRequest) {
@@ -55,6 +57,17 @@ export async function POST(request: NextRequest) {
       const pr = Number(prRaw);
       const result = await closePullRequest(pr, branch);
       await respondToSlackAction(responseUrl, result.ok ? `🗑️ PR #${pr} rejetée et branche supprimée.` : `❌ Rejet impossible (PR #${pr}) : ${result.error}`);
+    } else if (action.action_id === "infra_confirm") {
+      const infraAction = String(action.value ?? "");
+      const dispatched = await dispatchWorkflow("slack-infra", {
+        action: infraAction,
+        channel: payload.channel?.id ?? "",
+        thread_ts: payload.message?.thread_ts ?? payload.message?.ts ?? ""
+      });
+      const label = infraAction === "deploy" ? "Déploiement" : "Rollback";
+      await respondToSlackAction(responseUrl, dispatched.ok ? `🔧 ${label} lancé par l'agent Infra…` : `❌ Lancement impossible : ${dispatched.error}`);
+    } else if (action.action_id === "infra_cancel") {
+      await respondToSlackAction(responseUrl, "Annulé.");
     }
   }
 

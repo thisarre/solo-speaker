@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { dispatchWorkflow } from "@/lib/github/repo";
 import { postSlackMessage } from "@/lib/slack/client";
 import { extractTaskText, isAuthorizedSlackUser, verifySlackSignature } from "@/modules/slack/verify";
+import { routeSlackCommand } from "@/modules/slack/router";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,9 +25,16 @@ type SlackEnvelope = {
 };
 
 const HELP = [
-  "🤖 *Agent Dev — Solo Speaker*",
-  "Mentionne-moi avec une tâche : `@bot corrige le bug du bouton de connexion`.",
-  "Je code sur une branche, lance les tests et j'ouvre une *Pull Request* avec des boutons *Merger / Rejeter* ici même."
+  "🤖 *Solo Speaker — agents*",
+  "",
+  "*Dev* — mentionne-moi avec une tâche → je code, teste et j'ouvre une *Pull Request* avec boutons *Merger / Rejeter*.",
+  "_ex : `@bot corrige le bug du bouton de connexion`_",
+  "",
+  "*Infra* :",
+  "• `état prod` — santé du site + erreurs",
+  "• `déploie` — redéployer la prod (avec confirmation)",
+  "• `rollback` — revenir au dernier état (avec confirmation)",
+  "• `logs` — dernières lignes de logs"
 ].join("\n");
 
 function ok() {
@@ -73,13 +81,43 @@ export async function POST(request: NextRequest) {
   const threadTs = event.thread_ts ?? event.ts;
   if (!channel) return ok();
 
-  const prompt = extractTaskText(event.text);
-  if (!prompt) {
+  const route = routeSlackCommand(extractTaskText(event.text));
+
+  if (route.type === "help") {
     await postSlackMessage({ channel, text: HELP, thread_ts: threadTs });
     return ok();
   }
 
-  const dispatched = await dispatchWorkflow("slack-code", { prompt, channel, thread_ts: threadTs ?? "", user: event.user ?? "" });
+  if (route.type === "infra") {
+    if (route.action === "status" || route.action === "logs") {
+      const dispatched = await dispatchWorkflow("slack-infra", { action: route.action, channel, thread_ts: threadTs ?? "" });
+      await postSlackMessage({
+        channel,
+        thread_ts: threadTs,
+        text: dispatched.ok ? "🔧 Demande envoyée à l'agent Infra…" : `❌ Lancement impossible : ${dispatched.error}`
+      });
+    } else {
+      const label = route.action === "deploy" ? "le *déploiement* en production" : "un *rollback* (revert du dernier changement) puis redéploiement";
+      await postSlackMessage({
+        channel,
+        thread_ts: threadTs,
+        text: `⚠️ Confirmer ${label} ?`,
+        blocks: [
+          { type: "section", text: { type: "mrkdwn", text: `⚠️ Confirmer ${label} ?` } },
+          {
+            type: "actions",
+            elements: [
+              { type: "button", text: { type: "plain_text", text: "Confirmer" }, style: "primary", action_id: "infra_confirm", value: route.action },
+              { type: "button", text: { type: "plain_text", text: "Annuler" }, style: "danger", action_id: "infra_cancel", value: route.action }
+            ]
+          }
+        ]
+      });
+    }
+    return ok();
+  }
+
+  const dispatched = await dispatchWorkflow("slack-code", { prompt: route.prompt, channel, thread_ts: threadTs ?? "", user: event.user ?? "" });
   if (!dispatched.ok) console.error("[slack] dispatch failed", dispatched);
   await postSlackMessage({
     channel,
