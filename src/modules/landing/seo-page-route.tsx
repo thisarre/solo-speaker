@@ -9,7 +9,7 @@ export function buildSeoPageMetadata(locale: Locale, key: SeoPageKey): Metadata 
   const messages = getMessages(locale);
 
   return {
-    title: `${page.title} — ${messages.common.appName}`,
+    title: `${page.title} · ${messages.common.appName}`,
     description: page.description,
     alternates: {
       canonical: localizedPath(page.slug, locale),

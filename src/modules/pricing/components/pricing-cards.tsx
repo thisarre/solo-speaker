@@ -53,7 +53,7 @@ export function PricingCards({ cards, labels, locale }: PricingCardsProps) {
                 <span className="text-[30px] font-bold leading-none">{pricing.price}</span>
                 <span className="text-[13px] text-muted">{pricing.cadence}</span>
               </div>
-              <p className={`m-0 mt-1.5 text-[12px] text-accent-ink ${showSavings ? "" : "invisible"}`}>{card.yearly.savings || "—"}</p>
+              <p className={`m-0 mt-1.5 text-[12px] text-accent-ink ${showSavings ? "" : "invisible"}`}>{card.yearly.savings || " "}</p>
               <ul className="m-0 mt-3 grid flex-1 list-none gap-2 p-0">
                 {card.features.slice(0, 4).map((feature) => (
                   <li className="flex items-start gap-2 text-[13px] leading-5 text-muted" key={feature}>
