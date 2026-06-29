@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { AutosaveStatus, type AutosaveState } from "@/components/talks/AutosaveStatus";
 import { ExportPdfButton } from "@/components/talks/ExportPdfButton";
+import { ShareButton } from "@/components/talks/ShareButton";
 import { generateAssistantContent } from "@/modules/assistant/actions";
 import { AiPreviewDialog } from "@/modules/assistant/components/ai-preview-dialog";
 import { AssistantPanel } from "@/modules/assistant/components/assistant-panel";
@@ -715,6 +716,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
             <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
           </div>
           {showExportActions ? <ExportPdfButton talkId={talk.id} title={draft.title} /> : null}
+          {showExportActions ? <ShareButton title={draft.title} /> : null}
           {showSpeakingActions ? (
             <Button
               leftIcon={<Volume2 />}
