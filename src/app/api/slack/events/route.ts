@@ -36,12 +36,6 @@ function ok() {
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
 
-  console.log("[slack] hit /events", {
-    hasSig: Boolean(request.headers.get("x-slack-signature")),
-    hasSecret: Boolean(process.env.SLACK_SIGNING_SECRET),
-    retry: request.headers.get("x-slack-retry-num") ?? "none"
-  });
-
   if (
     !verifySlackSignature({
       signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -70,13 +64,10 @@ export async function POST(request: NextRequest) {
   if (request.headers.get("x-slack-retry-num")) return ok();
 
   const event = envelope.event;
-  console.log("[slack] envelope", { type: envelope.type, event: event?.type, user: event?.user, channel: event?.channel });
   if (!event || (event.type !== "app_mention" && event.type !== "message")) return ok();
   if (event.bot_id || event.subtype) return ok(); // ignore bot / system messages
 
-  const authorized = isAuthorizedSlackUser(event.user, process.env.SLACK_ALLOWED_USER_ID);
-  console.log("[slack] authorized?", { user: event.user, authorized });
-  if (!authorized) return ok();
+  if (!isAuthorizedSlackUser(event.user, process.env.SLACK_ALLOWED_USER_ID)) return ok();
 
   const channel = event.channel;
   const threadTs = event.thread_ts ?? event.ts;
@@ -89,7 +80,7 @@ export async function POST(request: NextRequest) {
   }
 
   const dispatched = await dispatchWorkflow("slack-code", { prompt, channel, thread_ts: threadTs ?? "", user: event.user ?? "" });
-  console.log("[slack] dispatch result", dispatched);
+  if (!dispatched.ok) console.error("[slack] dispatch failed", dispatched);
   await postSlackMessage({
     channel,
     thread_ts: threadTs,
