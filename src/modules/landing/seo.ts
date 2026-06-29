@@ -47,7 +47,7 @@ export const landingFaq: Record<Locale, Array<{ question: string; answer: string
   en: [
     {
       question: "What is Solo Speaker Studio?",
-      answer: "Solo Speaker Studio is an AI-powered preparation workspace for people who write, rehearse and deliver talks regularly. It helps turn rough ideas into structured talks, improve the wording, rehearse timing and present with a focused teleprompter mode."
+      answer: "Solo Speaker Studio is an AI-powered preparation workspace for people who write, rehearse and deliver talks regularly. It helps turn rough ideas into structured talks, improve the wording, rehearse timing and present with a distraction-free teleprompter mode."
     },
     {
       question: "Who is Solo Speaker Studio built for?",
@@ -59,17 +59,17 @@ export const landingFaq: Record<Locale, Array<{ question: string; answer: string
     },
     {
       question: "Does Solo Speaker Studio include a free trial?",
-      answer: "Yes. The trial lasts 14 days and includes up to 5 talks, teleprompter mode, voice notes, limited AI assistance and PDF export with product limits before upgrading to Studio."
+      answer: "Yes. The trial lasts 14 days and includes up to 5 talks, teleprompter mode, voice notes, limited AI assistance and PDF export with a few limits before upgrading to Studio."
     },
     {
       question: "Can I use Solo Speaker Studio for sermon preparation?",
-      answer: "Yes. Pastors can use Solo Speaker Studio to structure sermon ideas, develop sections, rewrite passages in a more oral style, estimate duration and rehearse before preaching."
+      answer: "Yes. Pastors can use Solo Speaker Studio to structure sermon ideas, develop sections, rewrite passages to sound natural out loud, estimate duration and rehearse before preaching."
     }
   ],
   fr: [
     {
       question: "Qu’est-ce que Solo Speaker Studio ?",
-      answer: "Solo Speaker Studio est un espace de préparation assisté par IA pour les personnes qui écrivent, répètent et présentent régulièrement des prises de parole. Il aide à transformer des idées brutes en interventions structurées, à améliorer le texte, à répéter le minutage et à présenter avec un prompteur concentré."
+      answer: "Solo Speaker Studio est un espace de préparation assisté par IA pour les personnes qui écrivent, répètent et présentent régulièrement des prises de parole. Il aide à transformer des idées brutes en interventions structurées, à améliorer le texte, à répéter le minutage et à présenter avec un prompteur épuré, sans distraction."
     },
     {
       question: "Pour qui Solo Speaker Studio est-il conçu ?",
@@ -77,15 +77,15 @@ export const landingFaq: Record<Locale, Array<{ question: string; answer: string
     },
     {
       question: "Quelle est la différence avec Google Docs ou Notion ?",
-      answer: "Google Docs et Notion sont des outils d’écriture généraux. Solo Speaker Studio est pensé pour les prises de parole : sections, durée estimée, réécriture orale, mémos vocaux, répétition, export PDF et mode prompteur dans un même flux."
+      answer: "Google Docs et Notion sont des outils d’écriture généraux. Solo Speaker Studio est pensé pour les prises de parole : sections, durée estimée, réécriture pour l’oral, mémos vocaux, répétition, export PDF et mode prompteur dans un même flux."
     },
     {
       question: "Solo Speaker Studio inclut-il un essai gratuit ?",
-      answer: "Oui. L’essai dure 14 jours et inclut jusqu’à 5 prises de parole, le mode prompteur, les mémos vocaux, l’assistance IA limitée et l’export PDF avec limites produit avant le passage à Studio."
+      answer: "Oui. L’essai dure 14 jours et inclut jusqu’à 5 prises de parole, le mode prompteur, les mémos vocaux, l’assistance IA limitée et l’export PDF avec quelques limites avant le passage à Studio."
     },
     {
       question: "Puis-je utiliser Solo Speaker Studio pour préparer un sermon ?",
-      answer: "Oui. Les pasteurs peuvent structurer une idée biblique, développer les sections, oraliser des passages, estimer la durée et répéter avant de prêcher."
+      answer: "Oui. Les pasteurs peuvent structurer une idée biblique, développer les sections, adapter des passages à l’oral, estimer la durée et répéter avant de prêcher."
     }
   ]
 };

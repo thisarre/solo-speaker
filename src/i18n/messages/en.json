@@ -29,7 +29,7 @@
   "landing": {
     "heroBadge": "From idea to stage",
     "heroTitle": "Turn your ideas into talks that captivate.",
-    "heroSubtitle": "Solo Speaker Studio turns an idea, voice memo or rough draft into a structured talk — AI oral rewriting, controlled timing and a teleprompter that follows your voice.",
+    "heroSubtitle": "Solo Speaker Studio turns an idea, voice memo or rough draft into a structured talk — AI rewriting for the spoken word, controlled timing and a teleprompter that follows your voice.",
     "heroDefinition": "No more blank page or last-minute stress: you walk on stage prepared, timed and confident.",
     "timeProofs": [
       ["Notes → outline", "No need to sort a blank page by hand."],
@@ -39,7 +39,7 @@
     "trialEyebrow": "Free trial · 14 days",
     "trialTitle": "Your next 5 talks, ready faster than ever.",
     "trialDescription": "For 14 days, live the full flow: capture an idea, generate an outline, polish your sections with AI, then rehearse — all in one place, no commitment.",
-    "trialHighlights": ["14-day free trial", "5 talks included", "Outline, AI, teleprompter and voice notes"],
+    "trialHighlights": ["14-day free trial", "5 talks included", "Outline, AI assistant, teleprompter and voice notes"],
     "videoDemoEyebrow": "In action",
     "videoDemoTitle": "From first idea to teleprompter, in one flow.",
     "videoDemoBody": "Two short demos show how Solo Speaker clarifies your notes, structures your sections and gets you rehearsing — without ever switching tools.",
@@ -50,11 +50,11 @@
     "heroStats": [
       ["Plan", "Structured sections"],
       ["AI", "More natural speech"],
-      ["Live", "Focused teleprompter"]
+      ["Live", "Distraction-free teleprompter"]
     ],
     "problemEyebrow": "The real challenge",
     "problemTitle": "Preparing a talk is exhausting — long before you reach the stage.",
-    "problemBody": "Sorting ideas, finding the right order, making sentences natural to say out loud, hitting your time, rehearsing again and again… That invisible prep is discouraging and eats up hours. Solo Speaker handles it for you.",
+    "problemBody": "Sorting ideas, finding the right order, making sentences natural to say out loud, hitting your time, rehearsing again and again… That invisible prep is discouraging and eats up hours. Solo Speaker makes that prep simple and fast.",
     "problemItems": [
       "Ideas stay scattered across notes, documents, messages and voice memos.",
       "You lose time moving, rewriting and reorganizing the same passages.",
@@ -65,13 +65,13 @@
     "solutionBody": "Notes, outline, AI rewriting, rehearsal and delivery: everything is connected. You move section by section and stay focused on what matters — your message and your audience.",
     "workflowFeatures": [
       ["Usable outline from the start", "Start from an idea, audience note or voice memo and get sections that are ready to refine."],
-      ["Rewrite without starting over", "Develop, shorten or make one section more spoken without breaking the rest of the talk."],
+      ["Rewrite without starting over", "Develop, shorten or make one section sound more natural out loud without breaking the rest of the talk."],
       ["Rehearse in the same tool", "Move into teleprompter mode with estimated duration, auto-scroll and voice follow already ready."]
     ],
     "featuresEyebrow": "Speaking mode",
     "featuresTitle": "A teleprompter that follows your voice, not the other way around.",
     "featuresBody": "Your sections become your teleprompter: timer, auto-scroll and real-time voice follow. You rehearse and present with confidence, with nothing to re-import.",
-    "featureList": ["AI outline generation", "Section-based editor", "Oral style rewriting", "Estimated duration", "Teleprompter mode", "Auto-scroll", "Voice notes", "PDF export"],
+    "featureList": ["AI outline generation", "Section-based editor", "Rewriting for the spoken word", "Estimated duration", "Teleprompter mode", "Auto-scroll", "Voice notes", "PDF export"],
     "previewPlan": "Plan",
     "previewPlanItems": ["Opening", "Idea", "Proof", "Call"],
     "previewScriptLines": [
@@ -81,13 +81,13 @@
       "It all starts with real preparation.",
       "Shall we get started?"
     ],
-    "previewSteps": ["You speak", "Text locks on", "Screen follows"],
+    "previewSteps": ["You speak", "The text syncs", "Screen follows"],
     "useCasesEyebrow": "Use cases",
     "useCasesTitle": "Built for people who take the stage regularly.",
     "useCasesBody": "Sermons, conferences, training sessions, founder pitches or speeches: the same workspace adapts to every talk.",
     "useCases": [
       ["Pastors and sermon preparation", "Shape a biblical idea into a sermon outline, develop sections, estimate duration and rehearse before Sunday.", "/use-cases/sermon-preparation"],
-      ["Speakers and conferences", "Prepare keynote talks, conference sessions and public speeches with a structure that is easy to deliver live.", "/use-cases/public-speaking"],
+      ["Speakers and conferences", "Prepare keynote talks, conference sessions and public speeches with a structure that is easy to follow live.", "/use-cases/public-speaking"],
       ["Trainers and workshops", "Build courses, lessons and workshop talks that stay clear, timed and actionable for the audience.", "/use-cases/training-presentations"],
       ["Founders and pitches", "Turn product ideas, investor notes and founder stories into tighter pitches with stronger oral flow.", "/features/ai-speech-writer"]
     ],
@@ -96,7 +96,7 @@
     "comparisonBody": "Solo Speaker doesn’t replace all your tools — it fills the real gap: everything between “I have an idea” and “I’m ready to deliver it.”",
     "comparisonRows": [
       ["Google Docs", "Good for writing text", "No talk structure, rehearsal flow, voice notes or teleprompter workflow."],
-      ["Notion", "Good for organizing notes", "Not designed for timing, oral rewriting, stage delivery or live reading."],
+      ["Notion", "Good for organizing notes", "Not designed for timing, adapting text for the spoken word, stage delivery or live reading."],
       ["Classic teleprompter apps", "Good for reading a final script", "Usually separate from planning, editing, AI improvement and export."]
     ],
     "pricingEyebrow": "Pricing",
@@ -113,7 +113,7 @@
       "Preparing a talk isn’t just writing it. It’s sorting your ideas, finding the right order, making the words sound natural out loud, keeping to time, and rehearsing — often alone, often the night before.",
       "I built Solo Speaker to bring all of that into one place: from the first idea to a teleprompter that follows your voice. The goal is simple — to help you walk on stage prepared, on time, and confident, focused on what truly matters: your message and your audience."
     ],
-    "founderSignature": "Thierno SARRé — founder of Solo Speaker",
+    "founderSignature": "Thierno SARRÉ — founder of Solo Speaker",
     "faqEyebrow": "FAQ",
     "faqTitle": "Everything you want to know before you start.",
     "heroSecondaryCta": "Start for free",
