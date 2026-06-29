@@ -17,3 +17,6 @@ coverage
 .agents/
 .claude/
 docs/superpowers/
+
+# Claude Code headless run output (never commit)
+claude-output.log
