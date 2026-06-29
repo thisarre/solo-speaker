@@ -27,6 +27,11 @@ jobs:
 
       - run: npm ci
 
+      - name: Slack — démarrage
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: bash scripts/slack-notify.sh "🤖 *Agent Dev* démarré. J'analyse le code et je code ta tâche…"
+
       - name: Run Claude Code on the task
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -37,6 +42,11 @@ jobs:
             --allowedTools "Edit,Write,Read,Bash,Glob,Grep" \
             --model claude-sonnet-4-6 \
             --max-turns 40 | tee claude-output.log
+
+      - name: Slack — code terminé
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: bash scripts/slack-notify.sh "✍️ Code terminé. Je lance les vérifications (tests, typecheck, build)…"
 
       - name: Detect changes
         id: changes
@@ -52,6 +62,15 @@ jobs:
           npm run typecheck > /dev/null 2>&1; echo "tc=$?"   >> "$GITHUB_OUTPUT"
           npm run build > /dev/null 2>&1;    echo "build=$?" >> "$GITHUB_OUTPUT"
           set -e
+
+      - name: Slack — vérifications
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          T: ${{ steps.validate.outputs.test }}
+          TC: ${{ steps.validate.outputs.tc }}
+          B: ${{ steps.validate.outputs.build }}
+        run: bash scripts/slack-notify.sh "🧪 Vérifications — tests=$T · typecheck=$TC · build=$B. J'ouvre la PR…"
 
       - name: Commit, push and open PR
         id: pr
