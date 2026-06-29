@@ -1,3 +1,5 @@
+import type { HealthReport } from "@/modules/monitoring/health-checks";
+
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://solospeaker.com").replace(/\/+$/, "");
 const LOGO = `${SITE}/brand/solo-speaker-logo-transparent-cropped.png`;
 
@@ -251,6 +253,44 @@ export function renderTrialReminderEmail(input: { name?: string | null; daysLeft
         " essai gratuit se termine bientôt. Pour garder tes prises de parole illimitées, l'assistant IA complet et le prompteur vocal, passe à Studio : 12 €/mois ou 99 €/an.",
       cta: { label: "Choisir mon offre", url: `${SITE}/fr/pricing` },
       footnote: "Tu peux continuer en gratuit, mais tu seras limité à 5 prises de parole."
+    })
+  };
+}
+
+/** Daily synthetic-monitoring digest sent to the site owner. */
+export function renderHealthReportEmail(input: { report: HealthReport; dateLabel: string }): RenderedEmail {
+  const { report, dateLabel } = input;
+  const { summary } = report;
+  const statusEmoji = summary.fail > 0 ? "🔴" : summary.warn > 0 ? "🟠" : "🟢";
+
+  const subject =
+    summary.fail > 0
+      ? `🔴 Solo Speaker : ${summary.fail} problème(s) détecté(s)`
+      : summary.warn > 0
+        ? `🟠 Solo Speaker : site en ligne, ${summary.warn} alerte(s)`
+        : `🟢 Solo Speaker : site en ligne (${summary.ok}/${summary.total})`;
+
+  const intro =
+    summary.fail > 0
+      ? `Rapport de santé du ${dateLabel}. ${summary.fail} vérification(s) en échec sur ${summary.total}. Détail ci-dessous.`
+      : summary.warn > 0
+        ? `Rapport de santé du ${dateLabel}. Site en ligne, mais ${summary.warn} page(s) lente(s). Détail ci-dessous.`
+        : `Rapport de santé du ${dateLabel}. Tout est au vert : ${summary.ok}/${summary.total} vérifications réussies.`;
+
+  const bullets = report.results.map((result) => {
+    const icon = result.level === "fail" ? "❌" : result.level === "warn" ? "⚠️" : "✅";
+    const detail = result.issues.length > 0 ? result.issues.join(" · ") : `${result.status ?? "?"} · ${result.durationMs} ms`;
+    return `${icon} <strong>${result.name}</strong> : ${detail}`;
+  });
+
+  return {
+    subject,
+    html: layout({
+      locale: "fr",
+      heading: `${statusEmoji} État du site`,
+      intro,
+      bullets,
+      footnote: `Surveillance automatique quotidienne de ${report.baseUrl}.`
     })
   };
 }
