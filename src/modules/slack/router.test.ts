@@ -23,14 +23,29 @@ test("routeSlackCommand detects logs and help", () => {
   assert.deepEqual(routeSlackCommand(""), { type: "help" });
 });
 
-test("routeSlackCommand treats real tasks as dev (no infra false positives)", () => {
+test("routeSlackCommand routes dev tasks and splits feature vs fix", () => {
+  // fixes go straight Dev -> QA (no infra false positive on "déploiement")
   assert.deepEqual(routeSlackCommand("corrige le bug dans le déploiement automatique"), {
     type: "dev",
-    prompt: "corrige le bug dans le déploiement automatique"
+    prompt: "corrige le bug dans le déploiement automatique",
+    track: "fix"
   });
-  assert.deepEqual(routeSlackCommand("ajoute des logs au module de paiement"), {
+  assert.deepEqual(routeSlackCommand("fix: typo sur la page tarifs"), {
     type: "dev",
-    prompt: "ajoute des logs au module de paiement"
+    prompt: "fix: typo sur la page tarifs",
+    track: "fix"
   });
-  assert.deepEqual(routeSlackCommand("améliore la page tarifs"), { type: "dev", prompt: "améliore la page tarifs" });
+  // features run the full cycle (Marketing -> PO -> Dev -> QA)
+  assert.deepEqual(routeSlackCommand("ajoute un bouton de partage public sur la page talk"), {
+    type: "dev",
+    prompt: "ajoute un bouton de partage public sur la page talk",
+    track: "feature"
+  });
+  assert.deepEqual(routeSlackCommand("améliore la page tarifs"), {
+    type: "dev",
+    prompt: "améliore la page tarifs",
+    track: "feature"
+  });
+  // "ajoute des logs au module de paiement" is a dev task, not the infra logs command
+  assert.equal(routeSlackCommand("ajoute des logs au module de paiement").type, "dev");
 });

@@ -91,48 +91,17 @@ jobs:
           echo "number=$(gh pr view "$BRANCH" --json number -q .number)" >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Notify Slack
+      - name: Notify Slack (QA pending, no merge button yet)
         if: always()
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           CHANGED: ${{ steps.changes.outputs.changed }}
           PR_URL: ${{ steps.pr.outputs.url }}
-          PR_NUM: ${{ steps.pr.outputs.number }}
-          BRANCH: ${{ steps.pr.outputs.branch }}
-          T: ${{ steps.validate.outputs.test }}
-          TC: ${{ steps.validate.outputs.tc }}
-          B: ${{ steps.validate.outputs.build }}
         run: |
-          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$CHANNEL" ]; then exit 0; fi
-
           if [ "$CHANGED" = "false" ]; then
-            TEXT=$(printf 'ℹ️ Tâche terminée, aucun changement de code produit.\n\n> %s' "$PROMPT")
-            PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" \
-              '{channel:$ch, text:$txt} | if $tts=="" then . else .+{thread_ts:$tts} end')
+            bash scripts/slack-notify.sh "$(printf 'ℹ️ Tâche terminée, aucun changement de code produit.\n\n> %s' "$PROMPT")"
           elif [ -n "$PR_URL" ]; then
-            if [ "$T" = "0" ] && [ "$TC" = "0" ] && [ "$B" = "0" ]; then
-              HEAD="✅ *PR prête* (tout est vert)"
-            else
-              HEAD="⚠️ *PR ouverte* — validation en échec (tests=$T typecheck=$TC build=$B)"
-            fi
-            TEXT=$(printf '%s\n%s' "$HEAD" "$PR_URL")
-            PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" --arg pr "$PR_NUM" --arg rej "$PR_NUM:$BRANCH" \
-              '{channel:$ch, text:$txt,
-                blocks:[
-                  {type:"section", text:{type:"mrkdwn", text:$txt}},
-                  {type:"actions", elements:[
-                    {type:"button", text:{type:"plain_text", text:"Merger + déployer"}, style:"primary", action_id:"merge_pr", value:$pr},
-                    {type:"button", text:{type:"plain_text", text:"Rejeter"}, style:"danger", action_id:"reject_pr", value:$rej}
-                  ]}
-                ]}
-               | if $tts=="" then . else .+{thread_ts:$tts} end')
+            bash scripts/slack-notify.sh "$(printf '🤖 PR ouverte : %s\n🔎 *QA en cours*… le bouton Merger apparaîtra après le verdict.' "$PR_URL")"
           else
-            TEXT="❌ La tâche a échoué avant l'ouverture de la PR. Voir les logs GitHub Actions."
-            PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" \
-              '{channel:$ch, text:$txt} | if $tts=="" then . else .+{thread_ts:$tts} end')
+            bash scripts/slack-notify.sh "❌ La tâche a échoué avant l'ouverture de la PR. Voir les logs GitHub Actions."
           fi
-
-          curl -s -X POST https://slack.com/api/chat.postMessage \
-            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-            -H "content-type: application/json; charset=utf-8" \
-            -d "$PAYLOAD" > /dev/null

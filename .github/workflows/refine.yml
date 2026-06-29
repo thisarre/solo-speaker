@@ -1,0 +1,66 @@
+name: Refine agent (Marketing + PO)
+
+on:
+  repository_dispatch:
+    types: [slack-refine]
+
+permissions:
+  contents: read
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    env:
+      PROMPT: ${{ github.event.client_payload.prompt }}
+      CHANNEL: ${{ github.event.client_payload.channel }}
+      THREAD_TS: ${{ github.event.client_payload.thread_ts }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Marketing + PO refine
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          npm install -g @anthropic-ai/claude-code
+          REFINE_PROMPT="Tu interviens en DEUX casquettes pour Solo Speaker (SaaS Next.js + Supabase, prepa de prise de parole par IA).
+          DEMANDE UTILISATEUR: $PROMPT
+
+          Produis un cadrage CONCIS, en francais, markdown simple :
+          *Marketing* : 1-2 phrases sur le pourquoi/l'impact + 1 metrique de succes.
+          *PO* : une user story, 3 a 5 criteres d'acceptation testables, et le scope (Inclus / Exclu). Si la demande implique une visibilite ou une page PUBLIQUE, precise-le explicitement.
+
+          Inspecte le code en lecture seule si utile. IMPERATIF: reste sous ~1100 caracteres au total (ce spec sera place dans un bouton Slack)."
+          claude -p "$REFINE_PROMPT" \
+            --dangerously-skip-permissions \
+            --allowedTools "Read,Bash,Glob,Grep" \
+            --model claude-sonnet-4-6 \
+            --max-turns 20 | tee "$RUNNER_TEMP/spec.txt"
+
+      - name: Post spec to Slack with approval buttons
+        if: always()
+        run: |
+          [ -z "$SLACK_BOT_TOKEN" ] && exit 0
+          SPEC=$(head -c 1900 "$RUNNER_TEMP/spec.txt" 2>/dev/null)
+          [ -z "$SPEC" ] && SPEC="(spec indisponible, reessaie la demande)"
+          TEXT=$(printf '📋 *Spec proposé* — Marketing + PO\n\n%s\n\n_Valide pour lancer le Dev, ou rejette._' "$SPEC")
+          PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" --arg spec "$SPEC" \
+            '{channel:$ch, text:$txt,
+              blocks:[
+                {type:"section", text:{type:"mrkdwn", text:$txt}},
+                {type:"actions", elements:[
+                  {type:"button", text:{type:"plain_text", text:"Valider le spec"}, style:"primary", action_id:"spec_approve", value:$spec},
+                  {type:"button", text:{type:"plain_text", text:"Rejeter"}, style:"danger", action_id:"spec_reject", value:"x"}
+                ]}
+              ]}
+             | if $tts=="" then . else . + {thread_ts:$tts} end')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            --data "$PAYLOAD" > /dev/null

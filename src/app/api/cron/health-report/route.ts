@@ -3,6 +3,7 @@ import { sendEmail } from "@/lib/email/send";
 import { renderHealthReportEmail } from "@/lib/email/templates";
 import { runHealthChecks } from "@/modules/monitoring/health-checks";
 import { fetchRecentErrors } from "@/modules/monitoring/posthog-errors";
+import { postSlackMessage } from "@/lib/slack/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +38,18 @@ export async function GET(request: NextRequest) {
   });
 
   const result = await sendEmail({ to: recipient, ...renderHealthReportEmail({ report, dateLabel, errors }) });
+
+  // Also post the report to the #analytics Slack channel, if configured.
+  const analyticsChannel = process.env.SLACK_ANALYTICS_CHANNEL?.trim();
+  if (analyticsChannel) {
+    const s = report.summary;
+    const icon = s.fail > 0 ? "🔴" : s.warn > 0 ? "🟠" : "🟢";
+    const lines = report.results
+      .map((r) => `${r.level === "fail" ? "❌" : r.level === "warn" ? "⚠️" : "✅"} ${r.name} (${r.status ?? "?"}, ${r.durationMs}ms)`)
+      .join("\n");
+    const jsLine = errors.status === "ok" ? `\nErreurs JS (24h) : ${errors.count}` : "";
+    await postSlackMessage({ channel: analyticsChannel, text: `${icon} *Rapport santé — ${dateLabel}*\n${lines}${jsLine}` });
+  }
 
   return NextResponse.json({
     ok: true,

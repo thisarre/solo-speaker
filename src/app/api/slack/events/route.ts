@@ -117,13 +117,27 @@ export async function POST(request: NextRequest) {
     return ok();
   }
 
+  if (route.track === "feature") {
+    const dispatched = await dispatchWorkflow("slack-refine", { prompt: route.prompt, channel, thread_ts: threadTs ?? "", user: event.user ?? "" });
+    if (!dispatched.ok) console.error("[slack] dispatch failed", dispatched);
+    await postSlackMessage({
+      channel,
+      thread_ts: threadTs,
+      text: dispatched.ok
+        ? "📋 Reçu. Les agents *Marketing* + *PO* cadrent la demande… je reviens avec un spec à valider."
+        : `❌ Lancement impossible : ${dispatched.error}`
+    });
+    return ok();
+  }
+
+  // quick fix → Dev directly
   const dispatched = await dispatchWorkflow("slack-code", { prompt: route.prompt, channel, thread_ts: threadTs ?? "", user: event.user ?? "" });
   if (!dispatched.ok) console.error("[slack] dispatch failed", dispatched);
   await postSlackMessage({
     channel,
     thread_ts: threadTs,
     text: dispatched.ok
-      ? "🛠️ Tâche reçue. L'agent Dev travaille… je poste la PR ici dès que c'est prêt (quelques minutes)."
+      ? "🛠️ Correctif reçu. L'agent Dev travaille… PR + QA à suivre."
       : `❌ Lancement impossible : ${dispatched.error}`
   });
 

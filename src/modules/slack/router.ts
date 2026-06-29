@@ -1,11 +1,12 @@
-// Orchestrator routing: decides whether a Slack message is an infra command or a
-// dev task. Pure + ASCII (accents stripped before matching) so it is testable and
-// passes the no-hardcoded-copy guard. Infra commands must be short/standalone so a
-// dev task that merely mentions "deploiement" isn't misrouted.
+// Orchestrator routing: decides whether a Slack message is an infra command, a
+// quick fix (Dev -> QA) or a feature (Marketing -> PO -> Dev -> QA). Pure + ASCII
+// (accents stripped before matching) so it is testable and passes the
+// no-hardcoded-copy guard. Infra commands must be short/standalone so a dev task
+// that merely mentions "deploiement" isn't misrouted.
 
 export type SlackRoute =
   | { type: "help" }
-  | { type: "dev"; prompt: string }
+  | { type: "dev"; prompt: string; track: "feature" | "fix" }
   | { type: "infra"; action: "status" | "deploy" | "rollback" | "logs" };
 
 function normalize(text: string | undefined | null): string {
@@ -29,5 +30,7 @@ export function routeSlackCommand(rawText: string | undefined | null): SlackRout
   if (/^(rollback|revert)( (la )?prod)?$/.test(t) || /^(retour arriere|reviens en arriere|annule le (dernier )?deploiement)$/.test(t)) return { type: "infra", action: "rollback" };
   if (/^(logs?|journaux|journal)( (prod|du site))?$/.test(t)) return { type: "infra", action: "logs" };
 
-  return { type: "dev", prompt: original };
+  // A quick fix skips Marketing/PO and goes straight Dev -> QA.
+  const isFix = /(^|\b)(fix|hotfix|corrige|corriger|repare|reparer|bug|typo|regression)(\b|:)/.test(t);
+  return { type: "dev", prompt: original, track: isFix ? "fix" : "feature" };
 }

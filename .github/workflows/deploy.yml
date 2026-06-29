@@ -63,3 +63,4 @@ jobs:
             SLACK_SIGNING_SECRET=${{ secrets.SLACK_SIGNING_SECRET }}
             SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}
             SLACK_ALLOWED_USER_ID=${{ vars.SLACK_ALLOWED_USER_ID }}
+            SLACK_ANALYTICS_CHANNEL=${{ vars.SLACK_ANALYTICS_CHANNEL }}

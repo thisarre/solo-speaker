@@ -68,6 +68,17 @@ export async function POST(request: NextRequest) {
       await respondToSlackAction(responseUrl, dispatched.ok ? `🔧 ${label} lancé par l'agent Infra…` : `❌ Lancement impossible : ${dispatched.error}`);
     } else if (action.action_id === "infra_cancel") {
       await respondToSlackAction(responseUrl, "Annulé.");
+    } else if (action.action_id === "spec_approve") {
+      const spec = String(action.value ?? "");
+      const dispatched = await dispatchWorkflow("slack-code", {
+        prompt: spec,
+        channel: payload.channel?.id ?? "",
+        thread_ts: payload.message?.thread_ts ?? payload.message?.ts ?? "",
+        user: payload.user?.id ?? ""
+      });
+      await respondToSlackAction(responseUrl, dispatched.ok ? "✅ Spec validé. L'agent *Dev* code… PR + QA à suivre." : `❌ Lancement impossible : ${dispatched.error}`);
+    } else if (action.action_id === "spec_reject") {
+      await respondToSlackAction(responseUrl, "🚫 Spec rejeté. Reformule la demande si besoin.");
     }
   }
 

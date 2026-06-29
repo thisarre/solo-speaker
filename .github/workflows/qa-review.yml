@@ -59,7 +59,7 @@ jobs:
             --max-turns 20 | tee "$RUNNER_TEMP/qa.txt"
           echo "verdict=$(grep -oiE 'VERDICT: ?(LGTM|CONCERNS|BLOCK)' "$RUNNER_TEMP/qa.txt" | head -1 | grep -oiE '(LGTM|CONCERNS|BLOCK)' | tr a-z A-Z)" >> "$GITHUB_OUTPUT"
 
-      - name: Post QA verdict to Slack thread
+      - name: Post QA verdict + gated merge buttons to Slack
         if: always() && steps.ctx.outputs.channel != ''
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -69,11 +69,32 @@ jobs:
           T: ${{ steps.validate.outputs.test }}
           TC: ${{ steps.validate.outputs.tc }}
           B: ${{ steps.validate.outputs.build }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          BRANCH: ${{ github.head_ref }}
         run: |
           ICON="✅"; [ "$VERDICT" = "CONCERNS" ] && ICON="⚠️"; [ "$VERDICT" = "BLOCK" ] && ICON="🛑"
-          REVIEW=$(head -c 2500 "$RUNNER_TEMP/qa.txt" 2>/dev/null || echo "(revue indisponible)")
+          REVIEW=$(head -c 2200 "$RUNNER_TEMP/qa.txt" 2>/dev/null || echo "(revue indisponible)")
           TEXT=$(printf '%s *QA — %s*  ·  tests=%s typecheck=%s build=%s\n\n%s' "$ICON" "${VERDICT:-?}" "$T" "$TC" "$B" "$REVIEW")
-          bash scripts/slack-notify.sh "$TEXT"
+          if [ "$VERDICT" = "LGTM" ] && [ "$T" = "0" ] && [ "$TC" = "0" ] && [ "$B" = "0" ]; then
+            ML="Merger + déployer"; MS="primary"
+          else
+            ML="Merger quand même"; MS="danger"
+          fi
+          PAYLOAD=$(jq -n --arg ch "$CHANNEL" --arg tts "$THREAD_TS" --arg txt "$TEXT" \
+            --arg pr "$PR_NUM" --arg rej "$PR_NUM:$BRANCH" --arg ml "$ML" --arg ms "$MS" \
+            '{channel:$ch, text:$txt,
+              blocks:[
+                {type:"section", text:{type:"mrkdwn", text:$txt}},
+                {type:"actions", elements:[
+                  {type:"button", text:{type:"plain_text", text:$ml}, style:$ms, action_id:"merge_pr", value:$pr},
+                  {type:"button", text:{type:"plain_text", text:"Rejeter"}, style:"danger", action_id:"reject_pr", value:$rej}
+                ]}
+              ]}
+             | if $tts=="" then . else . + {thread_ts:$tts} end')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            --data "$PAYLOAD" > /dev/null
 
       - name: Post QA as PR comment
         if: always()
