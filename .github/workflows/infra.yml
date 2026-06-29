@@ -24,11 +24,11 @@ jobs:
         run: |
           SUMMARY="🩺 *État prod*"
           for u in /fr /en /fr/pricing /fr/login /fr/signup /api/health /sitemap.xml; do
-            code=$(curl -s -o /dev/null -m 15 -w "%{http_code}" "https://solospeaker.com$u")
+            code=$(curl -s -o /dev/null -m 20 -w "%{http_code}" "https://solospeaker.com$u" || echo "000")
             icon="✅"; [ "$code" != "200" ] && icon="❌"
             SUMMARY="$SUMMARY"$'\n'"$icon $u → $code"
           done
-          SUMMARY="$SUMMARY"$'\n'"DB: $(curl -s -m 15 https://solospeaker.com/api/health)"
+          SUMMARY="$SUMMARY"$'\n'"DB: $(curl -s -m 20 https://solospeaker.com/api/health || echo indisponible)"
           bash scripts/slack-notify.sh "$SUMMARY"
 
       - name: Deploy
