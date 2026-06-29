@@ -41,7 +41,10 @@ export function LandingFooter({ locale }: { locale: Locale }) {
       <div className="border-t border-line">
         <div className="mx-auto flex w-full max-w-[1480px] flex-col gap-2 px-5 py-5 text-[12.5px] text-faint md:flex-row md:items-center md:justify-between md:px-8">
           <span>© {year} Madebysarre. {footer.rights}</span>
-          <span>{common.appName}</span>
+          <span className="flex items-center gap-3">
+            <span>{footer.poweredByAi}</span>
+            <span>{common.appName}</span>
+          </span>
         </div>
       </div>
     </footer>
