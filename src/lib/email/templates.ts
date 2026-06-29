@@ -1,4 +1,5 @@
 import type { HealthReport } from "@/modules/monitoring/health-checks";
+import type { ErrorSummary } from "@/modules/monitoring/posthog-errors";
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://solospeaker.com").replace(/\/+$/, "");
 const LOGO = `${SITE}/brand/solo-speaker-logo-transparent-cropped.png`;
@@ -11,6 +12,10 @@ export function normalizeEmailLocale(value: string | null | undefined): EmailLoc
 
 function cleanName(value: string | null | undefined): string {
   return (value ?? "").trim().replace(/[<>&]/g, "");
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 type LayoutInput = {
@@ -258,23 +263,28 @@ export function renderTrialReminderEmail(input: { name?: string | null; daysLeft
 }
 
 /** Daily synthetic-monitoring digest sent to the site owner. */
-export function renderHealthReportEmail(input: { report: HealthReport; dateLabel: string }): RenderedEmail {
-  const { report, dateLabel } = input;
+export function renderHealthReportEmail(input: { report: HealthReport; dateLabel: string; errors?: ErrorSummary }): RenderedEmail {
+  const { report, dateLabel, errors } = input;
   const { summary } = report;
-  const statusEmoji = summary.fail > 0 ? "🔴" : summary.warn > 0 ? "🟠" : "🟢";
+
+  const jsErrorCount = errors?.status === "ok" ? errors.count : 0;
+  const hasAlert = summary.warn > 0 || jsErrorCount > 0;
+  const statusEmoji = summary.fail > 0 ? "🔴" : hasAlert ? "🟠" : "🟢";
 
   const subject =
     summary.fail > 0
       ? `🔴 Solo Speaker : ${summary.fail} problème(s) détecté(s)`
-      : summary.warn > 0
-        ? `🟠 Solo Speaker : site en ligne, ${summary.warn} alerte(s)`
-        : `🟢 Solo Speaker : site en ligne (${summary.ok}/${summary.total})`;
+      : jsErrorCount > 0
+        ? `🟠 Solo Speaker : site en ligne, ${jsErrorCount} erreur(s) JS (24h)`
+        : summary.warn > 0
+          ? `🟠 Solo Speaker : site en ligne, ${summary.warn} alerte(s)`
+          : `🟢 Solo Speaker : site en ligne (${summary.ok}/${summary.total})`;
 
   const intro =
     summary.fail > 0
       ? `Rapport de santé du ${dateLabel}. ${summary.fail} vérification(s) en échec sur ${summary.total}. Détail ci-dessous.`
-      : summary.warn > 0
-        ? `Rapport de santé du ${dateLabel}. Site en ligne, mais ${summary.warn} page(s) lente(s). Détail ci-dessous.`
+      : hasAlert
+        ? `Rapport de santé du ${dateLabel}. Site en ligne, points d'attention ci-dessous.`
         : `Rapport de santé du ${dateLabel}. Tout est au vert : ${summary.ok}/${summary.total} vérifications réussies.`;
 
   const bullets = report.results.map((result) => {
@@ -282,6 +292,17 @@ export function renderHealthReportEmail(input: { report: HealthReport; dateLabel
     const detail = result.issues.length > 0 ? result.issues.join(" · ") : `${result.status ?? "?"} · ${result.durationMs} ms`;
     return `${icon} <strong>${result.name}</strong> : ${detail}`;
   });
+
+  if (errors && errors.status !== "unconfigured") {
+    if (errors.status === "error") {
+      bullets.push("⚠️ <strong>Erreurs JS (24h)</strong> : indisponible (PostHog)");
+    } else if (errors.count === 0) {
+      bullets.push("✅ <strong>Erreurs JS (24h)</strong> : 0");
+    } else {
+      const top = errors.topErrors.map((e) => `${e.type} (${e.count})`).join(", ");
+      bullets.push(`⚠️ <strong>Erreurs JS (24h)</strong> : ${errors.count}${top ? ` — ${top}` : ""}`);
+    }
+  }
 
   return {
     subject,
@@ -291,6 +312,36 @@ export function renderHealthReportEmail(input: { report: HealthReport; dateLabel
       intro,
       bullets,
       footnote: `Surveillance automatique quotidienne de ${report.baseUrl}.`
+    })
+  };
+}
+
+/** Daily browser (Playwright) monitoring digest. */
+export function renderBrowserReportEmail(input: { passed: number; failed: number; total: number; failures: { title: string; error: string }[]; dateLabel: string }): RenderedEmail {
+  const { passed, failed, total, failures, dateLabel } = input;
+  const healthy = failed === 0;
+  const statusEmoji = healthy ? "🟢" : "🔴";
+
+  const subject = healthy
+    ? `🟢 Solo Speaker : tests navigateur OK (${passed}/${total})`
+    : `🔴 Solo Speaker : ${failed} test(s) navigateur en échec`;
+
+  const intro = healthy
+    ? `Rapport navigateur du ${dateLabel}. Les ${passed} parcours testés fonctionnent (chargement, formulaires, JavaScript).`
+    : `Rapport navigateur du ${dateLabel}. ${failed} parcours sur ${total} en échec. Détail ci-dessous.`;
+
+  const bullets = healthy
+    ? [`✅ ${passed}/${total} parcours réussis`]
+    : failures.map((failure) => `❌ <strong>${escapeHtml(failure.title)}</strong> : ${escapeHtml(failure.error)}`);
+
+  return {
+    subject,
+    html: layout({
+      locale: "fr",
+      heading: `${statusEmoji} Tests navigateur`,
+      intro,
+      bullets,
+      footnote: "Tests Playwright quotidiens sur le site en production."
     })
   };
 }

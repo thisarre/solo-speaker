@@ -51,6 +51,11 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_FROM_NAME: "${EMAIL_FROM_NAME:-Solo Speaker}"
       CRON_SECRET: ${CRON_SECRET}
+      # daily health-report extras (all optional)
+      HEALTH_REPORT_TO: ${HEALTH_REPORT_TO:-}
+      POSTHOG_PROJECT_ID: ${POSTHOG_PROJECT_ID:-}
+      POSTHOG_API_HOST: ${POSTHOG_API_HOST:-https://us.posthog.com}
+      POSTHOG_PERSONAL_API_KEY: ${POSTHOG_PERSONAL_API_KEY:-}
       # AI rate limiting (safe defaults if unset)
       AI_RATE_LIMIT_ENABLED: ${AI_RATE_LIMIT_ENABLED:-true}
       AI_RATE_LIMIT_STRICT: ${AI_RATE_LIMIT_STRICT:-true}

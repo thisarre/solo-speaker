@@ -1,0 +1,29 @@
+name: Browser monitoring
+
+on:
+  schedule:
+    # 07:10 UTC daily (~09:10 Paris), just after the VPS HTTP health report.
+    - cron: "10 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run browser checks against production
+        run: npx playwright test --config e2e/playwright.config.ts
+        env:
+          BASE_URL: https://solospeaker.com
+      - name: Email the browser report
+        if: always()
+        run: node e2e/report.mjs
+        env:
+          REPORT_URL: https://solospeaker.com/api/cron/browser-report
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}

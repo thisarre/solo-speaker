@@ -52,3 +52,6 @@ jobs:
             EMAIL_FROM=${{ vars.EMAIL_FROM }}
             EMAIL_FROM_NAME=${{ vars.EMAIL_FROM_NAME }}
             CRON_SECRET=${{ secrets.CRON_SECRET }}
+            POSTHOG_PROJECT_ID=${{ vars.POSTHOG_PROJECT_ID }}
+            POSTHOG_API_HOST=${{ vars.POSTHOG_API_HOST }}
+            POSTHOG_PERSONAL_API_KEY=${{ secrets.POSTHOG_PERSONAL_API_KEY }}
