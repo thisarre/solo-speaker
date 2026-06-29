@@ -1,0 +1,103 @@
+name: Telegram coding agent
+
+on:
+  repository_dispatch:
+    types: [telegram-code]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      PROMPT: ${{ github.event.client_payload.prompt }}
+      CHAT_ID: ${{ github.event.client_payload.chat_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run Claude Code on the task
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude -p "$PROMPT" \
+            --dangerously-skip-permissions \
+            --allowedTools "Edit,Write,Read,Bash,Glob,Grep" \
+            --model claude-sonnet-4-6 \
+            --max-turns 40 | tee claude-output.log
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate (tests, typecheck, build)
+        id: validate
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set +e
+          npm test > /dev/null 2>&1;       echo "test=$?"  >> "$GITHUB_OUTPUT"
+          npm run typecheck > /dev/null 2>&1; echo "tc=$?"  >> "$GITHUB_OUTPUT"
+          npm run build > /dev/null 2>&1;   echo "build=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Commit, push and open PR
+        id: pr
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "Solo Speaker Bot"
+          git config user.email "bot@solospeaker.com"
+          BRANCH="telegram/${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "telegram: $(printf '%s' "$PROMPT" | head -c 70)"
+          git push origin "$BRANCH"
+          TITLE="$(printf '%s' "$PROMPT" | head -c 70)"
+          BODY="$(printf 'Tache lancee depuis Telegram.\n\n> %s\n\nValidation: tests=%s typecheck=%s build=%s' "$PROMPT" "${{ steps.validate.outputs.test }}" "${{ steps.validate.outputs.tc }}" "${{ steps.validate.outputs.build }}")"
+          URL="$(gh pr create --base main --head "$BRANCH" --title "$TITLE" --body "$BODY")"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Telegram
+        if: always()
+        env:
+          BOT: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          CHANGED: ${{ steps.changes.outputs.changed }}
+          T: ${{ steps.validate.outputs.test }}
+          TC: ${{ steps.validate.outputs.tc }}
+          B: ${{ steps.validate.outputs.build }}
+        run: |
+          if [ -z "$BOT" ] || [ -z "$CHAT_ID" ]; then exit 0; fi
+          if [ "$CHANGED" = "false" ]; then
+            MSG=$(printf 'ℹ️ Tâche terminée, aucun changement de code produit.\n\n> %s' "$PROMPT")
+          elif [ -n "$PR_URL" ]; then
+            V="tests=$T · typecheck=$TC · build=$B"
+            if [ "$T" = "0" ] && [ "$TC" = "0" ] && [ "$B" = "0" ]; then
+              MSG=$(printf '✅ PR prête (tout est vert).\n%s\n\nValide avec /merge <n°> pour déployer.\n(%s)' "$PR_URL" "$V")
+            else
+              MSG=$(printf '⚠️ PR ouverte, validation en échec, à relire.\n%s\n\n(%s)' "$PR_URL" "$V")
+            fi
+          else
+            MSG='❌ La tâche a échoué avant la PR. Voir les logs GitHub Actions.'
+          fi
+          curl -s "https://api.telegram.org/bot${BOT}/sendMessage" \
+            --data-urlencode "chat_id=${CHAT_ID}" \
+            --data-urlencode "text=${MSG}" \
+            -d "disable_web_page_preview=true" > /dev/null

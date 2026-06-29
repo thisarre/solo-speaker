@@ -55,3 +55,8 @@ jobs:
             POSTHOG_PROJECT_ID=${{ vars.POSTHOG_PROJECT_ID }}
             POSTHOG_API_HOST=${{ vars.POSTHOG_API_HOST }}
             POSTHOG_PERSONAL_API_KEY=${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+            TELEGRAM_WEBHOOK_SECRET=${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
+            TELEGRAM_OWNER_CHAT_ID=${{ vars.TELEGRAM_OWNER_CHAT_ID }}
+            GH_DISPATCH_TOKEN=${{ secrets.GH_DISPATCH_TOKEN }}
+            GH_REPO=${{ vars.GH_REPO }}
