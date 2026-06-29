@@ -13,7 +13,7 @@ type LoginPageProps = {
 export async function generateMetadata({ params }: Pick<LoginPageProps, "params">) {
   const locale = await getLocaleFromParams(params);
   const messages = getMessages(locale);
-  const title = `${messages.auth.loginTitle} — ${messages.common.appName}`;
+  const title = `${messages.auth.loginTitle} · ${messages.common.appName}`;
 
   return {
     title,

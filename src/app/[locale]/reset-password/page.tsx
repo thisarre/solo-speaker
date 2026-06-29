@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Pick<ResetPasswordPageProps, 
   const messages = getMessages(locale);
 
   return {
-    title: `${messages.auth.resetTitle} — ${messages.common.appName}`,
+    title: `${messages.auth.resetTitle} · ${messages.common.appName}`,
     description: messages.auth.resetSubtitle,
     alternates: {
       canonical: localizedPath("/reset-password", locale),

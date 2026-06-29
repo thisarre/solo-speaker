@@ -8,7 +8,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: LocaleParams }) {
   await getLocaleFromParams(params);
-  return { title: "Mentions légales — Solo Speaker Studio" };
+  return { title: "Mentions légales · Solo Speaker Studio" };
 }
 
 export default async function MentionsLegalesPage({ params }: { params: LocaleParams }) {
@@ -23,14 +23,14 @@ export default async function MentionsLegalesPage({ params }: { params: LocalePa
       <h2>1. Éditeur</h2>
       <p>
         Le site et l’application <strong>Solo Speaker Studio</strong> sont édités par <strong>Madebysarre</strong>,
-        [forme juridique — par exemple : entreprise individuelle / micro-entreprise / SASU], représentée par [nom et prénom du représentant légal].
+        [forme juridique, par exemple : entreprise individuelle / micro-entreprise / SASU], représentée par [nom et prénom du représentant légal].
       </p>
       <ul>
         <li>Adresse du siège : [adresse postale complète]</li>
         <li>SIREN / SIRET : [numéro]</li>
-        <li>[Si société] Capital social : [montant] € — immatriculée au RCS de [ville] sous le numéro [numéro]. [Si micro-entreprise] Dispensée d’immatriculation au registre du commerce et des sociétés (RCS) et au répertoire des métiers (RM).</li>
-        <li>Numéro de TVA intracommunautaire : [numéro] — ou, le cas échéant, « TVA non applicable, article 293 B du CGI ».</li>
-        <li>Contact : [adresse e-mail] — [numéro de téléphone]</li>
+        <li>[Si société] Capital social : [montant] €, immatriculée au RCS de [ville] sous le numéro [numéro]. [Si micro-entreprise] Dispensée d’immatriculation au registre du commerce et des sociétés (RCS) et au répertoire des métiers (RM).</li>
+        <li>Numéro de TVA intracommunautaire : [numéro] (ou, le cas échéant, « TVA non applicable, article 293 B du CGI »).</li>
+        <li>Contact : [adresse e-mail], [numéro de téléphone]</li>
       </ul>
 
       <h2>2. Directeur de la publication</h2>
@@ -39,8 +39,8 @@ export default async function MentionsLegalesPage({ params }: { params: LocalePa
       <h2>3. Hébergement</h2>
       <p>Le service est hébergé par les prestataires suivants [à confirmer selon votre configuration réelle] :</p>
       <ul>
-        <li><strong>Vercel Inc.</strong> — 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis — vercel.com.</li>
-        <li><strong>Supabase, Inc.</strong> (base de données, authentification, stockage) — supabase.com — hébergement des données dans l’Union européenne (région eu-west-1).</li>
+        <li><strong>Vercel Inc.</strong> : 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis, vercel.com.</li>
+        <li><strong>Supabase, Inc.</strong> (base de données, authentification, stockage) : supabase.com, hébergement des données dans l’Union européenne (région eu-west-1).</li>
       </ul>
 
       <h2>4. Propriété intellectuelle</h2>

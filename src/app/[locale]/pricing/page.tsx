@@ -13,7 +13,7 @@ type PricingRouteProps = {
 export async function generateMetadata({ params }: PricingRouteProps): Promise<Metadata> {
   const locale = await getLocaleFromParams(params);
   const messages = getMessages(locale);
-  const title = `${messages.pricing.eyebrow} — ${messages.common.appName}`;
+  const title = `${messages.pricing.eyebrow} · ${messages.common.appName}`;
 
   return {
     title,

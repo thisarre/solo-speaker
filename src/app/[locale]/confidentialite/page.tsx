@@ -8,7 +8,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: LocaleParams }) {
   await getLocaleFromParams(params);
-  return { title: "Politique de confidentialité — Solo Speaker Studio" };
+  return { title: "Politique de confidentialité · Solo Speaker Studio" };
 }
 
 export default async function ConfidentialitePage({ params }: { params: LocaleParams }) {
@@ -36,23 +36,23 @@ export default async function ConfidentialitePage({ params }: { params: LocalePa
 
       <h2>3. Finalités et bases légales</h2>
       <ul>
-        <li>Fournir et faire fonctionner le service, gérer votre compte — <strong>exécution du contrat</strong> (art. 6.1.b).</li>
-        <li>Traiter les paiements et abonnements — <strong>exécution du contrat</strong> et <strong>obligation légale</strong> (comptabilité).</li>
-        <li>Améliorer le service, mesurer l’audience, prévenir les abus — <strong>intérêt légitime</strong> (art. 6.1.f).</li>
-        <li>Transcription vocale et génération assistée par IA, à votre initiative — <strong>exécution du contrat</strong>.</li>
-        <li>Communications et cookies non essentiels — <strong>consentement</strong> (art. 6.1.a), lorsqu’il est requis.</li>
+        <li>Fournir et faire fonctionner le service, gérer votre compte : <strong>exécution du contrat</strong> (art. 6.1.b).</li>
+        <li>Traiter les paiements et abonnements : <strong>exécution du contrat</strong> et <strong>obligation légale</strong> (comptabilité).</li>
+        <li>Améliorer le service, mesurer l’audience, prévenir les abus : <strong>intérêt légitime</strong> (art. 6.1.f).</li>
+        <li>Transcription vocale et génération assistée par IA, à votre initiative : <strong>exécution du contrat</strong>.</li>
+        <li>Communications et cookies non essentiels : <strong>consentement</strong> (art. 6.1.a), lorsqu’il est requis.</li>
       </ul>
 
       <h2>4. Sous-traitants et destinataires</h2>
       <p>Nous faisons appel à des prestataires (sous-traitants au sens du RGPD) qui n’accèdent à vos données que pour fournir leurs services :</p>
       <ul>
-        <li><strong>Supabase</strong> — base de données, authentification, stockage (hébergement UE).</li>
-        <li><strong>Vercel</strong> — hébergement de l’application (États-Unis).</li>
-        <li><strong>OpenAI</strong> — assistant d’écriture et transcription (États-Unis).</li>
-        <li><strong>Deepgram</strong> — transcription vocale en temps réel.</li>
-        <li><strong>ElevenLabs</strong> — synthèse vocale (États-Unis).</li>
-        <li><strong>Stripe</strong> — traitement des paiements.</li>
-        <li><strong>PostHog</strong> — mesure d’audience (hébergement UE).</li>
+        <li><strong>Supabase</strong> : base de données, authentification, stockage (hébergement UE).</li>
+        <li><strong>Vercel</strong> : hébergement de l’application (États-Unis).</li>
+        <li><strong>OpenAI</strong> : assistant d’écriture et transcription (États-Unis).</li>
+        <li><strong>Deepgram</strong> : transcription vocale en temps réel.</li>
+        <li><strong>ElevenLabs</strong> : synthèse vocale (États-Unis).</li>
+        <li><strong>Stripe</strong> : traitement des paiements.</li>
+        <li><strong>PostHog</strong> : mesure d’audience (hébergement UE).</li>
       </ul>
       <p>Nous ne vendons pas vos données personnelles.</p>
 

@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Pick<ForgotPasswordPageProps,
   const messages = getMessages(locale);
 
   return {
-    title: `${messages.auth.forgotTitle} — ${messages.common.appName}`,
+    title: `${messages.auth.forgotTitle} · ${messages.common.appName}`,
     description: messages.auth.forgotSubtitle,
     alternates: {
       canonical: localizedPath("/forgot-password", locale),
