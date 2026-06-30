@@ -43,14 +43,20 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <a className="transition hover:text-foreground" href="#pricing-preview">{navigation.pricing}</a>
           </nav>
           <div className="flex min-w-0 items-center gap-2">
-            <ThemeToggle className="hidden w-[92px] md:inline-grid" />
-            <LanguageSwitcher className="hidden md:inline-grid" currentLocale={locale} />
-            <Link className="hidden md:block" href={localizedPath("/login", locale)}>
-              <span className="inline-flex h-8 items-center rounded-[7px] px-3 text-[13px] font-[550] text-muted transition hover:text-foreground">{navigation.login}</span>
-            </Link>
-            <TrackedLinkButton className="hidden md:inline-flex" event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ location: "header", cta: "create_talk" }} variant="primary">
-              {common.createTalk}
-            </TrackedLinkButton>
+            {/* Desktop controls hidden on mobile via this wrapper. We can't put `hidden` on the
+                controls themselves: ThemeToggle/LanguageSwitcher/Button hardcode an `inline-grid`/
+                `inline-flex` root, and in Tailwind v4 those win over `hidden` (defined earlier in the
+                stylesheet). The wrapper carries only `hidden`/`flex`, where `hidden` correctly wins. */}
+            <div className="hidden items-center gap-2 md:flex">
+              <ThemeToggle className="w-[92px]" />
+              <LanguageSwitcher currentLocale={locale} />
+              <Link href={localizedPath("/login", locale)}>
+                <span className="inline-flex h-8 items-center rounded-[7px] px-3 text-[13px] font-[550] text-muted transition hover:text-foreground">{navigation.login}</span>
+              </Link>
+              <TrackedLinkButton event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ location: "header", cta: "create_talk" }} variant="primary">
+                {common.createTalk}
+              </TrackedLinkButton>
+            </div>
             <details className="relative md:hidden">
               <summary aria-label={common.menu} className="flex size-9 cursor-pointer list-none items-center justify-center rounded-[8px] border border-line bg-surface text-muted transition hover:text-foreground [&::-webkit-details-marker]:hidden">
                 <Menu className="size-4" />
