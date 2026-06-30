@@ -287,7 +287,15 @@ export function LandingPage({ locale }: { locale: Locale }) {
           <div className="mt-8">
             <PricingCards
               cards={pricingCards}
-              labels={{ monthly: messages.pricing.cycleMonthly, recommended: messages.pricing.recommended, yearly: messages.pricing.cycleYearly }}
+              labels={{
+                monthly: messages.pricing.cycleMonthly,
+                recommended: messages.pricing.recommended,
+                yearly: messages.pricing.cycleYearly,
+                perSeatCadence: messages.pricing.perSeatCadence,
+                seatsLabel: messages.pricing.seatsLabel,
+                increaseSeats: messages.pricing.increaseSeats,
+                decreaseSeats: messages.pricing.decreaseSeats
+              }}
               locale={locale}
             />
           </div>

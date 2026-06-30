@@ -36,10 +36,10 @@
       ["Plan → sections", "Chaque partie se développe sans casser le reste."],
       ["Sections → prompteur", "La répétition démarre sans export ni remise en forme."]
     ],
-    "trialEyebrow": "Essai gratuit · 14 jours",
+    "trialEyebrow": "Essai gratuit · 5 prises de parole",
     "trialTitle": "Vos 5 prochaines prises de parole, prêtes plus vite que jamais.",
-    "trialDescription": "Pendant 14 jours, vivez le flux complet : capturez une idée, générez un plan, peaufinez vos sections avec l’IA, puis répétez, le tout au même endroit, sans engagement.",
-    "trialHighlights": ["14 jours gratuits", "5 prises de parole incluses", "Plan, assistant IA, prompteur et mémos vocaux"],
+    "trialDescription": "Sur vos 5 premières prises de parole, vivez le flux complet : capturez une idée, générez un plan, peaufinez vos sections avec l’IA, puis répétez, le tout au même endroit, sans limite de temps et sans carte bancaire.",
+    "trialHighlights": ["5 prises de parole gratuites", "Sans carte bancaire", "Plan, assistant IA, prompteur et mémos vocaux"],
     "videoDemoEyebrow": "En action",
     "videoDemoTitle": "De la première idée au prompteur, en un seul flux.",
     "videoDemoBody": "Deux démos courtes montrent comment Solo Speaker clarifie vos notes, structure vos sections et vous fait répéter, sans jamais changer d’outil.",
@@ -101,12 +101,13 @@
     ],
     "pricingEyebrow": "Tarifs",
     "pricingTitle": "Essayez gratuitement. Adoptez-le quand il vous convainc.",
-    "pricingBody": "14 jours d’essai et jusqu’à 5 prises de parole pour tout tester : notes, plan, IA, prompteur et export PDF. Studio à 99 EUR/an, soit 45 EUR d’économie face au mensuel.",
+    "pricingBody": "5 prises de parole d’essai pour tout tester sans limite de temps et sans carte bancaire : notes, plan, IA, prompteur et export PDF. Studio à 99 EUR/an, soit 45 EUR d’économie face au mensuel.",
     "pricingBullets": [
-      "Essai : 14 jours, 5 prises de parole maximum, IA limitée, prompteur et mémos vocaux.",
+      "Essai : 5 prises de parole maximum, sans limite de temps, sans carte bancaire, IA limitée, prompteur et mémos vocaux.",
       "Studio mensuel : 12 EUR/mois pour les orateurs réguliers.",
       "Studio annuel : 99 EUR/an, soit 45 EUR d’économie face au mensuel.",
-      "Équipe : 29 EUR/mois pour petites équipes, églises et groupes de formateurs."
+      "Pro : 19 EUR/mois pour analytics, multilingue et export sans watermark.",
+      "Équipe : 6 EUR/mois par siège (offre groupe, tarif dégressif) pour petites équipes, églises et groupes de formateurs."
     ],
     "founderEyebrow": "Le mot du fondateur",
     "founderParagraphs": [
@@ -117,7 +118,7 @@
     "faqEyebrow": "FAQ",
     "faqTitle": "Tout ce que vous voulez savoir avant de vous lancer.",
     "heroSecondaryCta": "Démarrer gratuitement",
-    "trustStrip": ["14 jours gratuits", "Sans engagement", "Annulable en 1 clic", "Vos données restent privées"]
+    "trustStrip": ["5 prises de parole gratuites", "Sans carte bancaire", "Annulable en 1 clic", "Vos données restent privées"]
   },
   "auth": {
     "loginTitle": "Retour au studio",
@@ -195,27 +196,23 @@
     "returnToStudio": "Retour au studio",
     "eyebrow": "Tarifs",
     "title": "Un studio simple à lancer, sérieux à garder.",
-    "description": "Commencez avec 14 jours pour tester la vraie valeur : 5 prises de parole, prompteur, mémos vocaux et IA incluse. Ensuite, Studio prend le relais.",
+    "description": "Commencez par 5 prises de parole d’essai, sans limite de temps et sans carte bancaire, pour mesurer la vraie valeur. Ensuite, Studio prend le relais.",
     "productionTitle": "Paiement production",
-    "productionBody": "Stripe Checkout appliquera l’essai de 14 jours au démarrage, puis l’abonnement mensuel ou annuel si l’utilisateur continue.",
+    "productionBody": "L’essai est basé sur l’usage : 5 prises de parole, sans limite de temps et sans carte bancaire. Au moment de continuer, Stripe Checkout applique l’abonnement mensuel ou annuel.",
     "prepareStudio": "Préparer ma prochaine prise de parole"
     ,
     "perMonthEquivalent": "soit ~{amount} €/mois",
-    "riskReversal": "Sans engagement · annulable en 1 clic · 14 jours gratuits",
+    "riskReversal": "Sans carte bancaire · annulable en 1 clic · 5 prises de parole d’essai sans limite de temps",
     "recommended": "Recommandé",
     "cycleYearly": "Annuel",
     "cycleMonthly": "Mensuel"
     ,
+    "trialCta": "Commencer l’essai gratuit · 5 talks · sans limite de temps · sans carte bancaire",
+    "perSeatCadence": "par siège",
+    "seatsLabel": "Sièges",
+    "increaseSeats": "Ajouter un siège",
+    "decreaseSeats": "Retirer un siège",
     "plans": [
-      {
-        "id": "starter",
-        "name": "Essai",
-        "audience": "Pour tester sans friction",
-        "price": "14 jours",
-        "cadence": "pour tester",
-        "description": "Accès assez complet pour mesurer la valeur, avec une limite claire avant de passer à Studio.",
-        "features": ["5 prises de parole maximum", "Assistant IA inclus (crédits limités)", "Prompteur disponible", "Export PDF (avec filigrane)", "Mémos vocaux inclus"]
-      },
       {
         "id": "studio",
         "name": "Studio",
@@ -225,22 +222,38 @@
         "description": "Le plan pensé pour écrire, améliorer et répéter toutes vos interventions.",
         "ctaLabel": "Choisir Studio",
         "secondaryPrice": {
-          "badge": "45 EUR d’économie face au mensuel",
+          "badge": "économisez 45 €",
           "cadence": "par mois",
           "price": "12 EUR"
         },
         "features": ["Prises de parole illimitées", "Assistant IA complet", "Prompteur vocal", "Mémos vocaux", "Progression globale", "Assistance prioritaire"]
       },
       {
+        "id": "pro",
+        "name": "Pro",
+        "audience": "Pour orateurs exigeants",
+        "price": "159 EUR",
+        "cadence": "par an",
+        "description": "Pour aller plus loin : analytics, versions multiples, multilingue et export sans watermark.",
+        "ctaLabel": "Choisir Pro",
+        "secondaryPrice": {
+          "badge": "économisez 69 €",
+          "cadence": "par mois",
+          "price": "19 EUR"
+        },
+        "features": ["Analytics de répétition", "Versions multiples d’un talk", "Déclinaison multilingue", "Export branded sans watermark", "Partage & feedback"]
+      },
+      {
         "id": "team",
         "name": "Équipe",
         "audience": "Pour équipes et églises",
-        "price": "240 EUR",
-        "cadence": "par an, jusqu’à 5 utilisateurs",
+        "price": "49 EUR",
+        "cadence": "par siège / an",
+        "groupFraming": "Offre groupe — tarif dégressif par siège",
         "description": "Un cadre pour plusieurs intervenants, avec onboarding et accompagnement.",
         "ctaLabel": "Démarrer avec mon équipe",
-        "secondaryPrice": { "badge": "108 EUR d’économie face au mensuel", "cadence": "par mois", "price": "29 EUR" },
-        "features": ["Jusqu’à 5 comptes Studio", "Invitations par lien ou email", "Facturation centralisée", "Accueil guidé", "Aide à la configuration"]
+        "secondaryPrice": { "badge": "économisez 23 €/siège", "cadence": "par siège / mois", "price": "6 EUR" },
+        "features": ["Studio pour chaque siège", "Invitations par lien ou email", "Facturation centralisée", "Accueil guidé", "Aide à la configuration"]
       }
     ]
   },
@@ -840,7 +853,7 @@
         "Mode prompteur : répéter ou présenter avec défilement automatique, minuteur et suivi vocal.",
         "Réglages : ajuster assistant IA, modules, thème, taille du texte et suivi vocal.",
         "Progression : vérifier ce qui est prêt et ce qu’il reste à finaliser.",
-        "Tarifs : consulter l’essai de 14 jours et l’abonnement Studio."
+        "Tarifs : consulter l’essai de 5 prises de parole et l’abonnement Studio."
       ]
     }
   },
@@ -897,7 +910,7 @@
     "coverTitle": "Ce que cette page couvrira",
     "coverBody": "Cette page SEO est préparée comme un hub de contenu ciblé pour {audience}. Elle évoluera avec des exemples, workflows, comparaisons et liens internes à mesure que Solo Speaker Studio développe sa visibilité.",
     "tryTitle": "Tester le studio",
-    "tryBody": "Commencez avec 14 jours, 5 prises de parole, le mode prompteur, les mémos vocaux et l’assistance IA limitée.",
+    "tryBody": "Commencez avec 5 prises de parole, sans limite de temps et sans carte bancaire : le mode prompteur, les mémos vocaux et l’assistance IA limitée.",
     "sermon-preparation": {
       "audience": "les pasteurs et équipes de prédication",
       "description": "Préparez des sermons avec une structure assistée par IA, le développement des sections, la réécriture orale, la durée estimée et un mode prompteur concentré pour répéter.",

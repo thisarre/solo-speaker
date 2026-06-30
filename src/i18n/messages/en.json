@@ -36,10 +36,10 @@
       ["Outline → sections", "Each part can grow without breaking the rest."],
       ["Sections → teleprompter", "Rehearsal starts without export or reformatting."]
     ],
-    "trialEyebrow": "Free trial · 14 days",
+    "trialEyebrow": "Free trial · 5 talks",
     "trialTitle": "Your next 5 talks, ready faster than ever.",
-    "trialDescription": "For 14 days, live the full flow: capture an idea, generate an outline, polish your sections with AI, then rehearse, all in one place, no commitment.",
-    "trialHighlights": ["14-day free trial", "5 talks included", "Outline, AI assistant, teleprompter and voice notes"],
+    "trialDescription": "Across your first 5 talks, live the full flow: capture an idea, generate an outline, polish your sections with AI, then rehearse, all in one place, with no time limit and no credit card.",
+    "trialHighlights": ["5 free talks", "No credit card", "Outline, AI assistant, teleprompter and voice notes"],
     "videoDemoEyebrow": "In action",
     "videoDemoTitle": "From first idea to teleprompter, in one flow.",
     "videoDemoBody": "Two short demos show how Solo Speaker clarifies your notes, structures your sections and gets you rehearsing, without ever switching tools.",
@@ -101,12 +101,13 @@
     ],
     "pricingEyebrow": "Pricing",
     "pricingTitle": "Try it free. Keep it once it wins you over.",
-    "pricingBody": "14 days and up to 5 talks to test everything: notes, outline, AI, teleprompter and PDF export. Studio is 99 EUR/year, saving 45 EUR compared with monthly billing.",
+    "pricingBody": "5 trial talks to test everything with no time limit and no credit card: notes, outline, AI, teleprompter and PDF export. Studio is 99 EUR/year, saving 45 EUR compared with monthly billing.",
     "pricingBullets": [
-      "Trial: 14 days, 5 talks maximum, limited AI, teleprompter and voice notes.",
+      "Trial: 5 talks maximum, no time limit, no credit card, limited AI, teleprompter and voice notes.",
       "Studio monthly: 12 EUR/month for regular speakers.",
       "Studio annual: 99 EUR/year, saving 45 EUR compared with monthly billing.",
-      "Team: 29 EUR/month for small teams, churches and training groups."
+      "Pro: 19 EUR/month for analytics, multilingual and watermark-free export.",
+      "Team: 6 EUR/month per seat (group offer, volume pricing) for small teams, churches and training groups."
     ],
     "founderEyebrow": "A note from the founder",
     "founderParagraphs": [
@@ -117,7 +118,7 @@
     "faqEyebrow": "FAQ",
     "faqTitle": "Everything you want to know before you start.",
     "heroSecondaryCta": "Start for free",
-    "trustStrip": ["14 days free", "No commitment", "Cancel in one click", "Your data stays private"]
+    "trustStrip": ["5 free talks", "No credit card", "Cancel in one click", "Your data stays private"]
   },
   "auth": {
     "loginTitle": "Back to the studio",
@@ -196,27 +197,23 @@
     "returnToStudio": "Back to studio",
     "eyebrow": "Pricing",
     "title": "A simple studio to start, a serious one to keep.",
-    "description": "Start with 14 days to test the real value: 5 talks, teleprompter, voice notes and AI included. Then Studio takes over.",
+    "description": "Start with 5 trial talks, no time limit and no credit card, to test the real value. Then Studio takes over.",
     "productionTitle": "Production payment",
-    "productionBody": "Stripe Checkout will apply the 14-day trial at the start, then monthly or yearly billing if the user continues.",
+    "productionBody": "The trial is usage-based: 5 talks, no time limit and no credit card. When you choose to continue, Stripe Checkout applies the monthly or yearly subscription.",
     "prepareStudio": "Prepare my next talk"
     ,
     "perMonthEquivalent": "i.e. ~€{amount}/mo",
-    "riskReversal": "No commitment · cancel in one click · 14 days free",
+    "riskReversal": "No credit card · cancel in one click · 5 trial talks with no time limit",
     "recommended": "Recommended",
     "cycleYearly": "Yearly",
     "cycleMonthly": "Monthly"
     ,
+    "trialCta": "Start the free trial · 5 talks · no time limit · no credit card",
+    "perSeatCadence": "per seat",
+    "seatsLabel": "Seats",
+    "increaseSeats": "Add a seat",
+    "decreaseSeats": "Remove a seat",
     "plans": [
-      {
-        "id": "starter",
-        "name": "Trial",
-        "audience": "For trying without friction",
-        "price": "14 days",
-        "cadence": "to test",
-        "description": "Enough access to feel the value, with a clear limit before moving to Studio.",
-        "features": ["5 talks maximum", "AI assistant included (limited credits)", "Teleprompter available", "PDF export (with watermark)", "Voice notes included"]
-      },
       {
         "id": "studio",
         "name": "Studio",
@@ -226,22 +223,38 @@
         "description": "The plan for writing, improving and rehearsing every talk.",
         "ctaLabel": "Choose Studio",
         "secondaryPrice": {
-          "badge": "Save 45 EUR compared with monthly",
+          "badge": "Save €45",
           "cadence": "per month",
           "price": "12 EUR"
         },
         "features": ["Unlimited talks", "Full AI assistant", "Voice-aware teleprompter", "Voice notes", "Global progress", "Priority support"]
       },
       {
+        "id": "pro",
+        "name": "Pro",
+        "audience": "For demanding speakers",
+        "price": "159 EUR",
+        "cadence": "per year",
+        "description": "Go further: analytics, multiple versions, multilingual and watermark-free branded export.",
+        "ctaLabel": "Choose Pro",
+        "secondaryPrice": {
+          "badge": "Save €69",
+          "cadence": "per month",
+          "price": "19 EUR"
+        },
+        "features": ["Rehearsal analytics", "Multiple versions of a talk", "Multilingual variants", "Branded export without watermark", "Sharing & feedback"]
+      },
+      {
         "id": "team",
         "name": "Team",
         "audience": "For teams and churches",
-        "price": "240 EUR",
-        "cadence": "per year, up to 5 users",
+        "price": "49 EUR",
+        "cadence": "per seat / year",
+        "groupFraming": "Group offer — volume pricing per seat",
         "description": "A workspace for multiple speakers, with onboarding and support.",
         "ctaLabel": "Get started with my team",
-        "secondaryPrice": { "badge": "Save 108 EUR vs monthly", "cadence": "per month", "price": "29 EUR" },
-        "features": ["Up to 5 Studio seats", "Invite by link or email", "Centralized billing", "Guided onboarding", "Setup help"]
+        "secondaryPrice": { "badge": "Save €23/seat", "cadence": "per seat / month", "price": "6 EUR" },
+        "features": ["Studio for every seat", "Invite by link or email", "Centralized billing", "Guided onboarding", "Setup help"]
       }
     ]
   },
@@ -841,7 +854,7 @@
         "Teleprompter mode: rehearse or present with auto-scroll, timer and voice follow.",
         "Settings: adjust AI assistant, modules, theme, text size and voice follow.",
         "Progression: check what is ready and what still needs work.",
-        "Pricing: review the 14-day trial and Studio subscription."
+        "Pricing: review the 5-talk trial and Studio subscription."
       ]
     }
   },
@@ -898,7 +911,7 @@
     "coverTitle": "What this page will cover",
     "coverBody": "This SEO page is prepared as a focused content hub for {audience}. It will expand into examples, workflows, comparison copy and internal links as Solo Speaker Studio grows its search footprint.",
     "tryTitle": "Try the studio",
-    "tryBody": "Start with 14 days, 5 talks, teleprompter mode, voice notes and limited AI assistance.",
+    "tryBody": "Start with 5 talks, no time limit and no credit card: teleprompter mode, voice notes and limited AI assistance.",
     "sermon-preparation": {
       "audience": "pastors and preaching teams",
       "description": "Prepare sermons with AI-assisted structure, section development, oral rewriting, estimated duration and a focused teleprompter mode for rehearsal.",
