@@ -19,7 +19,7 @@ export async function AppShell({ children, locale }: { children: ReactNode; loca
   const billingPlan = profile?.billing_plan ?? "trial";
   const trialReminder = billingPlan === "studio" || billingPlan === "team"
     ? null
-    : getTrialReminder({ copy: messages.trial, trialStartedAt: profile?.created_at ?? null });
+    : getTrialReminder({ copy: messages.trial, currentTalkCount: talkCount });
 
   return (
     <div className="flex min-h-[100svh] bg-bg text-ink">

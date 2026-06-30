@@ -2,30 +2,51 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { getPricingPlans, pricingPlans } from "./plans";
 
-test("pricingPlans exposes production-ready plans in display order", () => {
+function euros(price: string): number {
+  return Number(price.replace(/[^\d]/g, ""));
+}
+
+test("pricingPlans exposes three paid tiers in display order", () => {
   assert.deepEqual(
     pricingPlans.map((plan) => plan.id),
-    ["starter", "studio", "team"]
+    ["studio", "pro", "team"]
   );
   assert.equal(pricingPlans.filter((plan) => plan.highlighted).length, 1);
   assert.equal(pricingPlans.find((plan) => plan.highlighted)?.id, "studio");
-  assert.equal(pricingPlans[0].price, "14 jours");
-  assert.equal(pricingPlans[0].features.some((feature) => feature.includes("5 prises de parole maximum")), true);
-  assert.equal(pricingPlans[1].price, "99 EUR");
-  assert.match(pricingPlans[1].secondaryPrice?.badge ?? "", /45 EUR/i);
-  assert.equal(pricingPlans[1].checkoutPlan, "studio_yearly");
-  assert.equal(pricingPlans[2].price, "240 EUR");
-  assert.equal(pricingPlans[2].secondaryPrice?.price, "29 EUR");
-  assert.match(pricingPlans[2].secondaryPrice?.badge ?? "", /108 EUR/i);
+
+  const [studio, pro, team] = pricingPlans;
+  assert.equal(studio.price, "99 EUR");
+  assert.match(studio.secondaryPrice.badge, /45/);
+
+  assert.equal(pro.price, "159 EUR");
+  assert.match(pro.secondaryPrice.badge, /69/);
+  assert.equal(pro.checkoutPlan, "pro_yearly");
+
+  assert.equal(team.perSeat, true);
+  assert.equal(team.minSeats, 3);
+  assert.equal(team.price, "49 EUR");
+  assert.equal(studio.perSeat, false);
+  assert.equal(pro.perSeat, false);
 });
 
-test("pricingPlans route paid Studio and Team CTAs to Stripe Checkout", () => {
+test("each tier holds a ~30% annual gap vs 12x monthly", () => {
+  for (const plan of pricingPlans) {
+    const monthlyAmount = euros(plan.secondaryPrice.price);
+    const yearlyAmount = euros(plan.price);
+    assert.ok(monthlyAmount > 0 && yearlyAmount > 0, `${plan.id} prices parse`);
+    assert.ok(
+      yearlyAmount <= monthlyAmount * 12 * 0.72,
+      `${plan.id}: ${yearlyAmount} <= ${monthlyAmount * 12 * 0.72}`
+    );
+  }
+});
+
+test("pricingPlans route paid CTAs to Stripe Checkout in both locales", () => {
   for (const locale of ["en", "fr"] as const) {
-    const [trial, studio, team] = getPricingPlans(locale);
-    assert.equal(trial.ctaHref.startsWith(`/${locale}/signup`), true);
+    const [studio, pro, team] = getPricingPlans(locale);
     assert.equal(studio.ctaHref, "/api/billing/checkout");
     assert.equal(studio.checkoutPlan, "studio_yearly");
-    assert.equal(team.ctaHref, "/api/billing/checkout");
+    assert.equal(pro.checkoutPlan, "pro_yearly");
     assert.equal(team.checkoutPlan, "team_yearly");
     assert.equal(team.features.length >= 4, true);
   }

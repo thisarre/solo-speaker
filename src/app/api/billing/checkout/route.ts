@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { buildStripeCheckoutPayload, getCheckoutPlan, getStripePriceId } from "@/modules/billing/checkout";
+import { buildStripeCheckoutPayload } from "@/modules/billing/checkout";
+import { lookupKeyFor, parseCheckoutSelection, resolvePriceId, resolveSeats } from "@/modules/billing/stripe-prices";
 import { localizedPath, type Locale } from "@/i18n/routing";
 
 export const runtime = "nodejs";
@@ -19,14 +20,25 @@ function parseLocale(value: FormDataEntryValue | string | null): Locale {
   return value === "fr" ? "fr" : "en";
 }
 
-async function createCheckoutRedirect(request: NextRequest, input: { locale: Locale; planValue: FormDataEntryValue | string | null }) {
+async function createCheckoutRedirect(
+  request: NextRequest,
+  input: { locale: Locale; planValue: FormDataEntryValue | string | null; seatsValue: FormDataEntryValue | string | null }
+) {
   const locale = input.locale;
-  const plan = getCheckoutPlan(input.planValue);
+  const selection = parseCheckoutSelection(typeof input.planValue === "string" ? input.planValue : null);
   const origin = requestOrigin(request);
 
-  if (!plan) {
+  if (!selection) {
     return NextResponse.redirect(new URL(localizedPath("/pricing?error=invalid-plan", locale), origin), 303);
   }
+
+  const { plan, cadence } = selection;
+
+  const seatResult = resolveSeats(plan, typeof input.seatsValue === "string" ? input.seatsValue : null);
+  if ("error" in seatResult) {
+    return NextResponse.redirect(new URL(localizedPath("/pricing?error=invalid-seats", locale), origin), 303);
+  }
+  const seats = seatResult.seats;
 
   const supabase = await createClient();
   const {
@@ -35,15 +47,20 @@ async function createCheckoutRedirect(request: NextRequest, input: { locale: Loc
 
   if (!user) {
     const signupUrl = new URL(localizedPath("/signup", locale), origin);
-    signupUrl.searchParams.set("plan", plan.id);
+    signupUrl.searchParams.set("plan", `${plan}_${cadence}`);
     signupUrl.searchParams.set("checkout", "1");
     return NextResponse.redirect(signupUrl, 303);
   }
 
   const secretKey = process.env.STRIPE_SECRET_KEY?.trim();
-  const priceId = getStripePriceId(plan);
 
-  if (!secretKey || !priceId) {
+  if (!secretKey) {
+    return NextResponse.redirect(new URL(localizedPath("/pricing?error=stripe-not-configured", locale), origin), 303);
+  }
+
+  const priceId = await resolvePriceId(lookupKeyFor(plan, cadence), secretKey);
+
+  if (!priceId) {
     return NextResponse.redirect(new URL(localizedPath("/pricing?error=stripe-not-configured", locale), origin), 303);
   }
 
@@ -51,7 +68,9 @@ async function createCheckoutRedirect(request: NextRequest, input: { locale: Loc
     cancelUrl: `${origin}${localizedPath("/pricing?checkout=cancelled", locale)}`,
     customerEmail: user.email,
     plan,
+    cadence,
     priceId,
+    seats,
     successUrl: `${origin}${localizedPath("/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}", locale)}`,
     userId: user.id
   });
@@ -79,7 +98,8 @@ async function createCheckoutRedirect(request: NextRequest, input: { locale: Loc
 export async function GET(request: NextRequest) {
   return createCheckoutRedirect(request, {
     locale: parseLocale(request.nextUrl.searchParams.get("locale")),
-    planValue: request.nextUrl.searchParams.get("plan")
+    planValue: request.nextUrl.searchParams.get("plan"),
+    seatsValue: request.nextUrl.searchParams.get("seats")
   });
 }
 
@@ -87,6 +107,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   return createCheckoutRedirect(request, {
     locale: parseLocale(formData.get("locale")),
-    planValue: formData.get("plan")
+    planValue: formData.get("plan"),
+    seatsValue: formData.get("seats")
   });
 }

@@ -20,3 +20,8 @@ docs/superpowers/
 
 # Claude Code headless run output (never commit)
 claude-output.log
+
+# Playwright E2E artifacts
+e2e/results.json
+playwright-report/
+test-results/

@@ -15,17 +15,20 @@ import { evaluateTranscriptQuality } from "./transcript-quality";
 import { useDeepgramProvider } from "./providers/deepgram-provider";
 import { readVoiceProviderPreference } from "@/modules/settings/studio-preferences";
 
-export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", currentIndex: number) {
+export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", currentIndex: number, talkId?: string | null) {
   const browserRecognition = useSpeechRecognition(language);
-  const deepgramRecognition = useDeepgramProvider(language);
+  const deepgramRecognition = useDeepgramProvider(language, talkId);
   const [enabled, setEnabled] = useState(false);
   const [providerMode, setProviderMode] = useState<VoiceFollowProviderMode>(() => readVoiceProviderPreference());
   const [autoDeepgramDisabled, setAutoDeepgramDisabled] = useState(false);
+  const [capReachedDisabled, setCapReachedDisabled] = useState(false);
   const [lockState, setLockState] = useState<LockOnState>(() => resetLockOn());
   const globalFallbackTimerRef = useRef(0);
+  // Cap-reached forces the browser provider in ALL modes (forced-deepgram included).
   const shouldUseDeepgram =
-    providerMode === "deepgram" ||
-    (providerMode === "auto" && !browserRecognition.isSupported && deepgramRecognition.isSupported && !autoDeepgramDisabled);
+    !capReachedDisabled &&
+    (providerMode === "deepgram" ||
+      (providerMode === "auto" && !browserRecognition.isSupported && deepgramRecognition.isSupported && !autoDeepgramDisabled));
   const activeRecognition = shouldUseDeepgram ? deepgramRecognition : browserRecognition;
   const vocabulary = useMemo(() => buildTalkVocabulary({ items }), [items]);
   const speakingIndex = useMemo(() => buildSpeakingIndex(items, vocabulary), [items, vocabulary]);
@@ -142,6 +145,20 @@ export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", cur
 
     return () => window.clearTimeout(timeoutId);
   }, [activeRecognition.error, activeRecognition.provider, browserRecognition, deepgramRecognition, enabled, providerMode]);
+
+  // Cap reached: switch to the browser provider for the rest of the session, regardless of
+  // provider mode (including forced "deepgram"). Distinct from the no-delta path above.
+  useEffect(() => {
+    if (!enabled || !deepgramRecognition.capReached || capReachedDisabled) return;
+
+    const timeoutId = window.setTimeout(() => {
+      deepgramRecognition.stop();
+      setCapReachedDisabled(true);
+      browserRecognition.start();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [enabled, deepgramRecognition.capReached, capReachedDisabled, browserRecognition, deepgramRecognition]);
 
   const recalibrate = useCallback(() => {
     setLockState((current) => ({ ...current, globalFallbackEnabled: true, lockedIndex: null, lockedItemId: null, pendingCount: 0, pendingItemId: null }));

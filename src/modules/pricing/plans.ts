@@ -1,8 +1,10 @@
 import { getMessages } from "@/i18n/messages";
 import { localizedPath, type Locale } from "@/i18n/routing";
 
+export type PlanId = "studio" | "pro" | "team";
+
 export type PricingPlan = {
-  id: "starter" | "studio" | "team";
+  id: PlanId;
   name: string;
   audience: string;
   price: string;
@@ -11,17 +13,20 @@ export type PricingPlan = {
   highlighted?: boolean;
   ctaLabel: string;
   ctaHref: string;
-  checkoutPlan?: "studio_monthly" | "studio_yearly" | "team_monthly" | "team_yearly";
+  checkoutPlan: "studio_monthly" | "studio_yearly" | "pro_monthly" | "pro_yearly" | "team_monthly" | "team_yearly";
   features: string[];
+  perSeat: boolean;
+  minSeats?: number;
+  groupFraming?: string;
   monthlyEquivalent?: number;
-  secondaryPrice?: {
+  secondaryPrice: {
     badge: string;
     cadence: string;
     price: string;
   };
 };
 
-// Monthly equivalent of an annual price, rounded (e.g. "99 EUR" → 8, "240 EUR" → 20).
+// Monthly equivalent of an annual price, rounded (e.g. "99 EUR" → 8, "159 EUR" → 13).
 function monthlyEquivalentFromAnnual(price: string, cadence: string): number | undefined {
   if (!/an|year/i.test(cadence)) return undefined;
   const amount = Number(price.replace(/[^\d]/g, ""));
@@ -29,51 +34,67 @@ function monthlyEquivalentFromAnnual(price: string, cadence: string): number | u
   return Math.round(amount / 12);
 }
 
+const MIN_TEAM_SEATS = 3;
+
 export function getPricingPlans(locale: Locale): PricingPlan[] {
   const messages = getMessages(locale);
   const planCopy = messages.pricing.plans;
 
+  const byId = Object.fromEntries(planCopy.map((plan) => [plan.id, plan]));
+  const studioCopy = byId.studio;
+  const proCopy = byId.pro;
+  const teamCopy = byId.team;
+
   return [
     {
-      id: "starter",
-      name: planCopy[0].name,
-      audience: planCopy[0].audience,
-      price: planCopy[0].price,
-      cadence: planCopy[0].cadence,
-      description: planCopy[0].description,
-      ctaLabel: messages.common.startFreeTrial,
-      ctaHref: localizedPath("/signup?plan=trial", locale),
-      features: planCopy[0].features
-    },
-    {
       id: "studio",
-      name: planCopy[1].name,
-      audience: planCopy[1].audience,
-      price: planCopy[1].price,
-      cadence: planCopy[1].cadence,
-      description: planCopy[1].description,
+      name: studioCopy.name,
+      audience: studioCopy.audience,
+      price: studioCopy.price,
+      cadence: studioCopy.cadence,
+      description: studioCopy.description,
       highlighted: true,
-      ctaLabel: planCopy[1].ctaLabel ?? messages.common.startFreeTrial,
+      ctaLabel: studioCopy.ctaLabel ?? messages.common.startFreeTrial,
       ctaHref: "/api/billing/checkout",
       checkoutPlan: "studio_yearly",
-      secondaryPrice: planCopy[1].secondaryPrice,
-      features: planCopy[1].features,
-      monthlyEquivalent: monthlyEquivalentFromAnnual(planCopy[1].price, planCopy[1].cadence)
+      secondaryPrice: studioCopy.secondaryPrice,
+      features: studioCopy.features,
+      perSeat: false,
+      monthlyEquivalent: monthlyEquivalentFromAnnual(studioCopy.price, studioCopy.cadence)
+    },
+    {
+      id: "pro",
+      name: proCopy.name,
+      audience: proCopy.audience,
+      price: proCopy.price,
+      cadence: proCopy.cadence,
+      description: proCopy.description,
+      highlighted: false,
+      ctaLabel: proCopy.ctaLabel ?? messages.common.startFreeTrial,
+      ctaHref: "/api/billing/checkout",
+      checkoutPlan: "pro_yearly",
+      secondaryPrice: proCopy.secondaryPrice,
+      features: proCopy.features,
+      perSeat: false,
+      monthlyEquivalent: monthlyEquivalentFromAnnual(proCopy.price, proCopy.cadence)
     },
     {
       id: "team",
-      name: planCopy[2].name,
-      audience: planCopy[2].audience,
-      price: planCopy[2].price,
-      cadence: planCopy[2].cadence,
-      description: planCopy[2].description,
+      name: teamCopy.name,
+      audience: teamCopy.audience,
+      price: teamCopy.price,
+      cadence: teamCopy.cadence,
+      description: teamCopy.description,
       highlighted: false,
-      ctaLabel: planCopy[2].ctaLabel ?? messages.common.startFreeTrial,
+      ctaLabel: teamCopy.ctaLabel ?? messages.common.startFreeTrial,
       ctaHref: "/api/billing/checkout",
       checkoutPlan: "team_yearly",
-      secondaryPrice: planCopy[2].secondaryPrice,
-      features: planCopy[2].features,
-      monthlyEquivalent: monthlyEquivalentFromAnnual(planCopy[2].price, planCopy[2].cadence)
+      secondaryPrice: teamCopy.secondaryPrice,
+      features: teamCopy.features,
+      perSeat: true,
+      minSeats: MIN_TEAM_SEATS,
+      groupFraming: teamCopy.groupFraming,
+      monthlyEquivalent: monthlyEquivalentFromAnnual(teamCopy.price, teamCopy.cadence)
     }
   ];
 }
@@ -81,20 +102,22 @@ export function getPricingPlans(locale: Locale): PricingPlan[] {
 export type BillingCycle = "monthly" | "yearly";
 
 export type PricingCard = {
-  id: PricingPlan["id"];
+  id: PlanId;
   name: string;
   audience: string;
   description: string;
   features: string[];
   highlighted: boolean;
-  isTrial: boolean;
+  perSeat: boolean;
+  minSeats?: number;
+  groupFraming?: string;
   ctaLabel: string;
   monthly: { price: string; cadence: string };
   yearly: { price: string; cadence: string; savings: string };
 };
 
-// Serializable plan cards for the client-side billing-cycle toggle. Annual price is the plan's
-// primary price; monthly comes from `secondaryPrice`. The starter is a free trial (no cycle).
+// Serializable plan cards for the client-side billing-cycle toggle. Yearly price is the plan's
+// primary price; monthly comes from `secondaryPrice`. Team prices are PER SEAT.
 export function getPricingCards(locale: Locale): PricingCard[] {
   return getPricingPlans(locale).map((plan) => ({
     id: plan.id,
@@ -103,13 +126,18 @@ export function getPricingCards(locale: Locale): PricingCard[] {
     description: plan.description,
     features: plan.features,
     highlighted: Boolean(plan.highlighted),
-    isTrial: !plan.secondaryPrice,
+    perSeat: plan.perSeat,
+    minSeats: plan.minSeats,
+    groupFraming: plan.groupFraming,
     ctaLabel: plan.ctaLabel,
-    monthly: plan.secondaryPrice
-      ? { price: plan.secondaryPrice.price, cadence: plan.secondaryPrice.cadence }
-      : { price: plan.price, cadence: plan.cadence },
-    yearly: { price: plan.price, cadence: plan.cadence, savings: plan.secondaryPrice?.badge ?? "" }
+    monthly: { price: plan.secondaryPrice.price, cadence: plan.secondaryPrice.cadence },
+    yearly: { price: plan.price, cadence: plan.cadence, savings: plan.secondaryPrice.badge }
   }));
 }
 
 export const pricingPlans = getPricingPlans("fr");
+
+// Re-export for callers that still reference the localized trial path.
+export function trialHref(locale: Locale): string {
+  return localizedPath("/signup?plan=trial", locale);
+}

@@ -90,7 +90,7 @@ export function renderWelcomeEmail(input: { name?: string | null; locale?: Email
           "<strong>4. Voice memos & PDF export</strong>: capture ideas by voice, export whenever you want."
         ],
         cta: { label: "Create my first talk", url: `${SITE}/en/talks/new` },
-        footnote: "You have a 14-day trial with up to 5 talks. Questions? Just reply to this email."
+        footnote: "Your free trial includes 5 talks with no time limit and no credit card. Questions? Just reply to this email."
       })
     };
   }
@@ -108,7 +108,7 @@ export function renderWelcomeEmail(input: { name?: string | null; locale?: Email
         "<strong>4. Mémos vocaux & export PDF</strong> : capture tes idées à la voix, exporte quand tu veux."
       ],
       cta: { label: "Créer ma première prise de parole", url: `${SITE}/fr/talks/new` },
-      footnote: "Tu as 14 jours d'essai avec jusqu'à 5 prises de parole. Une question ? Réponds simplement à cet email."
+      footnote: "Ton essai gratuit inclut 5 prises de parole, sans limite de temps et sans carte bancaire. Une question ? Réponds simplement à cet email."
     })
   };
 }
