@@ -7,8 +7,16 @@ import { lastTranscriptWords } from "../transcript-buffer";
 type DeepgramTokenResponse = {
   access_token?: string;
   expires_in?: number;
+  engine?: "cloud" | "browser";
+  reason?: string;
   error?: string;
 };
+
+// Marker the auto-fallback effect in use-voice-follow watches for ("aucun delta").
+// When the STT cap is reached the mint endpoint returns { engine: "browser" } with no
+// access_token; we surface the same fallback signal so speaking mode switches to the
+// in-browser provider for the rest of the session.
+const CAP_REACHED_ERROR = "Quota Deepgram atteint — aucun delta cloud, bascule sur navigateur.";
 
 type DeepgramAlternative = {
   confidence?: number;
@@ -60,6 +68,7 @@ export function useDeepgramProvider(language: "FR" | "EN"): TranscriptionProvide
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
   const noDeltaTimeoutRef = useRef(0);
   const [alternatives, setAlternatives] = useState<string[]>([]);
   const [error, setError] = useState("");
@@ -86,6 +95,7 @@ export function useDeepgramProvider(language: "FR" | "EN"): TranscriptionProvide
     mediaRecorderRef.current = null;
     mediaStreamRef.current = null;
     socketRef.current = null;
+    sessionIdRef.current = null;
     setIsRequesting(false);
     setInterimTranscript("");
   }, []);
@@ -104,9 +114,27 @@ export function useDeepgramProvider(language: "FR" | "EN"): TranscriptionProvide
     setIsRequesting(true);
     setLastDeltaAt(null);
 
+    // One stable session UUID per speaking session; re-used on every ~60s re-mint so the
+    // server can keep this session's reserved_seconds in sync with the usage counter.
+    const sessionId = sessionIdRef.current ?? crypto.randomUUID();
+    sessionIdRef.current = sessionId;
+
     try {
-      const tokenResponse = await fetch("/api/deepgram/token", { method: "POST" });
+      const tokenResponse = await fetch("/api/deepgram/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId })
+      });
       const tokenPayload = (await tokenResponse.json().catch(() => ({}))) as DeepgramTokenResponse;
+
+      // Cap reached: server tells us to use the in-browser engine. Surface the fallback
+      // signal so use-voice-follow switches providers for the rest of the session.
+      if (tokenResponse.ok && tokenPayload.engine === "browser" && !tokenPayload.access_token) {
+        stop();
+        setError(CAP_REACHED_ERROR);
+        return;
+      }
+
       if (!tokenResponse.ok || !tokenPayload.access_token) {
         throw new Error(tokenPayload.error ?? "Token Deepgram indisponible.");
       }
