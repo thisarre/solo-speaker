@@ -291,7 +291,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 monthly: messages.pricing.cycleMonthly,
                 recommended: messages.pricing.recommended,
                 yearly: messages.pricing.cycleYearly,
-                perSeatCadence: messages.pricing.perSeatCadence,
+                perSeatTotalYearly: messages.pricing.perSeatTotalYearly,
+                perSeatTotalMonthly: messages.pricing.perSeatTotalMonthly,
                 seatsLabel: messages.pricing.seatsLabel,
                 increaseSeats: messages.pricing.increaseSeats,
                 decreaseSeats: messages.pricing.decreaseSeats

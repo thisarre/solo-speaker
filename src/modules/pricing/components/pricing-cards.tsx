@@ -12,7 +12,8 @@ type PricingCardsProps = {
     monthly: string;
     recommended: string;
     yearly: string;
-    perSeatCadence: string;
+    perSeatTotalYearly: string;
+    perSeatTotalMonthly: string;
     seatsLabel: string;
     increaseSeats: string;
     decreaseSeats: string;
@@ -54,8 +55,15 @@ export function PricingCards({ cards, labels, locale }: PricingCardsProps) {
           const minSeats = card.minSeats ?? 1;
           const seats = card.perSeat ? seatsByCard[card.id] ?? minSeats : 1;
           const perSeatAmount = eurosOf(pricing.price);
-          const displayPrice = card.perSeat ? `${perSeatAmount * seats} EUR` : pricing.price;
-          const cadence = card.perSeat ? `${labels.perSeatCadence} · ${pricing.cadence}` : pricing.cadence;
+          // The headline price is always the PER-SEAT amount (e.g. "49 EUR"); the localized cadence
+          // string already states the per-seat period. The seat multiplier only feeds the secondary total.
+          const displayPrice = pricing.price;
+          const cadence = pricing.cadence;
+          const seatTotalLabel = card.perSeat
+            ? (cycle === "yearly" ? labels.perSeatTotalYearly : labels.perSeatTotalMonthly)
+                .replaceAll("{total}", String(perSeatAmount * seats))
+                .replaceAll("{seats}", String(seats))
+            : "";
           const href = card.perSeat
             ? `/api/billing/checkout?plan=${card.id}_${cycle}&seats=${seats}&locale=${locale}`
             : `/api/billing/checkout?plan=${card.id}_${cycle}&locale=${locale}`;
@@ -79,6 +87,9 @@ export function PricingCards({ cards, labels, locale }: PricingCardsProps) {
                 <span className="text-[30px] font-bold leading-none">{displayPrice}</span>
                 <span className="text-[13px] text-muted">{cadence}</span>
               </div>
+              {card.perSeat ? (
+                <p className="m-0 mt-1 text-[12px] text-muted">{seatTotalLabel}</p>
+              ) : null}
               <p className={`m-0 mt-1.5 text-[12px] text-accent-ink ${showSavings ? "" : "invisible"}`}>{card.yearly.savings || " "}</p>
 
               {card.perSeat ? (

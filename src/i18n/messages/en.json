@@ -209,7 +209,8 @@
     "cycleMonthly": "Monthly"
     ,
     "trialCta": "Start the free trial · 5 talks · no time limit · no credit card",
-    "perSeatCadence": "per seat",
+    "perSeatTotalYearly": "i.e. €{total}/year for {seats} seats",
+    "perSeatTotalMonthly": "i.e. €{total}/month for {seats} seats",
     "seatsLabel": "Seats",
     "increaseSeats": "Add a seat",
     "decreaseSeats": "Remove a seat",
