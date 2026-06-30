@@ -75,7 +75,7 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
     voiceFollowActive,
     onEnd: stopPlaying
   });
-  const voiceFollow = useVoiceFollow(items, talk.language, currentIndex);
+  const voiceFollow = useVoiceFollow(items, talk.language, currentIndex, talk.id);
   const voiceActivity = useVoiceActivity(voiceFollowActive, voiceFollow.state.lastDeltaAt);
   const followStateRef = useRef<{
     confidence: number;

@@ -2,6 +2,9 @@ import type { VoiceFollowProvider } from "../types";
 
 export type TranscriptionProviderController = {
   alternatives: string[];
+  // True once the STT mint endpoint reports the plan's cloud cap is reached for this session.
+  // Drives a mode-independent switch to the in-browser provider in use-voice-follow.
+  capReached?: boolean;
   error: string;
   finalTranscript: string;
   interimTranscript: string;
