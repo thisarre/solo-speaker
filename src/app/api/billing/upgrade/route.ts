@@ -22,6 +22,13 @@ export async function POST(request: NextRequest) {
   const selection = parseBody(body);
   if (!selection) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
 
+  // This endpoint only handles in-place price swaps (Studio→Pro, monthly→yearly), which keep
+  // quantity 1. Team is seat-based (min 3) and must go through the seat-aware checkout, never a
+  // bare price swap — otherwise we'd create an invalid 1-seat Team subscription.
+  if (selection.plan === "team") {
+    return NextResponse.json({ error: "Team plans require seat selection via checkout, not in-place upgrade." }, { status: 400 });
+  }
+
   const secretKey = process.env.STRIPE_SECRET_KEY?.trim();
   if (!secretKey) return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
 

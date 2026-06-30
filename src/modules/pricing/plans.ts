@@ -135,10 +135,6 @@ export function getPricingCards(locale: Locale): PricingCard[] {
   }));
 }
 
-export function getTrialCta(locale: Locale): string {
-  return getMessages(locale).pricing.trialCta;
-}
-
 export const pricingPlans = getPricingPlans("fr");
 
 // Re-export for callers that still reference the localized trial path.

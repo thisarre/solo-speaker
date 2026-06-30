@@ -63,7 +63,15 @@ export type StripeSubscriptionLike = {
   current_period_start?: number | null;
   current_period_end?: number | null;
   metadata?: Record<string, string>;
-  items?: { data?: Array<{ quantity?: number | null; price?: StripePriceLike | null } | null> } | null;
+  items?: {
+    data?: Array<{
+      quantity?: number | null;
+      price?: StripePriceLike | null;
+      // Stripe API 2025-03-31+ exposes the period on the item rather than the subscription.
+      current_period_start?: number | null;
+      current_period_end?: number | null;
+    } | null>;
+  } | null;
 };
 
 export type DerivedSubscriptionFields = {
@@ -109,8 +117,10 @@ export function deriveSubscriptionFields(subscription: StripeSubscriptionLike): 
     seats,
     status: subscription.status ?? "",
     stripeCustomerId,
-    currentPeriodStart: isoFromUnix(subscription.current_period_start),
-    currentPeriodEnd: isoFromUnix(subscription.current_period_end),
+    // Prefer the subscription-level period (older API versions); fall back to the item-level
+    // period (API 2025-03-31+) so a new subscription isn't stored with a null period.
+    currentPeriodStart: isoFromUnix(subscription.current_period_start ?? item?.current_period_start),
+    currentPeriodEnd: isoFromUnix(subscription.current_period_end ?? item?.current_period_end),
   };
 }
 
