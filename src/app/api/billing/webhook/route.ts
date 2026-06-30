@@ -199,6 +199,16 @@ export async function POST(request: NextRequest) {
       .from("subscriptions")
       .update({ status: "canceled", updated_at: new Date().toISOString() })
       .eq("user_id", userId);
+
+    // Revoke the team members' entitlements too: a Team subscription pays for the seats, so when the
+    // owner cancels, every member must drop back to trial. Otherwise getActivePlan/can() would keep
+    // granting them the team plan (90-min STT cap, Pro/Team capabilities) off a canceled subscription.
+    // We downgrade billing_plan but keep team_id, so the membership link survives a possible re-subscribe.
+    const { data: team } = await admin.from("teams").select("id").eq("owner_id", userId).maybeSingle();
+    if (team) {
+      await admin.from("profiles").update({ billing_plan: "trial" }).eq("team_id", team.id);
+    }
+
     await emailSubscriber(admin, userId, (name, locale) => renderSubscriptionCancelledEmail({ name, locale }));
   }
 
