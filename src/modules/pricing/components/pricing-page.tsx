@@ -64,7 +64,8 @@ export function PricingPage({ locale = "en", returnHref = "/" }: { locale?: Loca
               monthly: pricing.cycleMonthly,
               recommended: pricing.recommended,
               yearly: pricing.cycleYearly,
-              perSeatCadence: pricing.perSeatCadence,
+              perSeatTotalYearly: pricing.perSeatTotalYearly,
+              perSeatTotalMonthly: pricing.perSeatTotalMonthly,
               seatsLabel: pricing.seatsLabel,
               increaseSeats: pricing.increaseSeats,
               decreaseSeats: pricing.decreaseSeats
