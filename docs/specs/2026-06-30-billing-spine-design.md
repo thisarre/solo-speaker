@@ -53,7 +53,7 @@ migration d'abonné payant live.
 | Reset payant | Sur `invoice.paid` / `current_period_end` Stripe — **pas le mois calendaire** |
 | Stripe prix | **`lookup_keys`** (pas de `price_id` en dur) · metadata `plan` sur chaque produit · Team `licensed` quantity |
 | Proration | Activée sur update (Studio→Pro, mensuel→annuel) via `proration_behavior='create_prorations'` |
-| Pricing page | 3 tiers payants ; **trial en bandeau/CTA universel** ; toggle annuel pré-sélectionné ; « économisez X € » ; sélecteur sièges Team min 3 ; framing Team « offre groupe / remise volume » ; badge **« Recommandé » sur Pro** |
+| Pricing page | 3 tiers payants ; **trial en CTA universel** (hors grille, **« sans carte bancaire »** mis en avant) ; toggle annuel pré-sélectionné ; « économisez X € » ; sélecteur sièges Team min 3 ; framing Team « offre groupe / remise volume » ; badge **« Recommandé » sur Studio** (choix par défaut du visiteur moyen / wedge pasteur ; Pro se vend par ses features, pas par un badge) |
 | Migration | Pré-lancement : aucun abonné payant à migrer ; trials restent trial |
 
 ---
@@ -248,15 +248,20 @@ idempotente avec le webhook) pour que le dashboard reflète l'état avant l'arri
 ## 9. Pricing page UI
 
 - `getPricingCards` : **3 tiers payants** (Studio · Pro · Team) dans la grille `md:grid-cols-3`.
-  Trial = **bandeau/CTA universel** au-dessus de la grille (« tous les plans démarrent par
-  5 talks gratuits »), pas une carte.
+  **Pas de 4ᵉ colonne** pour le trial.
+- **Trial = CTA universel hors grille**, au-dessus de la grille :
+  **« Commencer l'essai gratuit · 5 talks · sans limite de temps · sans carte bancaire »**
+  (optionnellement répété en bande sous la grille). Le trial est **la porte d'entrée vers les
+  3 tiers**, pas une option à comparer ; **« sans carte bancaire » mis en avant**.
 - **Toggle** mensuel/annuel, **annuel pré-sélectionné** (déjà le cas — `pricing-cards.tsx`).
 - **« économisez X € »** par tier en annuel (montants ci-dessus).
 - **Sélecteur de sièges Team** : stepper, **min 3**, défaut 3, **avant checkout** ; recalcule
   le prix affiché (`sièges × prix/siège`) et passe `quantity` au checkout.
 - **Framing Team** : copy « remise volume / offre groupe » expliquant pourquoi le per-siège
   (6 €) est inférieur à Studio (12 €).
-- **Badge « Recommandé »** déplacé de Studio → **Pro**.
+- **Badge « Recommandé »** reste sur **Studio** (choix par défaut du visiteur moyen / wedge
+  pasteur ; Pro se vend par ses features, pas par un badge — donc on ne touche pas au
+  `highlighted` actuel).
 
 ---
 
