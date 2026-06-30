@@ -20,7 +20,7 @@ export async function acceptPendingTeamInvitation(user: { id: string; email?: st
   if (!invitation) return false;
 
   await Promise.all([
-    admin.from("profiles").update({ team_id: invitation.team_id, billing_plan: "studio" }).eq("id", user.id),
+    admin.from("profiles").update({ team_id: invitation.team_id, billing_plan: "team" }).eq("id", user.id),
     admin.from("team_invitations").update({ status: "active", accepted_at: new Date().toISOString() }).eq("id", invitation.id)
   ]);
 
