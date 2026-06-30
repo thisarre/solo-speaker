@@ -205,9 +205,8 @@
     "riskReversal": "Sans carte bancaire · annulable en 1 clic · 5 prises de parole d’essai sans limite de temps",
     "recommended": "Recommandé",
     "cycleYearly": "Annuel",
-    "cycleMonthly": "Mensuel"
-    ,
-    "trialCta": "Commencer l’essai gratuit · 5 talks · sans limite de temps · sans carte bancaire",
+    "cycleMonthly": "Mensuel",
+    "trialCta": "Commencer l’essai gratuit · 5 prises de parole · sans limite de temps · sans carte bancaire",
     "perSeatCadence": "par siège",
     "seatsLabel": "Sièges",
     "increaseSeats": "Ajouter un siège",
@@ -241,7 +240,7 @@
           "cadence": "par mois",
           "price": "19 EUR"
         },
-        "features": ["Analytics de répétition", "Versions multiples d’un talk", "Déclinaison multilingue", "Export branded sans watermark", "Partage & feedback"]
+        "features": ["Analytics de répétition", "Versions multiples d’une prise de parole", "Déclinaison multilingue", "Export branded sans watermark", "Partage & feedback"]
       },
       {
         "id": "team",

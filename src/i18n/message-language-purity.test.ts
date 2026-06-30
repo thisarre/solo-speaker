@@ -13,10 +13,6 @@ function flattenMessages(value: unknown, path = ""): MessageEntry[] {
   if (typeof value === "string") {
     if (/^pricing\.plans\[\d+\]\.id$/.test(path)) return [];
     if (/^onboarding\.(roles|talkTypes)\[\d+\]\[0\]$/.test(path)) return [];
-    // Locked marketing copy intentionally uses the product term "talks" verbatim
-    // (universal trial CTA and the Pro "multiple versions of a talk" feature).
-    if (path === "pricing.trialCta") return [];
-    if (/^pricing\.plans\[\d+\]\.features\[\d+\]$/.test(path) && /\btalks?\b/i.test(value)) return [];
     return value.startsWith("/") ? [] : [{ path, value }];
   }
 
