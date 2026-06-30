@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { TranscriptionProviderController } from "./transcription-provider";
 import { lastTranscriptWords } from "../transcript-buffer";
 
@@ -68,6 +68,9 @@ export function useDeepgramProvider(language: "FR" | "EN", talkId?: string | nul
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const sessionIdRef = useRef<string | null>(null);
+  // Set only once a CLOUD session actually mints a token; null for the browser-fallback path.
+  // Used at stop() to confirm the real used seconds so the server releases the reservation.
+  const cloudStartedAtRef = useRef<number | null>(null);
   const noDeltaTimeoutRef = useRef(0);
   const [alternatives, setAlternatives] = useState<string[]>([]);
   const [error, setError] = useState("");
@@ -86,8 +89,43 @@ export function useDeepgramProvider(language: "FR" | "EN", talkId?: string | nul
     );
   }, []);
 
+  // Fire-and-forget: report the real used seconds so the server releases this session's
+  // reservation. Only runs for a CLOUD session (both sessionId and a cloud start time set);
+  // browser-fallback sessions never reserved, so they must NOT confirm. Idempotent server-side.
+  const confirmCloudSession = useCallback(() => {
+    const sessionId = sessionIdRef.current;
+    const startedAt = cloudStartedAtRef.current;
+    // Clear immediately so a re-start() is a fresh session and we never double-confirm.
+    sessionIdRef.current = null;
+    cloudStartedAtRef.current = null;
+    if (!sessionId || startedAt === null) return;
+
+    const confirmedSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+    const payload = JSON.stringify({ sessionId, confirmedSeconds });
+
+    try {
+      // Prefer sendBeacon: survives page teardown without keeping a listener around.
+      if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+        navigator.sendBeacon("/api/stt/session", new Blob([payload], { type: "application/json" }));
+        return;
+      }
+    } catch {
+      // Fall through to fetch below.
+    }
+
+    void fetch("/api/stt/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true
+    }).catch(() => {
+      // Best-effort; the sweep cron is the backstop for a dropped confirm.
+    });
+  }, []);
+
   const stop = useCallback(() => {
     window.clearTimeout(noDeltaTimeoutRef.current);
+    confirmCloudSession();
     const recorder = mediaRecorderRef.current;
     if (recorder && recorder.state !== "inactive") recorder.stop();
     socketRef.current?.close();
@@ -95,10 +133,9 @@ export function useDeepgramProvider(language: "FR" | "EN", talkId?: string | nul
     mediaRecorderRef.current = null;
     mediaStreamRef.current = null;
     socketRef.current = null;
-    sessionIdRef.current = null;
     setIsRequesting(false);
     setInterimTranscript("");
-  }, []);
+  }, [confirmCloudSession]);
 
   const start = useCallback(async () => {
     if (!isSupported) {
@@ -145,6 +182,8 @@ export function useDeepgramProvider(language: "FR" | "EN", talkId?: string | nul
       const socket = new WebSocket(buildDeepgramListenUrl(language), ["token", tokenPayload.access_token]);
 
       socket.addEventListener("open", () => {
+        // Cloud session is live: mark the start so stop() can confirm the real used seconds.
+        cloudStartedAtRef.current = Date.now();
         const mimeType = mediaRecorderMimeTypes.find((candidate) => MediaRecorder.isTypeSupported(candidate));
         const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
         recorder.addEventListener("dataavailable", (event) => {
@@ -196,6 +235,15 @@ export function useDeepgramProvider(language: "FR" | "EN", talkId?: string | nul
       setError(deepgramError instanceof Error ? deepgramError.message : "Transcription Deepgram impossible.");
     }
   }, [isSupported, language, stop, talkId]);
+
+  // Safety net: if the tab is closed/backgrounded mid-session (stop() never runs), confirm the
+  // cloud session via sendBeacon so the reservation still releases. No-op when no cloud session
+  // is active (confirmCloudSession early-returns). Listener is removed on unmount.
+  useEffect(() => {
+    const onPageHide = () => confirmCloudSession();
+    window.addEventListener("pagehide", onPageHide);
+    return () => window.removeEventListener("pagehide", onPageHide);
+  }, [confirmCloudSession]);
 
   return {
     alternatives,
