@@ -61,7 +61,7 @@ export default async function CgvPage({ params }: { params: LocaleParams }) {
 
       <h2>Article 8 : Essai gratuit</h2>
       <p>
-        Le Service peut être proposé avec une période d’essai gratuite de 14 jours, dans les limites décrites sur la page Tarifs. À l’issue de l’essai, l’accès aux fonctionnalités payantes nécessite la souscription d’un Abonnement.
+        Le Service peut être proposé avec un essai gratuit limité à un nombre défini de prises de parole, sans limite de durée et sans carte bancaire, dans les limites décrites sur la page Tarifs. À l’issue de l’essai, l’accès aux fonctionnalités payantes nécessite la souscription d’un Abonnement.
       </p>
 
       <h2>Article 9 : Droit de rétractation</h2>

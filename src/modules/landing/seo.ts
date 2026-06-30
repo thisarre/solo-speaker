@@ -59,7 +59,7 @@ export const landingFaq: Record<Locale, Array<{ question: string; answer: string
     },
     {
       question: "Does Solo Speaker Studio include a free trial?",
-      answer: "Yes. The trial lasts 14 days and includes up to 5 talks, teleprompter mode, voice notes, limited AI assistance and PDF export with a few limits before upgrading to Studio."
+      answer: "Yes. The free trial includes up to 5 talks with no time limit and no credit card: teleprompter mode, voice notes, limited AI assistance and PDF export with a few limits before upgrading to Studio."
     },
     {
       question: "Can I use Solo Speaker Studio for sermon preparation?",
@@ -81,7 +81,7 @@ export const landingFaq: Record<Locale, Array<{ question: string; answer: string
     },
     {
       question: "Solo Speaker Studio inclut-il un essai gratuit ?",
-      answer: "Oui. L’essai dure 14 jours et inclut jusqu’à 5 prises de parole, le mode prompteur, les mémos vocaux, l’assistance IA limitée et l’export PDF avec quelques limites avant le passage à Studio."
+      answer: "Oui. L’essai gratuit inclut jusqu’à 5 prises de parole, sans limite de temps et sans carte bancaire : le mode prompteur, les mémos vocaux, l’assistance IA limitée et l’export PDF avec quelques limites avant le passage à Studio."
     },
     {
       question: "Puis-je utiliser Solo Speaker Studio pour préparer un sermon ?",
@@ -157,7 +157,7 @@ export function buildLandingJsonLd(locale: Locale = "en", baseUrl = siteUrl) {
             name: "Trial",
             price: "0",
             priceCurrency: "EUR",
-            description: "14-day trial with up to 5 talks."
+            description: "Free trial with up to 5 talks, no time limit, no credit card."
           },
           {
             "@type": "Offer",
