@@ -147,6 +147,24 @@ La progression estime déjà les minutes depuis le nombre de mots. Comme chaque 
 La création d'une version vérifie que la **source appartient au user** (`talks.user_id = user.id`)
 avant copie — pas seulement le gate de plan. RLS `talks`/`talk_sections` inchangée (déjà par user).
 
+### 6.6 Saisie libre de durée — borne min/max
+La durée cible (preset 3/10/20 **ou** saisie libre) est **bornée à 1–60 min**, côté serveur ET UI :
+- Hors `[1, 60]` → rejet (ou clamp) : pas de version « 0 min » (estimation/génération cassée) ni
+  « 240 min » (irréaliste, fait dériver le prompt IA et l'estimation). Le `check
+  (target_duration_minutes > 0)` de la migration est le filet DB ; la borne haute (60) est appliquée
+  au niveau application (validation de l'action `createTalkVersion` + input UI). Bornes en constantes
+  `MIN/MAX_VERSION_MINUTES` pour ajustement ultérieur.
+
+### 6.7 Durée cible incohérente avec le contenu source
+Une version 3 min dérivée d'un talk source estimé à 30 min (ou l'inverse) :
+- **L'IA condense / développe** pour viser la durée cible — c'est l'intérêt même d'une version par
+  durée. `target_duration_minutes` passé en contrainte de prompt (§6.3).
+- **MAIS on prévient** : si le ratio `cible / durée_estimée_source` est extrême (heuristique : cible
+  < ~25 % ou > ~400 % de l'estimation source), l'UI affiche un **avertissement non bloquant**
+  (« condensation/expansion importante — relisez le résultat ») avant la copie/génération. Non
+  bloquant : l'utilisateur décide. Le statut de minutage par version (§6.4) renforce ensuite le
+  signal (« trop court / trop long ») sur la version produite.
+
 ---
 
 ## 7. Découpage pressenti (pour writing-plans, après validation)
@@ -175,7 +193,9 @@ avant copie — pas seulement le gate de plan. RLS `talks`/`talk_sections` incha
 4. **Suppression source** = détacher les variantes (`set null`). ✅ recommandé
 5. **Pas de cap** de versions au lancement (log PostHog). ✅ recommandé
 6. **Comparaison côte à côte = phase 2** (pas dans la v1). ✅ recommandé
-7. Durées cibles proposées par défaut : **3 / 10 / 20 min** (+ saisie libre). À confirmer.
+7. Durées cibles par défaut : **3 / 10 / 20 min** + saisie libre **bornée 1–60 min** (§6.6). ✅ recommandé
+8. Durée cible incohérente avec la source : **l'IA condense/développe + avertissement non bloquant**
+   si ratio extrême (§6.7). ✅ recommandé
 
 ## 9. Hors périmètre
 Comparaison visuelle 2 colonnes, régénération « source → toutes les versions », label libre de version,
