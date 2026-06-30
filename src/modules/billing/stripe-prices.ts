@@ -46,3 +46,77 @@ export function planFromProductMetadata(metadata: Record<string, string> | undef
   const plan = metadata?.plan;
   return plan === "studio" || plan === "pro" || plan === "team" ? plan : "trial";
 }
+
+// --- Subscription field derivation (shared by webhook + checkout-return sync) ---
+
+export type StripePriceLike = {
+  id?: string;
+  metadata?: Record<string, string>;
+  recurring?: { interval?: "month" | "year" } | null;
+  product?: string | { metadata?: Record<string, string> } | null;
+};
+
+export type StripeSubscriptionLike = {
+  id?: string;
+  status?: string;
+  customer?: string | { id?: string } | null;
+  current_period_start?: number | null;
+  current_period_end?: number | null;
+  metadata?: Record<string, string>;
+  items?: { data?: Array<{ quantity?: number | null; price?: StripePriceLike | null } | null> } | null;
+};
+
+export type DerivedSubscriptionFields = {
+  plan: BillingPlan;
+  cadence: Cadence;
+  seats: number;
+  status: string;
+  stripeCustomerId: string | null;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+};
+
+function isoFromUnix(seconds: number | null | undefined): string | null {
+  return typeof seconds === "number" && Number.isFinite(seconds) ? new Date(seconds * 1000).toISOString() : null;
+}
+
+// Derive the plan from the PRICE (which changes on upgrade), not the possibly-stale
+// subscription.metadata.plan. Falls back to product metadata, then subscription metadata.
+export function deriveSubscriptionFields(subscription: StripeSubscriptionLike): DerivedSubscriptionFields {
+  const item = subscription.items?.data?.[0] ?? null;
+  const price = item?.price ?? null;
+
+  const pricePlan = price?.metadata?.plan;
+  let plan: BillingPlan;
+  if (pricePlan === "studio" || pricePlan === "pro" || pricePlan === "team") {
+    plan = pricePlan;
+  } else if (price?.product && typeof price.product === "object") {
+    plan = planFromProductMetadata(price.product.metadata);
+  } else {
+    plan = planFromSubscriptionMetadataPlan(subscription.metadata ?? {});
+  }
+
+  const cadence: Cadence = price?.recurring?.interval === "year" ? "yearly" : "monthly";
+  const seats = typeof item?.quantity === "number" && item.quantity > 0 ? item.quantity : 1;
+
+  const customer = subscription.customer;
+  const stripeCustomerId =
+    typeof customer === "string" ? customer : customer && typeof customer === "object" ? (customer.id ?? null) : null;
+
+  return {
+    plan,
+    cadence,
+    seats,
+    status: subscription.status ?? "",
+    stripeCustomerId,
+    currentPeriodStart: isoFromUnix(subscription.current_period_start),
+    currentPeriodEnd: isoFromUnix(subscription.current_period_end),
+  };
+}
+
+// Local copy of the bare-plan-id mapping (mirrors checkout.planFromSubscriptionMetadata)
+// kept here to avoid a circular import between checkout.ts and stripe-prices.ts.
+function planFromSubscriptionMetadataPlan(metadata: Record<string, string>): BillingPlan {
+  const planId = metadata["plan"] ?? "";
+  return planId === "studio" || planId === "pro" || planId === "team" ? planId : "trial";
+}

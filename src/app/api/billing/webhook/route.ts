@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { BillingPlan } from "@/modules/billing/entitlements";
+import { deriveSubscriptionFields, type StripeSubscriptionLike } from "@/modules/billing/stripe-prices";
 import { sendEmail } from "@/lib/email/send";
 import {
   normalizeEmailLocale,
@@ -32,28 +32,39 @@ async function emailSubscriber(
 
 export const runtime = "nodejs";
 
+type StripePrice = {
+  id: string;
+  metadata?: Record<string, string>;
+  recurring?: { interval?: "month" | "year" } | null;
+  product?: string | { metadata?: Record<string, string> };
+};
+type StripeSubscriptionItem = { quantity?: number; price?: StripePrice };
 type StripeSubscription = {
   id: string;
   status: string;
+  customer?: string;
+  current_period_start?: number;
+  current_period_end?: number;
   metadata: Record<string, string>;
+  items?: { data?: StripeSubscriptionItem[] };
+};
+
+type StripeInvoice = {
+  subscription?: string;
+  lines?: { data?: Array<{ period?: { start?: number; end?: number } }> };
 };
 
 type StripeEvent = {
   type: string;
-  data: { object: StripeSubscription };
+  data: { object: StripeSubscription | StripeInvoice };
 };
 
 const HANDLED_EVENTS = [
   "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
+  "invoice.paid",
 ];
-
-function planFromSubscriptionId(planId: string): BillingPlan {
-  if (planId === "team_monthly" || planId === "team_yearly") return "team";
-  if (planId === "studio_monthly" || planId === "studio_yearly") return "studio";
-  return "trial";
-}
 
 async function verifyStripeSignature(request: NextRequest, body: string): Promise<boolean> {
   const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
@@ -112,24 +123,67 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  const subscription = data.object;
+  const admin = createAdminClient();
+
+  // invoice.paid carries an INVOICE (not a subscription). Advance the stored billing
+  // period so the STT period_key rotates for the next cycle.
+  if (type === "invoice.paid") {
+    const invoice = data.object as StripeInvoice;
+    const subId = invoice.subscription;
+    const period = invoice.lines?.data?.[0]?.period;
+    if (subId && period && (period.start != null || period.end != null)) {
+      await admin
+        .from("subscriptions")
+        .update({
+          current_period_start: period.start != null ? new Date(period.start * 1000).toISOString() : null,
+          current_period_end: period.end != null ? new Date(period.end * 1000).toISOString() : null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("stripe_subscription_id", subId);
+    }
+    return NextResponse.json({ received: true });
+  }
+
+  const subscription = data.object as StripeSubscription;
   const userId = subscription.metadata?.user_id;
-  const planId = subscription.metadata?.plan;
 
   if (!userId) {
     return NextResponse.json({ received: true });
   }
 
-  const admin = createAdminClient();
+  const derived = deriveSubscriptionFields(subscription as StripeSubscriptionLike);
 
   if (type === "customer.subscription.created" || type === "customer.subscription.updated") {
     const isActive = subscription.status === "active" || subscription.status === "trialing";
-    const billingPlan: BillingPlan = isActive ? planFromSubscriptionId(planId ?? "") : "trial";
+    // Plan derives from the PRICE (changes on upgrade), not stale subscription.metadata.plan.
+    const billingPlan = isActive ? derived.plan : "trial";
+
+    // Source-of-truth row. The table CHECK forbids 'trial', so only upsert for a paid plan.
+    if (derived.plan === "studio" || derived.plan === "pro" || derived.plan === "team") {
+      await admin.from("subscriptions").upsert(
+        {
+          user_id: userId,
+          stripe_customer_id: derived.stripeCustomerId,
+          stripe_subscription_id: subscription.id,
+          plan: derived.plan,
+          cadence: derived.cadence,
+          status: subscription.status,
+          seats: derived.seats,
+          current_period_start: derived.currentPeriodStart,
+          current_period_end: derived.currentPeriodEnd,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+    }
 
     await admin.from("profiles").update({ billing_plan: billingPlan }).eq("id", userId);
 
     if (billingPlan === "team") {
-      await admin.from("teams").upsert({ owner_id: userId }, { onConflict: "owner_id", ignoreDuplicates: true });
+      await admin.from("teams").upsert(
+        { owner_id: userId, max_seats: derived.seats },
+        { onConflict: "owner_id" }
+      );
     }
 
     // Confirmation email only on the INITIAL subscription (created), never on every update/renewal.
@@ -141,6 +195,10 @@ export async function POST(request: NextRequest) {
 
   if (type === "customer.subscription.deleted") {
     await admin.from("profiles").update({ billing_plan: "trial" }).eq("id", userId);
+    await admin
+      .from("subscriptions")
+      .update({ status: "canceled", updated_at: new Date().toISOString() })
+      .eq("user_id", userId);
     await emailSubscriber(admin, userId, (name, locale) => renderSubscriptionCancelledEmail({ name, locale }));
   }
 
