@@ -5,31 +5,34 @@ import { getTrialReminder } from "./trial";
 
 const copy = getMessages("fr").trial;
 
-test("getTrialReminder shows remaining days during the 14 day trial", () => {
-  const reminder = getTrialReminder({
-    copy,
-    now: new Date("2026-06-10T12:00:00.000Z"),
-    trialStartedAt: "2026-06-01T12:00:00.000Z"
-  });
+test("getTrialReminder shows the plural remaining talks during the trial", () => {
+  const reminder = getTrialReminder({ copy, currentTalkCount: 2 });
 
   assert.deepEqual(reminder, {
     ctaLabel: "Garder mon accès",
     href: "/pricing",
     label: "Essai gratuit",
-    message: "Plus que 5 jours pour garder vos prises de parole illimitées et l’IA complète."
+    message: "Plus que 3 prises de parole pour garder vos prises de parole illimitées et l’IA complète."
   });
+  assert.ok(reminder.message.includes("3"));
 });
 
-test("getTrialReminder handles trial end without hiding billing context", () => {
-  const reminder = getTrialReminder({
-    copy,
-    now: new Date("2026-06-17T12:00:00.000Z"),
-    trialStartedAt: "2026-06-01T12:00:00.000Z"
-  });
+test("getTrialReminder uses the singular form when one talk remains", () => {
+  const reminder = getTrialReminder({ copy, currentTalkCount: 4 });
 
-  assert.equal(reminder.message, "Votre essai est terminé. Ne perdez pas vos prises de parole. Repassez en illimité.");
+  assert.equal(
+    reminder.message,
+    "Plus que 1 prise de parole pour garder vos prises de parole illimitées et l’IA complète."
+  );
 });
 
-test("getTrialReminder falls back when the profile creation date is missing", () => {
-  assert.equal(getTrialReminder({ copy, trialStartedAt: null }).message, "14 jours gratuits, 5 prises de parole incluses.");
+test("getTrialReminder shows the ended message once the trial cap is reached", () => {
+  assert.equal(
+    getTrialReminder({ copy, currentTalkCount: 5 }).message,
+    "Votre essai est terminé. Ne perdez pas vos prises de parole. Repassez en illimité."
+  );
+  assert.equal(
+    getTrialReminder({ copy, currentTalkCount: 8 }).message,
+    "Votre essai est terminé. Ne perdez pas vos prises de parole. Repassez en illimité."
+  );
 });

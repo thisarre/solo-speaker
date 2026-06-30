@@ -886,9 +886,8 @@
   "trial": {
     "ctaLabel": "Keep my access",
     "label": "Free trial",
-    "defaultMessage": "14 days free, 5 talks included.",
     "endedMessage": "Your trial is over. Don't lose your talks. Go back to unlimited.",
-    "remainingMessage": "Only {count} day{plural} left to keep your unlimited talks and the full AI."
+    "remainingMessage": "Only {count} talk{plural} left to keep your unlimited talks and the full AI."
   },
   "seo": {
     "landingTitle": "Solo Speaker Studio: AI Speech Coach and Teleprompter for Speakers",

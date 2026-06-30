@@ -885,9 +885,8 @@
   "trial": {
     "ctaLabel": "Garder mon accès",
     "label": "Essai gratuit",
-    "defaultMessage": "14 jours gratuits, 5 prises de parole incluses.",
     "endedMessage": "Votre essai est terminé. Ne perdez pas vos prises de parole. Repassez en illimité.",
-    "remainingMessage": "Plus que {count} jour{plural} pour garder vos prises de parole illimitées et l’IA complète."
+    "remainingMessage": "Plus que {count} prise{plural} de parole pour garder vos prises de parole illimitées et l’IA complète."
   },
   "seo": {
     "landingTitle": "Solo Speaker Studio : Coach IA et prompteur pour prises de parole",
