@@ -12,7 +12,7 @@ export type Database = {
           onboarding_completed_at: string | null;
           onboarding_help_requested: boolean;
           onboarding_support_note: string;
-          billing_plan: "trial" | "studio" | "team";
+          billing_plan: "trial" | "studio" | "pro" | "team";
           team_id: string | null;
           ai_credits_used: number;
           trial_reminders_sent: string[];
@@ -28,7 +28,7 @@ export type Database = {
           onboarding_completed_at?: string | null;
           onboarding_help_requested?: boolean;
           onboarding_support_note?: string;
-          billing_plan?: "trial" | "studio" | "team";
+          billing_plan?: "trial" | "studio" | "pro" | "team";
           team_id?: string | null;
           ai_credits_used?: number;
           trial_reminders_sent?: string[];
@@ -44,7 +44,7 @@ export type Database = {
           onboarding_completed_at?: string | null;
           onboarding_help_requested?: boolean;
           onboarding_support_note?: string;
-          billing_plan?: "trial" | "studio" | "team";
+          billing_plan?: "trial" | "studio" | "pro" | "team";
           team_id?: string | null;
           ai_credits_used?: number;
           trial_reminders_sent?: string[];
