@@ -11,7 +11,7 @@ import { resolveServerLocale } from "@/i18n/server";
 import { sendEmail } from "@/lib/email/send";
 import { renderWelcomeEmail } from "@/lib/email/templates";
 import { authErrorMessage, buildOAuthRedirectTo, buildPasswordRecoveryRedirectTo, firstLoginDestination, passwordValidationError, safeNext } from "./security";
-import { getCheckoutPlan } from "@/modules/billing/checkout";
+import { parseCheckoutSelection } from "@/modules/billing/stripe-prices";
 import { acceptPendingTeamInvitation } from "@/modules/team/accept-invitation";
 import { buildOnboardingFirstTalkDraft } from "@/modules/onboarding/first-talk";
 import type { TalkType } from "@/types/talk";
@@ -71,10 +71,14 @@ export async function signUp(formData: FormData) {
   const password = getString(formData, "password");
   const confirmPassword = getString(formData, "confirmPassword");
   const checkoutRequested = getString(formData, "checkout") === "1";
-  const checkoutPlan = getCheckoutPlan(getString(formData, "plan"));
+  const planValue = getString(formData, "plan");
+  const checkoutSelection = parseCheckoutSelection(planValue);
   const localeValue = getString(formData, "locale");
   const locale = isLocale(localeValue) ? localeValue : "fr";
-  const checkoutRedirect = checkoutRequested && checkoutPlan ? `/api/billing/checkout?plan=${checkoutPlan.id}&locale=${locale}` : "";
+  const checkoutRedirect =
+    checkoutRequested && checkoutSelection
+      ? `/api/billing/checkout?plan=${checkoutSelection.plan}_${checkoutSelection.cadence}&locale=${locale}`
+      : "";
 
   if (!email || !password) {
     redirectWithError("/signup", errors.emailPasswordRequired, { email });
