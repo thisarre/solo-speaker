@@ -938,7 +938,43 @@ Expected: PASS.
 
 - [ ] **Step 9: Update the checkout route (resolve lookup_key, validate seats)**
 
-Modify `src/app/api/billing/checkout/route.ts` `createCheckoutRedirect`: parse `plan` as a `plan_cadence` selection + read `seats` (Team) from query/form, validate with `seatsAreValid` (reject <3 for Team → redirect `?error=invalid-seats`), resolve the price via `resolvePriceId(lookupKeyFor(plan, cadence), secretKey)`, then call `buildStripeCheckoutPayload({ plan, cadence, priceId, seats, ... })`. Remove all `getCheckoutPlan`/`getStripePriceId`/`STRIPE_PRICE_*` usage.
+Modify `src/app/api/billing/checkout/route.ts` `createCheckoutRedirect`: parse `plan` as a `plan_cadence` selection + read the raw `seats` query/form param, resolve the seat count (see below), resolve the price via `resolvePriceId(lookupKeyFor(plan, cadence), secretKey)`, then call `buildStripeCheckoutPayload({ plan, cadence, priceId, seats, ... })`. Remove all `getCheckoutPlan`/`getStripePriceId`/`STRIPE_PRICE_*` usage.
+
+**Seat resolution — backward-compat for old Team links (no `seats` param).** Currently-live Team CTAs point at `?plan=team_yearly` with NO `seats` param; a bookmarked/indexed old link must NOT break under the new `seats >= 3` rule. So strict validation (`<3` → `?error=invalid-seats`) applies ONLY when `seats` is **explicitly provided**; an absent `seats` for a Team plan **defaults to `MIN_TEAM_SEATS` (3)**, not an error. Studio/Pro force `seats = 1` regardless of any param. Add a helper to `src/modules/billing/stripe-prices.ts` and a unit test for it:
+
+```ts
+// in stripe-prices.ts
+export function resolveSeats(plan: PaidPlan, rawSeats: string | null | undefined): { seats: number } | { error: "invalid-seats" } {
+  if (plan !== "team") return { seats: 1 };           // studio/pro always single-seat
+  if (rawSeats == null || rawSeats === "") return { seats: MIN_TEAM_SEATS }; // old link → default 3, never error
+  const n = Number(rawSeats);
+  if (!Number.isInteger(n) || n < MIN_TEAM_SEATS) return { error: "invalid-seats" }; // explicit < 3 → error
+  return { seats: n };
+}
+```
+
+```ts
+// add to stripe-prices.test.ts
+import { resolveSeats } from "./stripe-prices";
+
+test("resolveSeats defaults old Team links (no seats param) to 3, never errors", () => {
+  assert.deepEqual(resolveSeats("team", null), { seats: 3 });
+  assert.deepEqual(resolveSeats("team", ""), { seats: 3 });
+  assert.deepEqual(resolveSeats("team", undefined), { seats: 3 });
+});
+
+test("resolveSeats rejects an explicit Team seat count below 3", () => {
+  assert.deepEqual(resolveSeats("team", "2"), { error: "invalid-seats" });
+  assert.deepEqual(resolveSeats("team", "5"), { seats: 5 });
+});
+
+test("resolveSeats forces studio/pro to a single seat regardless of the param", () => {
+  assert.deepEqual(resolveSeats("studio", "9"), { seats: 1 });
+  assert.deepEqual(resolveSeats("pro", null), { seats: 1 });
+});
+```
+
+The route uses `resolveSeats(plan, rawSeats)`; on `{ error }` redirect `?error=invalid-seats`, otherwise pass `seats` through to the payload.
 
 - [ ] **Step 10: Implement the proration upgrade endpoint**
 
@@ -953,7 +989,7 @@ git add src/modules/billing/stripe-prices.ts src/modules/billing/stripe-prices.t
 git commit -m "feat(billing): Stripe lookup_keys, seat-quantity checkout, proration upgrade; drop 14-day trial"
 ```
 
-**Done (testable):** `npm test` green. Manual (test mode): hitting `/api/billing/checkout?plan=team_yearly&seats=2` redirects with `?error=invalid-seats`; `seats=3` creates a Stripe Checkout session whose line item quantity is 3 and whose subscription has no trial.
+**Done (testable):** `npm test` green (incl. the new `resolveSeats` cases). Manual (test mode): `/api/billing/checkout?plan=team_yearly&seats=2` redirects with `?error=invalid-seats`; **`?plan=team_yearly` with NO seats param creates a session with quantity 3 (old-link compat, no error)**; `seats=3` creates a session with line-item quantity 3 and no Stripe trial.
 
 ---
 
@@ -1055,6 +1091,14 @@ In both message files, under `pricing.plans`, set three tiers (drop the separate
 - Add `pricing.trialCta` = "Commencer l'essai gratuit · 5 talks · sans limite de temps · sans carte bancaire" (fr) / English equivalent.
 - Update `pricing.description` to drop "14 jours" → "5 talks gratuits, sans carte bancaire".
 
+**Sweep ALL "14 jours / 14 days" copy, not just the cards.** The live build says "14 days/jours" in MORE places than `pricing.plans`/`pricing.description`: the hero ("Free trial · 14 days", "For 14 days, live the full flow"), the FAQ ("The trial lasts 14 days"), and the home `pricing-preview` block. If only the cards are migrated, the hero/FAQ will still promise "14 jours" while the grid says "5 talks" — an inconsistency. Before editing, run:
+
+```bash
+grep -rn "14 jours\|14 days\|14-day\|14 jour" src/i18n/
+```
+
+Fix EVERY matched key in both `fr.json` and `en.json` (hero, FAQ, pricing-preview, cards, description, risk-reversal/`riskReversal`, etc.) to the usage-based framing: "5 talks", "sans limite de temps", "sans carte bancaire" (FR) / "5 talks", "no time limit", "no credit card" (EN). Adapt each string to its context (a hero subtitle reads differently from a FAQ answer) — do not blindly find/replace; rewrite each sentence so it still reads naturally.
+
 - [ ] **Step 2: Update `plans.ts` for 3 paid tiers + per-seat Team**
 
 Rewrite `getPricingPlans`/`getPricingCards` so the cards array is `[studio, pro, team]` (Studio `highlighted: true`), each with `monthly`/`yearly` prices and `savings`; add a `perSeat: boolean` flag (true for Team) and `minSeats` (3 for Team). Keep the serializable `PricingCard` shape used by the client component. The trial is no longer a card — expose `pricing.trialCta` separately for the page CTA.
@@ -1088,7 +1132,7 @@ git add src/modules/pricing/ src/i18n/messages/fr.json src/i18n/messages/en.json
 git commit -m "feat(pricing): 3 tiers (Studio/Pro/Team per-seat), universal trial CTA, seat selector"
 ```
 
-**Done (testable):** `npm test` green; `/fr/pricing` shows exactly 3 priced cards with Studio recommended, a no-credit-card trial CTA above the grid, working monthly/yearly toggle, and a Team seat selector enforcing ≥3.
+**Done (testable):** `npm test` green; **`grep -rn "14 jours\|14 days\|14-day\|14 jour" src/i18n/` returns ZERO matches** (no residual time-based trial copy anywhere — hero, FAQ, pricing-preview, cards); `/fr/pricing` shows exactly 3 priced cards with Studio recommended, a no-credit-card trial CTA above the grid, working monthly/yearly toggle, and a Team seat selector enforcing ≥3.
 
 ---
 
