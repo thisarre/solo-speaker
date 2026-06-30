@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { GRANT_TTL_SECONDS, decideCloudAllowed, applyConfirmation } from "./stt-metering";
 
-test("cloud is refused once reserved+confirmed reaches the cap", () => {
-  const cap = 60 * 60;
-  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: 0, cloudConfirmed: 0 }), true);
-  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: cap - 1, cloudConfirmed: 0 }), true);
-  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: cap, cloudConfirmed: 0 }), false);
-  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: 30, cloudConfirmed: cap - 30 }), false);
+test("cloud is allowed only if the expected session fits the remaining budget", () => {
+  const cap = 900;
+  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: 0, cloudConfirmed: 0, expectedSeconds: 600 }), true);
+  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: 0, cloudConfirmed: 0, expectedSeconds: 1200 }), false); // long talk blocked up front
+  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: 0, cloudConfirmed: 840, expectedSeconds: 300 }), false); // won't fit remaining budget
+  assert.equal(decideCloudAllowed({ capSeconds: cap, cloudReserved: 0, cloudConfirmed: 300, expectedSeconds: 600 }), true); // exactly fits
 });
 
 test("confirmation replaces the reservation with the real figure (delta math)", () => {

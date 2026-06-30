@@ -2,8 +2,8 @@ export const GRANT_TTL_SECONDS = 60;
 
 export type CounterState = { cloudReserved: number; cloudConfirmed: number };
 
-export function decideCloudAllowed(input: { capSeconds: number } & CounterState): boolean {
-  return input.cloudReserved + input.cloudConfirmed < input.capSeconds;
+export function decideCloudAllowed(input: { capSeconds: number; expectedSeconds: number } & CounterState): boolean {
+  return input.cloudReserved + input.cloudConfirmed + input.expectedSeconds <= input.capSeconds;
 }
 
 export function applyConfirmation(
