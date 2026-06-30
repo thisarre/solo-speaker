@@ -90,15 +90,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ engine: "browser", reason: "cap_reached" }, { status: 200, headers: rateLimit.headers });
   }
 
-  // Reserve the FULL expected duration ONCE per session. On a re-mint of the same sessionId the
-  // row already exists, so we leave the reservation and counter untouched (the confirm step later
-  // releases exactly reserved_seconds = expectedSeconds and books the real confirmed seconds).
+  // Check the once-per-session guard BEFORE minting, but DON'T write the reservation yet:
+  // the grant can still fail (502), and a reservation written here would never be released.
   const { data: existingSession } = await admin
     .from("stt_sessions")
     .select("id")
     .eq("id", sessionId)
     .maybeSingle();
 
+  const response = await fetch("https://api.deepgram.com/v1/auth/grant", {
+    body: JSON.stringify({ ttl_seconds: GRANT_TTL_SECONDS }),
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    method: "POST"
+  });
+  const payload = (await response.json().catch(() => ({}))) as DeepgramGrantResponse;
+
+  if (!response.ok || !payload.access_token) {
+    // Grant failed: no reservation has been written, so nothing to release. No orphan charge.
+    return NextResponse.json({ error: "Unable to create Deepgram token." }, { status: 502 });
+  }
+
+  // Grant succeeded — NOW reserve the FULL expected duration ONCE per session. On a re-mint of
+  // the same sessionId the row already exists, so we leave the reservation and counter untouched
+  // (the confirm step later releases reserved_seconds = expectedSeconds and books real seconds).
   if (!existingSession) {
     await admin.from("stt_sessions").insert({
       id: sessionId,
@@ -121,20 +138,6 @@ export async function POST(request: NextRequest) {
     );
   }
   posthog.capture({ distinctId: user.id, event: "stt_engine_used", properties: { engine: "cloud", plan: active.plan } });
-
-  const response = await fetch("https://api.deepgram.com/v1/auth/grant", {
-    body: JSON.stringify({ ttl_seconds: GRANT_TTL_SECONDS }),
-    headers: {
-      Authorization: `Token ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    method: "POST"
-  });
-  const payload = (await response.json().catch(() => ({}))) as DeepgramGrantResponse;
-
-  if (!response.ok || !payload.access_token) {
-    return NextResponse.json({ error: "Unable to create Deepgram token." }, { status: 502 });
-  }
 
   return NextResponse.json(
     {
