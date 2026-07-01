@@ -86,7 +86,7 @@ function formatSpeechRecognitionError(event: SpeechRecognitionErrorEventLike) {
   return event.error || "Erreur de reconnaissance vocale.";
 }
 
-export function useSpeechRecognition(language: "FR" | "EN" = "FR"): SpeechRecognitionController {
+export function useSpeechRecognition(language: import("@/types/talk").TalkLanguage = "FR"): SpeechRecognitionController {
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const manuallyStoppedRef = useRef(false);
   const isSupported = useSyncExternalStore(subscribeSpeechSupport, getSpeechSupportSnapshot, getServerSpeechSupportSnapshot);
@@ -125,7 +125,8 @@ export function useSpeechRecognition(language: "FR" | "EN" = "FR"): SpeechRecogn
     const recognition = new Recognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = language === "FR" ? "fr-FR" : "en-US";
+    const bcp47: Record<import("@/types/talk").TalkLanguage, string> = { FR: "fr-FR", EN: "en-US", ES: "es-ES", DE: "de-DE", IT: "it-IT", PT: "pt-PT" };
+    recognition.lang = bcp47[language] ?? "en-US";
     recognition.maxAlternatives = 3;
 
     recognition.onresult = (event) => {

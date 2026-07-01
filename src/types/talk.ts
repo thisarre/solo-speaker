@@ -2,6 +2,8 @@ export type TalkType = "sermon" | "conference" | "training" | "pitch" | "speech"
 
 export type TalkStatus = "draft" | "ready" | "archived";
 
+export type TalkLanguage = "FR" | "EN" | "ES" | "DE" | "IT" | "PT";
+
 export type TalkSection = {
   id: string;
   heading: string;
@@ -17,7 +19,7 @@ export type Talk = {
   status: TalkStatus;
   audience: string;
   durationMinutes: number;
-  language: "FR" | "EN";
+  language: TalkLanguage;
   updatedAtLabel: string;
   sections: TalkSection[];
 };
@@ -34,4 +36,13 @@ export const talkStatusLabels: Record<TalkStatus, string> = {
   draft: "Brouillon",
   ready: "Prêt",
   archived: "Archivé"
+};
+
+export const talkLanguageLabels: Record<TalkLanguage, string> = {
+  FR: "Français",
+  EN: "English",
+  ES: "Español",
+  DE: "Deutsch",
+  IT: "Italiano",
+  PT: "Português"
 };

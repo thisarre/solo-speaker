@@ -459,7 +459,18 @@
     "exportingPdf": "Export...",
     "exportPdfError": "PDF export failed.",
     "exportPdfSuccess": "PDF generated.",
-    "simulateVoice": "Simulate"
+    "simulateVoice": "Simulate",
+    "translate": {
+      "label": "Translate",
+      "title": "Translate this talk",
+      "body": "Choose a target language. One AI credit will be consumed.",
+      "selectLanguage": "Target language",
+      "confirm": "Generate translation",
+      "loading": "Translating...",
+      "error": "Translation failed. Please try again.",
+      "locked": "Available on the Pro plan",
+      "creditsExhausted": "AI credits exhausted. Upgrade to Studio to continue."
+    }
   },
   "voiceSimulator": {
     "title": "Voice simulation",

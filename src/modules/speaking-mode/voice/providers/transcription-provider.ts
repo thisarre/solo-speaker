@@ -16,6 +16,9 @@ export type TranscriptionProviderController = {
   stop: () => void;
 };
 
-export function languageToRealtimeCode(language: "FR" | "EN") {
-  return language === "EN" ? "en" : "fr";
+import type { TalkLanguage } from "@/types/talk";
+
+export function languageToRealtimeCode(language: TalkLanguage) {
+  const map: Record<TalkLanguage, string> = { FR: "fr", EN: "en", ES: "es", DE: "de", IT: "it", PT: "pt" };
+  return map[language] ?? "en";
 }

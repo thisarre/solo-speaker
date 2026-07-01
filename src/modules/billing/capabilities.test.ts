@@ -29,6 +29,13 @@ test("team unlocks all Pro capabilities plus team capabilities", () => {
   assert.deepEqual(sttCapFor("team"), { minutes: 90, basis: "billing_period" });
 });
 
+test("talk.multilingual is gated to Pro/Team only", () => {
+  assert.equal(can("trial", "talk.multilingual"), false);
+  assert.equal(can("studio", "talk.multilingual"), false);
+  assert.equal(can("pro", "talk.multilingual"), true);
+  assert.equal(can("team", "talk.multilingual"), true);
+});
+
 test("every plan is present in the matrix", () => {
   assert.deepEqual(Object.keys(PLAN_CAPABILITIES).sort(), ["pro", "studio", "team", "trial"]);
 });

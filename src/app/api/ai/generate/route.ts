@@ -21,12 +21,12 @@ import type {
   AssistantSectionContext,
   AssistantTalkContext
 } from "@/modules/assistant/types";
-import type { TalkType } from "@/types/talk";
+import type { TalkLanguage, TalkType } from "@/types/talk";
 import type { Database } from "@/lib/supabase/database.types";
 
 const actions = new Set<AssistantAction>(["outline", "expand-section", "oralize-section", "shorten-section", "predict-next", "suggest-bible"]);
 const talkTypes = new Set<TalkType>(["sermon", "conference", "training", "pitch", "speech"]);
-const languages = new Set(["FR", "EN"]);
+const languages = new Set(["FR", "EN", "ES", "DE", "IT", "PT"]);
 const openAiUrl = "https://api.openai.com/v1/responses";
 
 type OpenAITextContent = {
@@ -80,7 +80,7 @@ function parseTalk(value: unknown): AssistantTalkContext | null {
   if (!record) return null;
 
   const type = cleanString(record.type) as TalkType;
-  const language = cleanString(record.language) as "FR" | "EN";
+  const language = cleanString(record.language);
   const targetDurationMin = Math.max(1, Math.min(180, Math.round(Number(record.targetDurationMin ?? record.durationMinutes) || 10)));
 
   if (!talkTypes.has(type) || !languages.has(language)) {
@@ -93,7 +93,7 @@ function parseTalk(value: unknown): AssistantTalkContext | null {
     audience: cleanString(record.audience),
     objective: cleanString(record.objective),
     targetDurationMin,
-    language
+    language: language as TalkLanguage
   };
 }
 

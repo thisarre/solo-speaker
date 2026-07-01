@@ -17,12 +17,13 @@ import type {
   AssistantSectionContext,
   AssistantTalkContext
 } from "@/modules/assistant/types";
+import type { TalkLanguage } from "@/types/talk";
 
 type AssistantPanelProps = {
   activeSection?: AssistantSectionContext;
   className?: string;
   durationMinutes: number;
-  language: "FR" | "EN";
+  language: TalkLanguage;
   onResult: (result: AssistantGenerateResult, action: AssistantAction) => void;
   talkId: string;
   title: string;
