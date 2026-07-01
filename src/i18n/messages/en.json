@@ -455,6 +455,18 @@
     "share": "Share",
     "shareCopied": "Link copied!",
     "shareError": "Unable to share.",
+    "sharePublic": {
+      "title": "Share this preparation",
+      "body": "Anyone with this link can view your preparation read-only, without creating an account.",
+      "urlLabel": "Share link",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "revoke": "Revoke link",
+      "revoking": "Revoking...",
+      "generating": "Generating...",
+      "error": "Unable to generate share link.",
+      "locked": "Available on the Pro plan"
+    },
     "exportPdf": "Export PDF",
     "exportingPdf": "Export...",
     "exportPdfError": "PDF export failed.",
