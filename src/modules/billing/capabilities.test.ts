@@ -36,6 +36,13 @@ test("talk.multilingual is gated to Pro/Team only", () => {
   assert.equal(can("team", "talk.multilingual"), true);
 });
 
+test("talk.versions is gated to Pro/Team only", () => {
+  assert.equal(can("trial", "talk.versions"), false);
+  assert.equal(can("studio", "talk.versions"), false);
+  assert.equal(can("pro", "talk.versions"), true);
+  assert.equal(can("team", "talk.versions"), true);
+});
+
 test("every plan is present in the matrix", () => {
   assert.deepEqual(Object.keys(PLAN_CAPABILITIES).sort(), ["pro", "studio", "team", "trial"]);
 });

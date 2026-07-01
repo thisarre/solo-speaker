@@ -23,6 +23,7 @@ export type Talk = {
   updatedAtLabel: string;
   shareToken: string | null;
   sections: TalkSection[];
+  parentTalkId: string | null;
 };
 
 export const talkTypeLabels: Record<TalkType, string> = {

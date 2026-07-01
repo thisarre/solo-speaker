@@ -8,7 +8,11 @@ import { TalkCard } from "@/components/talks/TalkCard";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getTalks } from "@/modules/talks/queries";
-import type { TalkType } from "@/types/talk";
+import { can } from "@/modules/billing/capabilities";
+import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/modules/auth/queries";
+import type { BillingPlan } from "@/modules/billing/entitlements";
+import type { Talk, TalkType } from "@/types/talk";
 import { getMessages } from "@/i18n/messages";
 import { localizedPath, type Locale } from "@/i18n/routing";
 import { resolveServerLocale } from "@/i18n/server";
@@ -45,7 +49,17 @@ export async function TalksPageView({ searchParams, locale: routeLocale }: { sea
     { label: copy.types.speech, type: "speech" }
   ];
   const activeType = isTalkType(params?.type) ? params.type : undefined;
-  const talks = await getTalks();
+  const [talks, user] = await Promise.all([getTalks(), getUser()]);
+
+  let canDuplicate = false;
+  if (user) {
+    const supabase = await createClient();
+    const { data: profileData } = await supabase.from("profiles").select("billing_plan").eq("id", user.id).maybeSingle();
+    const billingPlan = (profileData?.billing_plan ?? "trial") as BillingPlan;
+    canDuplicate = can(billingPlan, "talk.versions");
+  }
+
+  const versionLabels = computeVersionLabels(talks, copy.versionBadge);
   const filteredTalks = activeType ? talks.filter((talk) => talk.type === activeType) : talks;
   const readyTalks = talks.filter((talk) => talk.status === "ready").length;
   const draftTalks = talks.filter((talk) => talk.status === "draft").length;
@@ -103,7 +117,7 @@ export async function TalksPageView({ searchParams, locale: routeLocale }: { sea
           {filteredTalks.length ? (
             <div className="mt-5 grid gap-3.5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" data-tour="talks-list">
               {filteredTalks.map((talk) => (
-                <TalkCard key={talk.id} talk={talk} />
+                <TalkCard key={talk.id} talk={talk} canDuplicate={canDuplicate} versionLabel={versionLabels.get(talk.id)} />
               ))}
               <Link
                 className="flex min-h-[184px] flex-col items-center justify-center gap-2 rounded-[12px] border border-dashed border-line bg-panel/40 text-[13px] font-medium text-mute transition hover:border-faint hover:bg-surface hover:text-ink"
@@ -131,6 +145,27 @@ export async function TalksPageView({ searchParams, locale: routeLocale }: { sea
       </div>
     </AppShell>
   );
+}
+
+function computeVersionLabels(talks: Talk[], versionBadge: string): Map<string, string> {
+  // Group copies by their parent talk, ordered by the position in the talks list (updated_at desc).
+  const siblingsByParent = new Map<string, string[]>();
+  for (const talk of [...talks].reverse()) {
+    if (!talk.parentTalkId) continue;
+    const siblings = siblingsByParent.get(talk.parentTalkId) ?? [];
+    siblings.push(talk.id);
+    siblingsByParent.set(talk.parentTalkId, siblings);
+  }
+
+  const labels = new Map<string, string>();
+  for (const [, siblings] of siblingsByParent) {
+    if (siblings.length === 1) {
+      labels.set(siblings[0], versionBadge);
+    } else {
+      siblings.forEach((id, i) => labels.set(id, `v${i + 2}`));
+    }
+  }
+  return labels;
 }
 
 function TalkMetric({ icon, label, value, detail }: { icon: ReactNode; label: string; value: number | string; detail: string }) {

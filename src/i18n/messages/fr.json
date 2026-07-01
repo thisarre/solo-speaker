@@ -323,6 +323,9 @@
   "talks": {
     "title": "Prises de parole",
     "description": "Retrouvez vos brouillons, vos interventions prêtes et les idées à transformer en prise de parole.",
+    "duplicate": "Dupliquer",
+    "duplicating": "Duplication…",
+    "versionBadge": "copie",
     "newTalk": "Nouvelle prise de parole",
     "all": "Tous",
     "allTalks": "Toutes les prises de parole",
