@@ -325,6 +325,9 @@
   "talks": {
     "title": "Talks",
     "description": "Find your drafts, ready talks and ideas to turn into speaking moments.",
+    "duplicate": "Duplicate",
+    "duplicating": "Duplicating…",
+    "versionBadge": "copy",
     "newTalk": "New talk",
     "all": "All",
     "allTalks": "All talks",

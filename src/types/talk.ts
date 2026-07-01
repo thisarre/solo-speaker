@@ -22,6 +22,7 @@ export type Talk = {
   language: TalkLanguage;
   updatedAtLabel: string;
   sections: TalkSection[];
+  parentTalkId: string | null;
 };
 
 export const talkTypeLabels: Record<TalkType, string> = {

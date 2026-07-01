@@ -15,7 +15,8 @@ const baseTalk: Talk = {
   sections: [
     { id: "intro", heading: "Intro", body: "Accroche", position: 0 },
     { id: "body", heading: "Corps", body: "Développement", position: 1 }
-  ]
+  ],
+  parentTalkId: null
 };
 
 test("buildDashboardFocusPlan guides an empty studio toward creating a first talk", () => {

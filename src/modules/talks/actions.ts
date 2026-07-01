@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/modules/auth/queries";
 import { canCreateTalk, type BillingPlan } from "@/modules/billing/entitlements";
+import { can } from "@/modules/billing/capabilities";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { getMessages } from "@/i18n/messages";
 import { localizedPath } from "@/i18n/routing";
@@ -282,4 +283,85 @@ export async function reorderTalkSections(talkId: string, sectionIds: string[]) 
   await supabase.from("talks").update({ updated_at: new Date().toISOString() }).eq("id", talkId);
   revalidatePath(`/talks/${talkId}`);
   revalidatePath("/talks");
+}
+
+export async function duplicateTalk(talkId: string) {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const locale = resolveServerLocale((await headers()).get("x-locale"));
+
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("billing_plan")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const billingPlan = (profileData?.billing_plan ?? "trial") as BillingPlan;
+
+  if (!can(billingPlan, "talk.versions")) {
+    redirect(localizedPath("/pricing", locale));
+  }
+
+  const [{ data: source, error: sourceError }, { data: sourceSections, error: sectionsQueryError }] = await Promise.all([
+    supabase.from("talks").select("id, title, type, audience, duration_minutes, language, parent_talk_id").eq("id", talkId).eq("user_id", user.id).maybeSingle(),
+    supabase.from("talk_sections").select("heading, body, position").eq("talk_id", talkId).order("position", { ascending: true })
+  ]);
+
+  if (sourceError) {
+    throw new Error(sourceError.message);
+  }
+
+  if (sectionsQueryError) {
+    throw new Error(sectionsQueryError.message);
+  }
+
+  if (!source) {
+    throw new Error(copy.errors.talkNotFound);
+  }
+
+  // Normalize parent: if the source is itself a copy, point to its parent instead of chaining.
+  const parentTalkId = source.parent_talk_id ?? source.id;
+
+  const { data: newTalk, error: insertError } = await supabase
+    .from("talks")
+    .insert({
+      user_id: user.id,
+      title: `${source.title} (copie)`,
+      type: source.type,
+      status: "draft",
+      audience: source.audience,
+      duration_minutes: source.duration_minutes,
+      language: source.language,
+      parent_talk_id: parentTalkId
+    })
+    .select("id")
+    .single();
+
+  if (insertError) {
+    throw new Error(insertError.message);
+  }
+
+  const sections = (sourceSections ?? []).map((s) => ({
+    talk_id: newTalk.id,
+    heading: s.heading,
+    body: s.body,
+    position: s.position
+  }));
+
+  if (sections.length > 0) {
+    const { error: sectionsInsertError } = await supabase.from("talk_sections").insert(sections);
+    if (sectionsInsertError) {
+      throw new Error(sectionsInsertError.message);
+    }
+  }
+
+  getPostHogClient().capture({
+    distinctId: user.id,
+    event: "talk_duplicated",
+    properties: { talk_type: source.type, source_talk_id: talkId }
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/talks");
+  redirect(localizedPath(`/talks/${newTalk.id}`, locale));
 }

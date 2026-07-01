@@ -114,7 +114,7 @@ function RecentTalksWidget({ data }: { data: DashboardWidgetData }) {
       </div>
       <div className="grid gap-3.5 md:grid-cols-2 xl:grid-cols-3">
         {data.talks.length ? (
-          data.talks.slice(0, 3).map((talk) => <TalkCard key={talk.id} talk={talk} />)
+          data.talks.slice(0, 3).map((talk) => <TalkCard key={talk.id} talk={talk} canDuplicate={false} />)
         ) : (
           <div className="md:col-span-2 xl:col-span-3">
             <EmptyState
