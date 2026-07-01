@@ -16,6 +16,7 @@ import { localizedPath } from "@/i18n/routing";
 import { getMessages } from "@/i18n/messages";
 import { TrackedCardLink } from "./tracked-card-link";
 import { TrackedLinkButton } from "./tracked-link-button";
+import { MobileNavDetails } from "./mobile-nav-details";
 
 const workflowIcons = [PanelsTopLeft, Wand2, Mic2];
 
@@ -57,7 +58,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 {common.createTalk}
               </TrackedLinkButton>
             </div>
-            <details className="relative md:hidden">
+            <MobileNavDetails className="relative md:hidden">
               <summary aria-label={common.menu} className="flex size-9 cursor-pointer list-none items-center justify-center rounded-[8px] border border-line bg-surface text-muted transition hover:text-foreground [&::-webkit-details-marker]:hidden">
                 <Menu className="size-4" />
               </summary>
@@ -76,7 +77,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                   <LanguageSwitcher currentLocale={locale} />
                 </div>
               </div>
-            </details>
+            </MobileNavDetails>
           </div>
         </div>
       </header>
