@@ -24,6 +24,7 @@
     "talks": "Talks",
     "newTalk": "New talk",
     "settings": "Settings",
+    "analytics": "Analytics",
     "studioOwner": "Studio owner"
   },
   "landing": {
@@ -979,6 +980,43 @@
     "alreadyAccepted": "Invitation already accepted.",
     "alreadyRevoked": "Invitation already revoked.",
     "wrongAccount": "This link is for {intended}. You’re signed in as {current}."
+  },
+  "analytics": {
+    "title": "Rehearsal analytics",
+    "subtitle": "Consistency, progression, and actual vs. estimated duration.",
+    "totalSessions": "Rehearsals",
+    "totalTime": "Total rehearsal time",
+    "avgPrecision": "Avg. precision",
+    "thisWeek": "This week",
+    "sessionCount": "{count} rehearsal{plural}",
+    "filterTalk": "Talk",
+    "filterAllTalks": "All talks",
+    "filterFrom": "From",
+    "filterTo": "To",
+    "resetFilters": "Reset",
+    "barChartTitle": "Actual vs. estimated duration",
+    "barChartActual": "Actual",
+    "barChartEstimated": "Estimated",
+    "heatmapTitle": "Weekly consistency",
+    "heatmapDays": ["M", "T", "W", "T", "F", "S", "S"],
+    "trendTitle": "Precision over time",
+    "emptyTitle": "No rehearsals recorded yet",
+    "emptyBody": "Open a talk in prompter mode and stay for at least 30 seconds. Sessions are recorded automatically.",
+    "goRehearse": "View talks",
+    "noDataPeriod": "No rehearsals in this period.",
+    "lockedTitle": "Rehearsal analytics",
+    "lockedBadge": "Pro feature",
+    "lockedSubtitle": "Upgrade to Pro to unlock your rehearsal dashboard.",
+    "lockedBody": "Track your consistency, visualize the gap between actual and estimated duration, and measure your precision over time.",
+    "lockedFeatures": [
+      "Weekly consistency heatmap",
+      "Actual vs. estimated duration per rehearsal",
+      "Precision score over time",
+      "Filter by talk and date range"
+    ],
+    "lockedCta": "Upgrade to Pro",
+    "minutesUnit": "min",
+    "secondsUnit": "s"
   },
   "footer": {
     "tagline": "The workspace to write, rehearse and deliver your talks.",

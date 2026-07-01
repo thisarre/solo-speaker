@@ -219,6 +219,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      rehearsal_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          talk_id: string | null;
+          talk_title: string | null;
+          started_at: string;
+          duration_seconds: number;
+          estimated_seconds: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          talk_id?: string | null;
+          talk_title?: string | null;
+          started_at: string;
+          duration_seconds: number;
+          estimated_seconds?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          talk_id?: string | null;
+          talk_title?: string | null;
+          started_at?: string;
+          duration_seconds?: number;
+          estimated_seconds?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       stt_sessions: {
         Row: {
           id: string;

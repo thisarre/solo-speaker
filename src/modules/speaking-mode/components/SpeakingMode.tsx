@@ -46,6 +46,7 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const totalSeconds = useMemo(() => estimateDuration(items), [items]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLElement | null>>({});
+  const elapsedSecondsRef = useRef(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speedIndex, setSpeedIndex] = useState(() => nearestIndex(speeds, readPrompterSpeedPreference()));
   const [fontSizeIndex, setFontSizeIndex] = useState(() => nearestIndex(fontSizes, readPrompterFontSizePreference()));
@@ -54,14 +55,28 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const [voiceFollowActive, setVoiceFollowActive] = useState(false);
   const [voiceScrollSource, setVoiceScrollSource] = useState<"auto-scroll" | "manual" | "transcript-sync" | "voice-paced">("auto-scroll");
   const { elapsedSeconds, reset } = useSpeakingTimer(isPlaying);
+  elapsedSecondsRef.current = elapsedSeconds;
   const speed = speeds[speedIndex];
   const fontSize = fontSizes[fontSizeIndex];
   const readingAnchorRatio = readingPositionRatios[readingPosition];
   const classicAutoScrollEnabled = isPlaying && !voiceFollowActive;
 
   const handleExit = useCallback(() => {
+    const elapsed = elapsedSecondsRef.current;
+    if (elapsed >= 30) {
+      fetch("/api/analytics/rehearsal/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          talkId: talk.id,
+          durationSeconds: elapsed,
+          estimatedSeconds: totalSeconds > 0 ? totalSeconds : null,
+          startedAt: new Date(Date.now() - elapsed * 1000).toISOString()
+        })
+      }).catch(() => {});
+    }
     router.push(localizedPath(`/talks/${talk.id}`, locale));
-  }, [router, talk.id, locale]);
+  }, [router, talk.id, locale, totalSeconds]);
 
   const stopPlaying = useCallback(() => setIsPlaying(false), []);
 

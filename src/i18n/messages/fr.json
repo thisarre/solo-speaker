@@ -24,6 +24,7 @@
     "talks": "Prises de parole",
     "newTalk": "Nouvelle prise de parole",
     "settings": "Réglages",
+    "analytics": "Analytiques",
     "studioOwner": "Propriétaire du studio"
   },
   "landing": {
@@ -977,6 +978,43 @@
     "alreadyAccepted": "Invitation déjà acceptée.",
     "alreadyRevoked": "Invitation déjà révoquée.",
     "wrongAccount": "Ce lien est destiné à {intended}. Tu es connecté en tant que {current}."
+  },
+  "analytics": {
+    "title": "Analytics de répétition",
+    "subtitle": "Régularité, progression et écart durée réelle/estimée.",
+    "totalSessions": "Répétitions",
+    "totalTime": "Temps répété",
+    "avgPrecision": "Précision moyenne",
+    "thisWeek": "Cette semaine",
+    "sessionCount": "{count} répétition{plural}",
+    "filterTalk": "Prise de parole",
+    "filterAllTalks": "Toutes les prises de parole",
+    "filterFrom": "Depuis",
+    "filterTo": "Jusqu'au",
+    "resetFilters": "Réinitialiser",
+    "barChartTitle": "Durée réelle vs estimée",
+    "barChartActual": "Réelle",
+    "barChartEstimated": "Estimée",
+    "heatmapTitle": "Régularité hebdomadaire",
+    "heatmapDays": ["L", "M", "M", "J", "V", "S", "D"],
+    "trendTitle": "Précision au fil du temps",
+    "emptyTitle": "Aucune répétition enregistrée",
+    "emptyBody": "Ouvrez une prise de parole en mode prompteur et répétez au moins 30 secondes. Chaque session est enregistrée automatiquement.",
+    "goRehearse": "Voir les prises de parole",
+    "noDataPeriod": "Aucune répétition sur cette période.",
+    "lockedTitle": "Analytics de répétition",
+    "lockedBadge": "Fonctionnalité Pro",
+    "lockedSubtitle": "Passez à Pro pour débloquer le tableau de bord de répétition.",
+    "lockedBody": "Suivez votre régularité, visualisez l'écart entre durée réelle et estimée, et mesurez votre précision au fil des sessions.",
+    "lockedFeatures": [
+      "Heatmap de régularité hebdomadaire",
+      "Durée réelle vs estimée par répétition",
+      "Score de précision dans le temps",
+      "Filtres par prise de parole et par période"
+    ],
+    "lockedCta": "Passer à Pro",
+    "minutesUnit": "min",
+    "secondsUnit": "s"
   },
   "footer": {
     "tagline": "L’atelier pour écrire, répéter et présenter vos prises de parole.",
