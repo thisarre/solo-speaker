@@ -21,6 +21,7 @@ export type Talk = {
   durationMinutes: number;
   language: TalkLanguage;
   updatedAtLabel: string;
+  shareToken: string | null;
   sections: TalkSection[];
   parentTalkId: string | null;
 };

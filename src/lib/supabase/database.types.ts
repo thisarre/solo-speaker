@@ -120,6 +120,7 @@ export type Database = {
           language: "FR" | "EN" | "ES" | "DE" | "IT" | "PT";
           source_talk_id: string | null;
           parent_talk_id: string | null;
+          share_token: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -134,6 +135,7 @@ export type Database = {
           language?: "FR" | "EN" | "ES" | "DE" | "IT" | "PT";
           source_talk_id?: string | null;
           parent_talk_id?: string | null;
+          share_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -148,6 +150,7 @@ export type Database = {
           language?: "FR" | "EN" | "ES" | "DE" | "IT" | "PT";
           source_talk_id?: string | null;
           parent_talk_id?: string | null;
+          share_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };

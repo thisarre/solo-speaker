@@ -56,7 +56,9 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const [voiceFollowActive, setVoiceFollowActive] = useState(false);
   const [voiceScrollSource, setVoiceScrollSource] = useState<"auto-scroll" | "manual" | "transcript-sync" | "voice-paced">("auto-scroll");
   const { elapsedSeconds, reset } = useSpeakingTimer(isPlaying);
-  elapsedSecondsRef.current = elapsedSeconds;
+  useEffect(() => {
+    elapsedSecondsRef.current = elapsedSeconds;
+  }, [elapsedSeconds]);
   const speed = speeds[speedIndex];
   const fontSize = fontSizes[fontSizeIndex];
   const readingAnchorRatio = readingPositionRatios[readingPosition];

@@ -1,0 +1,73 @@
+name: LinkedIn posts (weekly)
+
+on:
+  schedule:
+    # Monday 07:00 UTC (~09:00 Paris) — 4 drafts ready for the week.
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  posts:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      MARKETING_CHANNEL: ${{ vars.SLACK_MARKETING_CHANNEL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 60
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Gather recent app news
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "PR mergées récentes :"
+            gh pr list --state merged --limit 15 --json number,title -q '.[] | "- #\(.number) \(.title)"' 2>/dev/null || true
+            echo
+            echo "Commits récents :"
+            git log --oneline -30
+          } > "$RUNNER_TEMP/news.txt"
+          cat "$RUNNER_TEMP/news.txt"
+
+      - name: Write 4 LinkedIn posts (commercial agent)
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          NEWS=$(cat "$RUNNER_TEMP/news.txt")
+          PROMPT="Tu es le responsable marketing/commercial de Solo Speaker (SaaS IA de préparation de prise de parole, solospeaker.com). Actualité produit récente (PR mergées + commits) :
+          $NEWS
+
+          Rédige EXACTEMENT 4 posts LinkedIn en français, dans la voix du fondateur (authentique, concret, pas corporate), sur ces nouveautés (ignore les commits purement techniques/CI sans intérêt utilisateur). Pour CHAQUE post :
+          - *Accroche* : 1 ligne qui arrête le scroll
+          - *Corps* : 3 à 6 lignes, une seule idée, bénéfice concret, storytelling léger (principes : preuve, spécificité, curiosité, aversion à la perte)
+          - *CTA* : essai gratuit / solospeaker.com
+          - *Hashtags* : 3 à 5
+          - *🎨 Brief visuel Canva* : format (carré 1080x1080 ou 1200x627), couleur de marque #6E6CF7, le texte exact à afficher sur le visuel, et le concept graphique
+          Varie les angles (nouvelle feature, coulisses/fondateur, problème résolu, chiffre/preuve). Markdown clair, un séparateur '---' entre chaque post. Tu peux lire le code (read-only) pour préciser une feature."
+          printf '%s' "$PROMPT" | claude -p \
+            --dangerously-skip-permissions \
+            --allowedTools "Read,Grep,Glob" \
+            --model claude-sonnet-4-6 \
+            --max-turns 20 | tee "$RUNNER_TEMP/posts.md"
+
+      - name: Post drafts to #marketing
+        if: always()
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$MARKETING_CHANNEL" ]; then exit 0; fi
+          POSTS=$(head -c 14000 "$RUNNER_TEMP/posts.md" 2>/dev/null)
+          [ -z "$POSTS" ] && POSTS="(génération indisponible, relance le workflow)"
+          TEXT=$(printf '📣 *4 posts LinkedIn de la semaine* — brouillons à valider + briefs Canva. Tu postes toi-même.\n\n%s' "$POSTS")
+          PAYLOAD=$(jq -n --arg ch "$MARKETING_CHANNEL" --arg txt "$TEXT" '{channel:$ch, text:$txt}')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            --data "$PAYLOAD" > /dev/null

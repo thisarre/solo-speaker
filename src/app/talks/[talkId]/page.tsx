@@ -25,16 +25,18 @@ export async function TalkPageView({ params, locale }: TalkPageProps & { locale?
   }
 
   let canTranslate = false;
+  let canShare = false;
   if (user) {
     const supabase = await createClient();
     const { data: profile } = await supabase.from("profiles").select("billing_plan").eq("id", user.id).maybeSingle();
     const plan = (profile?.billing_plan ?? "trial") as BillingPlan;
     canTranslate = can(plan, "talk.multilingual");
+    canShare = can(plan, "share.public");
   }
 
   return (
     <AppShell locale={locale}>
-      <TalkEditor canTranslate={canTranslate} talk={talk} />
+      <TalkEditor canShare={canShare} canTranslate={canTranslate} talk={talk} />
     </AppShell>
   );
 }
