@@ -2,7 +2,7 @@ import type { BillingPlan } from "./entitlements";
 
 export type PaidPlan = "studio" | "pro" | "team";
 export type Cadence = "monthly" | "yearly";
-export const MIN_TEAM_SEATS = 3;
+export const MIN_TEAM_SEATS = 5;
 
 export function lookupKeyFor(plan: PaidPlan, cadence: Cadence): string {
   return `${plan}_${cadence}`;
@@ -18,8 +18,8 @@ export function seatsAreValid(plan: PaidPlan, seats: number): boolean {
   return seats === 1;
 }
 
-// Backward-compat for currently-live Team links that have NO seats param: default to 3 (never error).
-// Strict <3 rejection applies ONLY to an explicitly provided value. Studio/Pro are always single-seat.
+// Backward-compat for Team links that have NO seats param: default to the minimum (never error).
+// Strict "< minimum" rejection applies ONLY to an explicitly provided value. Studio/Pro are always single-seat.
 export function resolveSeats(plan: PaidPlan, rawSeats: string | null | undefined): { seats: number } | { error: "invalid-seats" } {
   if (plan !== "team") return { seats: 1 };
   if (rawSeats == null || rawSeats === "") return { seats: MIN_TEAM_SEATS };

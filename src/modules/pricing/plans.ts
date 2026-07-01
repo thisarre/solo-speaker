@@ -34,7 +34,7 @@ function monthlyEquivalentFromAnnual(price: string, cadence: string): number | u
   return Math.round(amount / 12);
 }
 
-const MIN_TEAM_SEATS = 3;
+const MIN_TEAM_SEATS = 5;
 
 export function getPricingPlans(locale: Locale): PricingPlan[] {
   const messages = getMessages(locale);

@@ -107,7 +107,7 @@
       "Studio mensuel : 12 EUR/mois pour les orateurs réguliers.",
       "Studio annuel : 99 EUR/an, soit 45 EUR d’économie face au mensuel.",
       "Pro : 19 EUR/mois pour analytics, multilingue et export sans watermark.",
-      "Équipe : 6 EUR/mois par siège (offre groupe, tarif dégressif) pour petites équipes, églises et groupes de formateurs."
+      "Équipe : 9 EUR/mois par siège (offre groupe, min. 5 sièges) pour petites équipes, églises et groupes de formateurs."
     ],
     "founderEyebrow": "Le mot du fondateur",
     "founderParagraphs": [
@@ -247,12 +247,12 @@
         "id": "team",
         "name": "Équipe",
         "audience": "Pour équipes et églises",
-        "price": "49 EUR",
+        "price": "72 EUR",
         "cadence": "par siège / an",
-        "groupFraming": "Offre groupe — tarif dégressif par siège",
+        "groupFraming": "Offre groupe — tarif par siège (min. 5 sièges)",
         "description": "Un cadre pour plusieurs intervenants, avec onboarding et accompagnement.",
         "ctaLabel": "Démarrer avec mon équipe",
-        "secondaryPrice": { "badge": "économisez 23 €/siège", "cadence": "par siège / mois", "price": "6 EUR" },
+        "secondaryPrice": { "badge": "économisez 36 €/siège", "cadence": "par siège / mois", "price": "9 EUR" },
         "features": ["Studio pour chaque siège", "Invitations par lien ou email", "Facturation centralisée", "Accueil guidé", "Aide à la configuration"]
       }
     ]

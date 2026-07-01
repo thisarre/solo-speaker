@@ -14,22 +14,25 @@ test("parseCheckoutSelection accepts valid plan_cadence and rejects junk", () =>
   assert.equal(parseCheckoutSelection("pro"), null);
 });
 
-test("team requires at least 3 seats; studio/pro are always single-seat", () => {
-  assert.equal(seatsAreValid("team", 3), true);
-  assert.equal(seatsAreValid("team", 2), false);
+test("team requires at least 5 seats; studio/pro are always single-seat", () => {
+  assert.equal(seatsAreValid("team", 5), true);
+  assert.equal(seatsAreValid("team", 4), false);
+  assert.equal(seatsAreValid("team", 3), false);
   assert.equal(seatsAreValid("studio", 1), true);
   assert.equal(seatsAreValid("pro", 5), false);
 });
 
-test("resolveSeats defaults old Team links (no seats param) to 3, never errors", () => {
-  assert.deepEqual(resolveSeats("team", null), { seats: 3 });
-  assert.deepEqual(resolveSeats("team", ""), { seats: 3 });
-  assert.deepEqual(resolveSeats("team", undefined), { seats: 3 });
+test("resolveSeats defaults Team links (no seats param) to 5, never errors", () => {
+  assert.deepEqual(resolveSeats("team", null), { seats: 5 });
+  assert.deepEqual(resolveSeats("team", ""), { seats: 5 });
+  assert.deepEqual(resolveSeats("team", undefined), { seats: 5 });
 });
 
-test("resolveSeats rejects an explicit Team seat count below 3", () => {
-  assert.deepEqual(resolveSeats("team", "2"), { error: "invalid-seats" });
+test("resolveSeats rejects an explicit Team seat count below 5", () => {
+  assert.deepEqual(resolveSeats("team", "3"), { error: "invalid-seats" });
+  assert.deepEqual(resolveSeats("team", "4"), { error: "invalid-seats" });
   assert.deepEqual(resolveSeats("team", "5"), { seats: 5 });
+  assert.deepEqual(resolveSeats("team", "8"), { seats: 8 });
 });
 
 test("resolveSeats forces studio/pro to a single seat regardless of the param", () => {

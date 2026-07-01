@@ -23,8 +23,10 @@ test("pricingPlans exposes three paid tiers in display order", () => {
   assert.equal(pro.checkoutPlan, "pro_yearly");
 
   assert.equal(team.perSeat, true);
-  assert.equal(team.minSeats, 3);
-  assert.equal(team.price, "49 EUR");
+  assert.equal(team.minSeats, 5);
+  assert.equal(team.price, "72 EUR");
+  assert.equal(team.secondaryPrice.price, "9 EUR");
+  assert.match(team.secondaryPrice.badge, /36/);
   assert.equal(studio.perSeat, false);
   assert.equal(pro.perSeat, false);
 });

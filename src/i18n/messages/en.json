@@ -107,7 +107,7 @@
       "Studio monthly: 12 EUR/month for regular speakers.",
       "Studio annual: 99 EUR/year, saving 45 EUR compared with monthly billing.",
       "Pro: 19 EUR/month for analytics, multilingual and watermark-free export.",
-      "Team: 6 EUR/month per seat (group offer, volume pricing) for small teams, churches and training groups."
+      "Team: 9 EUR/month per seat (group offer, min. 5 seats) for small teams, churches and training groups."
     ],
     "founderEyebrow": "A note from the founder",
     "founderParagraphs": [
@@ -249,12 +249,12 @@
         "id": "team",
         "name": "Team",
         "audience": "For teams and churches",
-        "price": "49 EUR",
+        "price": "72 EUR",
         "cadence": "per seat / year",
-        "groupFraming": "Group offer — volume pricing per seat",
+        "groupFraming": "Group offer — per-seat pricing (min. 5 seats)",
         "description": "A workspace for multiple speakers, with onboarding and support.",
         "ctaLabel": "Get started with my team",
-        "secondaryPrice": { "badge": "Save €23/seat", "cadence": "per seat / month", "price": "6 EUR" },
+        "secondaryPrice": { "badge": "Save €36/seat", "cadence": "per seat / month", "price": "9 EUR" },
         "features": ["Studio for every seat", "Invite by link or email", "Centralized billing", "Guided onboarding", "Setup help"]
       }
     ]
