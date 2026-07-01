@@ -30,11 +30,11 @@
   "landing": {
     "heroBadge": "From idea to stage",
     "heroTitle": "Turn your ideas into talks that captivate.",
-    "heroSubtitle": "Solo Speaker Studio turns an idea, voice memo or rough draft into a structured talk: AI rewriting for the spoken word, controlled timing and a teleprompter that follows your voice.",
-    "heroDefinition": "No more blank page or last-minute stress: you walk on stage prepared, timed and confident.",
+    "heroSubtitle": "Turn an idea, voice memo or rough draft into a structured, well-timed talk — then rehearse with a teleprompter that follows your voice.",
+    "heroDefinition": "No more blank page or night-before stress: you walk on stage prepared and sure of your timing.",
     "timeProofs": [
-      ["Notes → outline", "No need to sort a blank page by hand."],
-      ["Outline → sections", "Each part can grow without breaking the rest."],
+      ["Notes → outline", "No need to sort your notes by hand."],
+      ["Outline → sections", "Each part can grow without unpicking the others."],
       ["Sections → teleprompter", "Rehearsal starts without export or reformatting."]
     ],
     "trialEyebrow": "Free trial · 5 talks",
@@ -42,10 +42,10 @@
     "trialDescription": "Across your first 5 talks, live the full flow: capture an idea, generate an outline, polish your sections with AI, then rehearse, all in one place, with no time limit and no credit card.",
     "trialHighlights": ["5 free talks", "No credit card", "Outline, AI assistant, teleprompter and voice notes"],
     "videoDemoEyebrow": "In action",
-    "videoDemoTitle": "From first idea to teleprompter, in one flow.",
+    "videoDemoTitle": "Watch the studio turn notes into a ready-to-deliver talk.",
     "videoDemoBody": "Two short demos show how Solo Speaker clarifies your notes, structures your sections and gets you rehearsing, without ever switching tools.",
     "videoDemos": [
-      ["From scattered notes to outline", "Loose notes become usable sections without starting from a blank page."],
+      ["From scattered notes to outline", "Loose notes become usable sections, ready to refine."],
       ["From outline to teleprompter", "Preparation stays in one flow through rehearsal, without copy-pasting across tools."]
     ],
     "heroStats": [
@@ -62,7 +62,7 @@
       "Rehearsal happens too late, when the structure should already be clear."
     ],
     "solutionEyebrow": "The solution",
-    "solutionTitle": "One workspace, from idea to stage.",
+    "solutionTitle": "One studio for your whole preparation.",
     "solutionBody": "Notes, outline, AI rewriting, rehearsal and delivery: everything is connected. You move section by section and stay focused on what matters: your message and your audience.",
     "workflowFeatures": [
       ["Usable outline from the start", "Start from an idea, audience note or voice memo and get sections that are ready to refine."],
@@ -102,7 +102,7 @@
     ],
     "pricingEyebrow": "Pricing",
     "pricingTitle": "Try it free. Keep it once it wins you over.",
-    "pricingBody": "5 trial talks to test everything with no time limit and no credit card: notes, outline, AI, teleprompter and PDF export. Studio is 99 EUR/year, saving 45 EUR compared with monthly billing.",
+    "pricingBody": "5 trial talks, no credit card, to test everything. Then Studio (99 EUR/year) for unlimited use, Pro for multilingual talks, versions and rehearsal analytics, and Team for your collaborators.",
     "pricingBullets": [
       "Trial: 5 talks maximum, no time limit, no credit card, limited AI, teleprompter and voice notes.",
       "Studio monthly: 12 EUR/month for regular speakers.",
@@ -113,7 +113,7 @@
     "founderEyebrow": "A note from the founder",
     "founderParagraphs": [
       "Preparing a talk isn’t just writing it. It’s sorting your ideas, finding the right order, making the words sound natural out loud, keeping to time, and rehearsing, often alone, often the night before.",
-      "I built Solo Speaker to bring all of that into one place: from the first idea to a teleprompter that follows your voice. The goal is simple. Help you walk on stage prepared, on time, and confident, focused on what truly matters: your message and your audience."
+      "I built Solo Speaker to bring all of that into one place: from the first idea to a teleprompter that follows your voice. The goal is simple. Help you walk on stage calm and in control of your time, focused on what truly matters: what you want to say, and who you're saying it to."
     ],
     "founderSignature": "Thierno SARRÉ, founder of Solo Speaker",
     "faqEyebrow": "FAQ",

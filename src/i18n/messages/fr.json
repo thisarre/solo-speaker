@@ -30,11 +30,11 @@
   "landing": {
     "heroBadge": "De l’idée à la scène",
     "heroTitle": "Transformez vos idées en prises de parole qui captivent.",
-    "heroSubtitle": "Solo Speaker Studio transforme une idée, un mémo vocal ou un brouillon en une intervention structurée : réécriture pour l’oral par IA, durée maîtrisée et prompteur qui suit votre voix.",
-    "heroDefinition": "Fini la page blanche et le stress de dernière minute : vous montez sur scène préparé, minuté et confiant.",
+    "heroSubtitle": "Transformez une idée, un mémo vocal ou un brouillon en une intervention structurée et minutée — puis répétez avec un prompteur qui suit votre voix.",
+    "heroDefinition": "Fini la page blanche et le stress de la veille : vous arrivez préparé et sûr de votre minutage.",
     "timeProofs": [
-      ["Notes → plan", "Plus besoin de trier une page blanche à la main."],
-      ["Plan → sections", "Chaque partie se développe sans casser le reste."],
+      ["Notes → plan", "Plus besoin de trier vos notes à la main."],
+      ["Plan → sections", "Chaque partie se développe sans défaire les autres."],
       ["Sections → prompteur", "La répétition démarre sans export ni remise en forme."]
     ],
     "trialEyebrow": "Essai gratuit · 5 prises de parole",
@@ -42,10 +42,10 @@
     "trialDescription": "Sur vos 5 premières prises de parole, vivez le flux complet : capturez une idée, générez un plan, peaufinez vos sections avec l’IA, puis répétez, le tout au même endroit, sans limite de temps et sans carte bancaire.",
     "trialHighlights": ["5 prises de parole gratuites", "Sans carte bancaire", "Plan, assistant IA, prompteur et mémos vocaux"],
     "videoDemoEyebrow": "En action",
-    "videoDemoTitle": "De la première idée au prompteur, en un seul flux.",
+    "videoDemoTitle": "Regardez le studio transformer des notes en discours prêt.",
     "videoDemoBody": "Deux démos courtes montrent comment Solo Speaker clarifie vos notes, structure vos sections et vous fait répéter, sans jamais changer d’outil.",
     "videoDemos": [
-      ["Du désordre au plan", "Les notes dispersées deviennent des sections exploitables, sans repartir d’une page blanche."],
+      ["Du désordre au plan", "Les notes dispersées deviennent des sections exploitables, prêtes à travailler."],
       ["Du plan au prompteur", "La préparation reste dans le même flux jusqu’à la répétition, sans copier-coller entre plusieurs outils."]
     ],
     "heroStats": [
@@ -62,7 +62,7 @@
       "La répétition arrive trop tard, quand la structure devrait déjà être claire."
     ],
     "solutionEyebrow": "La solution",
-    "solutionTitle": "Un seul espace, de l’idée à la scène.",
+    "solutionTitle": "Un seul studio pour toute votre préparation.",
     "solutionBody": "Notes, plan, réécriture par IA, répétition et présentation : tout est relié. Vous avancez section par section et restez concentré sur l’essentiel : votre message et votre public.",
     "workflowFeatures": [
       ["Plan exploitable dès le départ", "Partez d’une idée, d’une audience ou d’un mémo vocal, puis obtenez des sections déjà prêtes à travailler."],
@@ -102,7 +102,7 @@
     ],
     "pricingEyebrow": "Tarifs",
     "pricingTitle": "Essayez gratuitement. Adoptez-le quand il vous convainc.",
-    "pricingBody": "5 prises de parole d’essai pour tout tester sans limite de temps et sans carte bancaire : notes, plan, IA, prompteur et export PDF. Studio à 99 EUR/an, soit 45 EUR d’économie face au mensuel.",
+    "pricingBody": "5 prises de parole d’essai, sans carte bancaire, pour tout tester. Puis Studio (99 EUR/an) pour un usage illimité, Pro pour le multilingue, les versions et les analytics de répétition, et Équipe pour vos collaborateurs.",
     "pricingBullets": [
       "Essai : 5 prises de parole maximum, sans limite de temps, sans carte bancaire, IA limitée, prompteur et mémos vocaux.",
       "Studio mensuel : 12 EUR/mois pour les orateurs réguliers.",
@@ -113,7 +113,7 @@
     "founderEyebrow": "Le mot du fondateur",
     "founderParagraphs": [
       "Préparer une prise de parole, ce n’est pas seulement l’écrire. C’est trier ses idées, trouver le bon ordre, rendre le texte naturel à l’oral, tenir le temps et répéter, souvent seul, souvent la veille.",
-      "J’ai créé Solo Speaker pour réunir tout ça au même endroit : de la première idée jusqu’au prompteur qui suit votre voix. L’objectif est simple : que vous montiez sur scène préparé, minuté et confiant, concentré sur ce qui compte vraiment, votre message et votre public."
+      "J’ai créé Solo Speaker pour réunir tout ça au même endroit : de la première idée jusqu’au prompteur qui suit votre voix. L’objectif est simple : que vous montiez sur scène serein et maître de votre temps, concentré sur l’essentiel : ce que vous voulez transmettre, et à qui."
     ],
     "founderSignature": "Thierno SARRÉ, fondateur de Solo Speaker",
     "faqEyebrow": "FAQ",
