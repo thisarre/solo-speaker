@@ -142,7 +142,7 @@ function useStoredBoolean(key: string, fallback: boolean) {
   return [value, setValue] as const;
 }
 
-export function TalkEditor({ canTranslate = false, talk }: { canTranslate?: boolean; talk: Talk }) {
+export function TalkEditor({ canShare = false, canTranslate = false, talk }: { canShare?: boolean; canTranslate?: boolean; talk: Talk }) {
   const { locale, messages } = useI18n();
   const editor = messages.editor;
   const addSectionFailedMessage = messages.errors.addSectionFailed;
@@ -717,7 +717,7 @@ export function TalkEditor({ canTranslate = false, talk }: { canTranslate?: bool
             <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
           </div>
           {showExportActions ? <ExportPdfButton talkId={talk.id} title={draft.title} /> : null}
-          {showExportActions ? <ShareButton title={draft.title} /> : null}
+          {showExportActions ? <ShareButton canShare={canShare} shareToken={talk.shareToken} talkId={talk.id} /> : null}
           {showExportActions ? <TranslateButton canTranslate={canTranslate} sourceLang={draft.language} talkId={talk.id} /> : null}
           {showSpeakingActions ? (
             <Button

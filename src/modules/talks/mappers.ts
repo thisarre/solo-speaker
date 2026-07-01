@@ -35,6 +35,7 @@ export function mapTalk(row: TalkWithSectionsRow): Talk {
     durationMinutes: row.duration_minutes,
     language: row.language,
     updatedAtLabel: updatedAtLabel(row.updated_at),
+    shareToken: row.share_token ?? null,
     sections: [...(row.talk_sections ?? [])].sort((a, b) => a.position - b.position).map(mapSection)
   };
 }

@@ -453,6 +453,18 @@
     "share": "Partager",
     "shareCopied": "Lien copié !",
     "shareError": "Impossible de partager.",
+    "sharePublic": {
+      "title": "Partager cette préparation",
+      "body": "Ce lien permet à n'importe qui de consulter votre préparation en lecture seule, sans créer de compte.",
+      "urlLabel": "Lien de partage",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "revoke": "Révoquer le lien",
+      "revoking": "Révocation...",
+      "generating": "Génération...",
+      "error": "Impossible de générer le lien.",
+      "locked": "Disponible avec le plan Pro"
+    },
     "exportPdf": "Exporter PDF",
     "exportingPdf": "Export...",
     "exportPdfError": "Export PDF impossible.",
