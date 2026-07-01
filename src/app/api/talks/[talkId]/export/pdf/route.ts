@@ -5,6 +5,8 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { formatDuration, sectionSeconds } from "@/lib/utils";
 import { mapTalk, type TalkWithSectionsRow } from "@/modules/talks/mappers";
 import { talkTypeLabels } from "@/types/talk";
+import { can } from "@/modules/billing/capabilities";
+import type { BillingPlan } from "@/modules/billing/entitlements";
 
 type ExportPdfRouteProps = {
   params: Promise<{ talkId: string }>;
@@ -166,10 +168,10 @@ function drawMetaRow(context: PdfContext, label: string, value: string) {
   context.cursorY -= 17;
 }
 
-function drawTrialWatermark(doc: PDFDocument, font: PDFFont) {
+function drawBrandWatermark(doc: PDFDocument, font: PDFFont) {
   for (const page of doc.getPages()) {
     const { width, height } = page.getSize();
-    page.drawText("SOLO SPEAKER · ESSAI", {
+    page.drawText("SOLO SPEAKER", {
       x: width * 0.12,
       y: height * 0.46,
       size: 40,
@@ -218,7 +220,9 @@ export async function GET(_request: Request, { params }: ExportPdfRouteProps) {
   }
 
   const { data: profile } = await supabase.from("profiles").select("billing_plan").eq("id", user.id).maybeSingle();
-  const isTrial = (profile?.billing_plan ?? "trial") === "trial";
+  const plan = (profile?.billing_plan ?? "trial") as BillingPlan;
+  // Branded (watermark-free) export is a Pro/Team capability. Trial + Studio keep the watermark.
+  const brandedExport = can(plan, "export.branded");
 
   const talk = mapTalk(data as TalkWithSectionsRow);
   const estimatedSeconds = talk.sections.reduce((total, section) => total + sectionSeconds(section.heading, section.body), 0);
@@ -312,8 +316,8 @@ export async function GET(_request: Request, { params }: ExportPdfRouteProps) {
     });
   }
 
-  if (isTrial) {
-    drawTrialWatermark(doc, bold);
+  if (!brandedExport) {
+    drawBrandWatermark(doc, bold);
   }
 
   doc.setTitle(talk.title || "Talk");
