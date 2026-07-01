@@ -36,13 +36,14 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          set -o pipefail
           npm install -g @anthropic-ai/claude-code
+          # No pipefail: if the agent hits max-turns it still leaves partial work → a PR opens
+          # for review; a real auth failure produces no file changes → "aucun changement" (no empty PR).
           printf '%s' "$PROMPT" | claude -p \
             --dangerously-skip-permissions \
             --allowedTools "Edit,Write,Read,Bash,Glob,Grep" \
             --model claude-sonnet-4-6 \
-            --max-turns 40 | tee "$RUNNER_TEMP/claude-output.log"
+            --max-turns 100 | tee "$RUNNER_TEMP/claude-output.log"
 
       - name: Slack — code terminé
         env:

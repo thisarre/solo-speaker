@@ -30,13 +30,12 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          set -o pipefail
           npm install -g @anthropic-ai/claude-code
           printf '%s' "$PROMPT" | claude -p \
             --dangerously-skip-permissions \
             --allowedTools "Edit,Write,Read,Bash,Glob,Grep" \
             --model claude-sonnet-4-6 \
-            --max-turns 40 | tee "$RUNNER_TEMP/claude-output.log"
+            --max-turns 80 | tee "$RUNNER_TEMP/claude-output.log"
 
       - name: Detect changes
         id: changes
