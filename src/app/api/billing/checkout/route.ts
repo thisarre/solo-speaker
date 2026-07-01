@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildStripeCheckoutPayload } from "@/modules/billing/checkout";
 import { lookupKeyFor, parseCheckoutSelection, resolvePriceId, resolveSeats } from "@/modules/billing/stripe-prices";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { localizedPath, type Locale } from "@/i18n/routing";
 
 export const runtime = "nodejs";
@@ -91,6 +92,9 @@ async function createCheckoutRedirect(
     pricingUrl.searchParams.set("error", session.error?.message ?? "stripe-checkout-failed");
     return NextResponse.redirect(pricingUrl, 303);
   }
+
+  // Funnel: checkout session created, redirecting to Stripe. Segmented by tier.
+  getPostHogClient().capture({ distinctId: user.id, event: "checkout_started", properties: { plan, cadence, seats } });
 
   return NextResponse.redirect(session.url, 303);
 }

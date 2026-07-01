@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { deriveSubscriptionFields, type StripeSubscriptionLike } from "@/modules/billing/stripe-prices";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { sendEmail } from "@/lib/email/send";
 import {
   normalizeEmailLocale,
@@ -188,6 +189,8 @@ export async function POST(request: NextRequest) {
 
     // Confirmation email only on the INITIAL subscription (created), never on every update/renewal.
     if (type === "customer.subscription.created" && isActive) {
+      // Funnel: paid conversion. Segmented by tier (priority: trial → Pro).
+      getPostHogClient().capture({ distinctId: userId, event: "checkout_completed", properties: { plan: billingPlan, cadence: derived.cadence } });
       if (billingPlan === "studio") await emailSubscriber(admin, userId, (name, locale) => renderStudioConfirmedEmail({ name, locale }));
       else if (billingPlan === "team") await emailSubscriber(admin, userId, (name, locale) => renderTeamConfirmedEmail({ name, locale }));
     }
