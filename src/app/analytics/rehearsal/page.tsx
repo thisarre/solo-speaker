@@ -8,7 +8,7 @@ import { getTalks } from "@/modules/talks/queries";
 import { can } from "@/modules/billing/capabilities";
 import type { BillingPlan } from "@/modules/billing/entitlements";
 import { getMessages } from "@/i18n/messages";
-import { resolveServerLocale, type LocaleParams } from "@/i18n/server";
+import { resolveServerLocale } from "@/i18n/server";
 import type { Locale } from "@/i18n/routing";
 
 export default async function RehearsalAnalyticsPage() {
