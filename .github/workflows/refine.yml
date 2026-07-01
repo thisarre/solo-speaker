@@ -37,7 +37,7 @@ jobs:
           *PO* : une user story, 3 a 5 criteres d'acceptation testables, et le scope (Inclus / Exclu). Si la demande implique une visibilite ou une page PUBLIQUE, precise-le explicitement.
 
           Inspecte le code en lecture seule si utile. IMPERATIF: reste sous ~1100 caracteres au total (ce spec sera place dans un bouton Slack)."
-          claude -p "$REFINE_PROMPT" \
+          printf '%s' "$REFINE_PROMPT" | claude -p \
             --dangerously-skip-permissions \
             --allowedTools "Read,Bash,Glob,Grep" \
             --model claude-sonnet-4-6 \

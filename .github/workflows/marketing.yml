@@ -62,7 +62,7 @@ jobs:
           2) 2-3 problemes ou opportunites.
           3) 2-3 idees d'A/B test concretes : hypothese + variation + metrique a suivre.
           Si les volumes sont faibles/nuls (produit recent), dis-le clairement et indique quoi instrumenter en priorite. Tu peux lire le code (read-only) pour le contexte produit."
-          claude -p "$ANALYSIS_PROMPT" \
+          printf '%s' "$ANALYSIS_PROMPT" | claude -p \
             --dangerously-skip-permissions \
             --allowedTools "Read,Glob,Grep" \
             --model claude-sonnet-4-6 \
