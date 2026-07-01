@@ -1,4 +1,4 @@
-import type { TalkType } from "@/types/talk";
+import type { TalkLanguage, TalkType } from "@/types/talk";
 
 export type AssistantAction =
   | "outline"
@@ -15,7 +15,7 @@ export type AssistantTalkContext = {
   audience: string;
   objective: string;
   targetDurationMin: number;
-  language: "FR" | "EN";
+  language: TalkLanguage;
 };
 
 export type AssistantSectionContext = {

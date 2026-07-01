@@ -117,7 +117,8 @@ export type Database = {
           status: "draft" | "ready" | "archived";
           audience: string;
           duration_minutes: number;
-          language: "FR" | "EN";
+          language: "FR" | "EN" | "ES" | "DE" | "IT" | "PT";
+          source_talk_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -129,7 +130,8 @@ export type Database = {
           status?: "draft" | "ready" | "archived";
           audience?: string;
           duration_minutes?: number;
-          language?: "FR" | "EN";
+          language?: "FR" | "EN" | "ES" | "DE" | "IT" | "PT";
+          source_talk_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -141,7 +143,8 @@ export type Database = {
           status?: "draft" | "ready" | "archived";
           audience?: string;
           duration_minutes?: number;
-          language?: "FR" | "EN";
+          language?: "FR" | "EN" | "ES" | "DE" | "IT" | "PT";
+          source_talk_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };

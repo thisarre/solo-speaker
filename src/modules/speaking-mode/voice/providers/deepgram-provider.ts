@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { TranscriptionProviderController } from "./transcription-provider";
+import { languageToRealtimeCode } from "./transcription-provider";
 import { lastTranscriptWords } from "../transcript-buffer";
+import type { TalkLanguage } from "@/types/talk";
 
 type DeepgramTokenResponse = {
   access_token?: string;
@@ -34,10 +36,10 @@ type DeepgramLiveMessage = {
 const defaultDeepgramModel = process.env.NEXT_PUBLIC_DEEPGRAM_MODEL ?? "nova-3";
 const mediaRecorderMimeTypes = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
 
-export function buildDeepgramListenUrl(language: "FR" | "EN", model = defaultDeepgramModel) {
+export function buildDeepgramListenUrl(language: TalkLanguage, model = defaultDeepgramModel) {
   const params = new URLSearchParams({
     model,
-    language: language === "EN" ? "en" : "fr",
+    language: languageToRealtimeCode(language),
     interim_results: "true",
     endpointing: "350",
     punctuate: "true",
@@ -63,7 +65,7 @@ export function parseDeepgramLiveMessage(message: DeepgramLiveMessage) {
   };
 }
 
-export function useDeepgramProvider(language: "FR" | "EN", talkId?: string | null): TranscriptionProviderController {
+export function useDeepgramProvider(language: TalkLanguage, talkId?: string | null): TranscriptionProviderController {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const socketRef = useRef<WebSocket | null>(null);

@@ -10,12 +10,12 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { getMessages } from "@/i18n/messages";
 import { localizedPath } from "@/i18n/routing";
 import { resolveServerLocale } from "@/i18n/server";
-import type { TalkStatus, TalkType } from "@/types/talk";
+import type { TalkLanguage, TalkStatus, TalkType } from "@/types/talk";
 
 const copy = getMessages("fr");
 const talkTypes = new Set<TalkType>(["sermon", "conference", "training", "pitch", "speech"]);
 const talkStatuses = new Set<TalkStatus>(["draft", "ready", "archived"]);
-const languages = new Set(["FR", "EN"]);
+const languages = new Set(["FR", "EN", "ES", "DE", "IT", "PT"]);
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -122,7 +122,7 @@ export async function updateTalk(input: {
   status: TalkStatus;
   audience: string;
   durationMinutes: number;
-  language: "FR" | "EN";
+  language: TalkLanguage;
 }) {
   const { user, supabase } = await assertOwnTalk(input.id);
   const title = cleanText(input.title);

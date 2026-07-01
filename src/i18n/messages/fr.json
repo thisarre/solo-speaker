@@ -457,7 +457,18 @@
     "exportingPdf": "Export...",
     "exportPdfError": "Export PDF impossible.",
     "exportPdfSuccess": "PDF généré.",
-    "simulateVoice": "Simuler"
+    "simulateVoice": "Simuler",
+    "translate": {
+      "label": "Traduire",
+      "title": "Traduire cette prise de parole",
+      "body": "Choisissez une langue cible. Un crédit IA sera consommé.",
+      "selectLanguage": "Langue cible",
+      "confirm": "Générer la traduction",
+      "loading": "Traduction...",
+      "error": "Impossible de traduire. Réessaie.",
+      "locked": "Disponible avec le plan Pro",
+      "creditsExhausted": "Crédits IA épuisés. Passez à Studio pour continuer."
+    }
   },
   "voiceSimulator": {
     "title": "Simulation vocale",

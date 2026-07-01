@@ -36,6 +36,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { AutosaveStatus, type AutosaveState } from "@/components/talks/AutosaveStatus";
 import { ExportPdfButton } from "@/components/talks/ExportPdfButton";
 import { ShareButton } from "@/components/talks/ShareButton";
+import { TranslateButton } from "@/components/talks/TranslateButton";
 import { generateAssistantContent } from "@/modules/assistant/actions";
 import { AiPreviewDialog } from "@/modules/assistant/components/ai-preview-dialog";
 import { AssistantPanel } from "@/modules/assistant/components/assistant-panel";
@@ -50,7 +51,7 @@ import { isEditorPanelVisible } from "@/modules/studio-layout/editor-layout-pres
 import { useEditorLayout } from "@/modules/studio-layout/layout-storage";
 import { useI18n } from "@/i18n/client";
 import { localizedPath } from "@/i18n/routing";
-import { talkStatusLabels, talkTypeLabels, type Talk, type TalkSection, type TalkStatus, type TalkType } from "@/types/talk";
+import { talkLanguageLabels, talkStatusLabels, talkTypeLabels, type Talk, type TalkLanguage, type TalkSection, type TalkStatus, type TalkType } from "@/types/talk";
 import { VoiceSimulatorPanel } from "@/modules/voice-simulator/components/voice-simulator-panel";
 
 type EditableSection = TalkSection & {
@@ -62,7 +63,7 @@ type TalkDraft = {
   type: TalkType;
   status: TalkStatus;
   audience: string;
-  language: "FR" | "EN";
+  language: TalkLanguage;
   sections: EditableSection[];
 };
 
@@ -73,7 +74,7 @@ type PendingAssistantResult = {
 
 const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
 const talkStatuses = Object.keys(talkStatusLabels) as TalkStatus[];
-const languages = ["FR", "EN"] as const;
+const languages = Object.keys(talkLanguageLabels) as TalkLanguage[];
 type BooleanStateAction = boolean | ((current: boolean) => boolean);
 
 function toDraft(talk: Talk): TalkDraft {
@@ -141,7 +142,7 @@ function useStoredBoolean(key: string, fallback: boolean) {
   return [value, setValue] as const;
 }
 
-export function TalkEditor({ talk }: { talk: Talk }) {
+export function TalkEditor({ canTranslate = false, talk }: { canTranslate?: boolean; talk: Talk }) {
   const { locale, messages } = useI18n();
   const editor = messages.editor;
   const addSectionFailedMessage = messages.errors.addSectionFailed;
@@ -717,6 +718,7 @@ export function TalkEditor({ talk }: { talk: Talk }) {
           </div>
           {showExportActions ? <ExportPdfButton talkId={talk.id} title={draft.title} /> : null}
           {showExportActions ? <ShareButton title={draft.title} /> : null}
+          {showExportActions ? <TranslateButton canTranslate={canTranslate} sourceLang={draft.language} talkId={talk.id} /> : null}
           {showSpeakingActions ? (
             <Button
               leftIcon={<Volume2 />}
@@ -851,9 +853,9 @@ export function TalkEditor({ talk }: { talk: Talk }) {
                       <option key={item} value={item}>{talkStatusLabels[item]}</option>
                     ))}
                   </select>
-                  <select className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none focus:border-accent" onChange={(event) => setDraft((current) => ({ ...current, language: event.target.value as "FR" | "EN" }))} value={draft.language}>
+                  <select className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none focus:border-accent" onChange={(event) => setDraft((current) => ({ ...current, language: event.target.value as TalkLanguage }))} value={draft.language}>
                     {languages.map((language) => (
-                      <option key={language} value={language}>{language}</option>
+                      <option key={language} value={language}>{talkLanguageLabels[language]}</option>
                     ))}
                   </select>
                 </div> : null}

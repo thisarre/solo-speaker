@@ -15,7 +15,7 @@ import { evaluateTranscriptQuality } from "./transcript-quality";
 import { useDeepgramProvider } from "./providers/deepgram-provider";
 import { readVoiceProviderPreference } from "@/modules/settings/studio-preferences";
 
-export function useVoiceFollow(items: SpeakingItem[], language: "FR" | "EN", currentIndex: number, talkId?: string | null) {
+export function useVoiceFollow(items: SpeakingItem[], language: import("@/types/talk").TalkLanguage, currentIndex: number, talkId?: string | null) {
   const browserRecognition = useSpeechRecognition(language);
   const deepgramRecognition = useDeepgramProvider(language, talkId);
   const [enabled, setEnabled] = useState(false);
