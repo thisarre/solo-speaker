@@ -29,7 +29,23 @@ export async function POST(request: NextRequest) {
     body.estimatedSeconds != null && Number(body.estimatedSeconds) > 0
       ? Math.floor(Number(body.estimatedSeconds))
       : null;
-  const startedAt = typeof body.startedAt === "string" ? body.startedAt : new Date().toISOString();
+  let startedAt: string;
+  if (typeof body.startedAt === "string") {
+    const startedAtDate = new Date(body.startedAt);
+    if (isNaN(startedAtDate.getTime())) {
+      return NextResponse.json({ error: "Invalid startedAt." }, { status: 400 });
+    }
+    const now = Date.now();
+    if (startedAtDate.getTime() > now) {
+      return NextResponse.json({ error: "startedAt cannot be in the future." }, { status: 400 });
+    }
+    if (now - startedAtDate.getTime() > 24 * 60 * 60 * 1000) {
+      return NextResponse.json({ error: "startedAt is too old." }, { status: 400 });
+    }
+    startedAt = startedAtDate.toISOString();
+  } else {
+    startedAt = new Date().toISOString();
+  }
 
   let talkTitle: string | null = null;
   if (talkId) {
@@ -44,7 +60,7 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  await admin.from("rehearsal_sessions").insert({
+  const { error: insertError } = await admin.from("rehearsal_sessions").insert({
     user_id: user.id,
     talk_id: talkId,
     talk_title: talkTitle,
@@ -52,6 +68,10 @@ export async function POST(request: NextRequest) {
     duration_seconds: durationSeconds,
     estimated_seconds: estimatedSeconds
   });
+  if (insertError) {
+    console.error("[rehearsal/sessions] insert failed:", insertError.message);
+    return NextResponse.json({ error: "Failed to record session." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

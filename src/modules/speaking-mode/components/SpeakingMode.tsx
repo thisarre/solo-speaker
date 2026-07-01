@@ -47,6 +47,7 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLElement | null>>({});
   const elapsedSecondsRef = useRef(0);
+  const sessionSentRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speedIndex, setSpeedIndex] = useState(() => nearestIndex(speeds, readPrompterSpeedPreference()));
   const [fontSizeIndex, setFontSizeIndex] = useState(() => nearestIndex(fontSizes, readPrompterFontSizePreference()));
@@ -61,22 +62,39 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const readingAnchorRatio = readingPositionRatios[readingPosition];
   const classicAutoScrollEnabled = isPlaying && !voiceFollowActive;
 
-  const handleExit = useCallback(() => {
+  const sendSession = useCallback(() => {
+    if (sessionSentRef.current) return;
     const elapsed = elapsedSecondsRef.current;
-    if (elapsed >= 30) {
-      fetch("/api/analytics/rehearsal/sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          talkId: talk.id,
-          durationSeconds: elapsed,
-          estimatedSeconds: totalSeconds > 0 ? totalSeconds : null,
-          startedAt: new Date(Date.now() - elapsed * 1000).toISOString()
-        })
-      }).catch(() => {});
+    if (elapsed < 30) return;
+    sessionSentRef.current = true;
+    const payload = JSON.stringify({
+      talkId: talk.id,
+      durationSeconds: elapsed,
+      estimatedSeconds: totalSeconds > 0 ? totalSeconds : null,
+      startedAt: new Date(Date.now() - elapsed * 1000).toISOString()
+    });
+    const url = "/api/analytics/rehearsal/sessions";
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
+    } else {
+      fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
     }
+  }, [talk.id, totalSeconds]);
+
+  const handleExit = useCallback(() => {
+    sendSession();
     router.push(localizedPath(`/talks/${talk.id}`, locale));
-  }, [router, talk.id, locale, totalSeconds]);
+  }, [router, talk.id, locale, sendSession]);
+
+  useEffect(() => {
+    const onVisibilityChange = () => { if (document.visibilityState === "hidden") sendSession(); };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", sendSession);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", sendSession);
+    };
+  }, [sendSession]);
 
   const stopPlaying = useCallback(() => setIsPlaying(false), []);
 
