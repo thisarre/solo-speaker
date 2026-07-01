@@ -25,7 +25,8 @@ export function isProtectedAppPath(pathname: string) {
     normalizedPathname === "/progression" ||
     normalizedPathname === "/onboarding" ||
     normalizedPathname === "/talks" ||
-    normalizedPathname.startsWith("/talks/")
+    normalizedPathname.startsWith("/talks/") ||
+    normalizedPathname.startsWith("/analytics/")
   );
 }
 

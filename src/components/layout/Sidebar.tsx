@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarClock, FileText, HelpCircle, Home, LogOut, MoreHorizontal, Plus, Settings } from "lucide-react";
+import { BarChart2, CalendarClock, FileText, HelpCircle, Home, LogOut, MoreHorizontal, Plus, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { CommandPalette } from "./CommandPalette";
 import { LogoutButton } from "./LogoutButton";
@@ -19,6 +19,7 @@ function getNavItems(talkCount: number, locale: Locale) {
     { href: localizedPath("/dashboard", locale), label: navigation.dashboard, icon: Home },
     { href: localizedPath("/talks", locale), label: navigation.talks, icon: FileText, count: talkCount },
     { href: localizedPath("/talks/new", locale), label: navigation.newTalk, icon: Plus },
+    { href: localizedPath("/analytics/rehearsal", locale), label: navigation.analytics, icon: BarChart2 },
     { href: localizedPath("/settings", locale), label: navigation.settings, icon: Settings }
   ];
 }
