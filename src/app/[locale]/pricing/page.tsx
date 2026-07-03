@@ -3,6 +3,7 @@ import { getUser } from "@/modules/auth/queries";
 import { getPricingReturnHref } from "@/modules/pricing/navigation";
 import { PricingPage } from "@/modules/pricing/components/pricing-page";
 import { getMessages } from "@/i18n/messages";
+import { defaultOgImages } from "@/modules/landing/seo";
 import { getLocalizedPathAlternates, localizedPath } from "@/i18n/routing";
 import { getLocaleFromParams, type LocaleParams } from "@/i18n/server";
 
@@ -25,12 +26,14 @@ export async function generateMetadata({ params }: PricingRouteProps): Promise<M
     openGraph: {
       title,
       description: messages.pricing.description,
-      url: localizedPath("/pricing", locale)
+      url: localizedPath("/pricing", locale),
+      images: defaultOgImages
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description: messages.pricing.description
+      description: messages.pricing.description,
+      images: defaultOgImages
     }
   };
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SeoPlaceholderPage } from "@/modules/landing/components/seo-placeholder-page";
 import { getSeoPage, type SeoPageKey } from "@/modules/landing/seo-pages";
+import { defaultOgImages } from "@/modules/landing/seo";
 import { getMessages } from "@/i18n/messages";
 import { getLocalizedPathAlternates, localizedPath, type Locale } from "@/i18n/routing";
 
@@ -18,12 +19,14 @@ export function buildSeoPageMetadata(locale: Locale, key: SeoPageKey): Metadata 
     openGraph: {
       title: page.title,
       description: page.description,
-      url: localizedPath(page.slug, locale)
+      url: localizedPath(page.slug, locale),
+      images: defaultOgImages
     },
     twitter: {
       card: "summary_large_image",
       title: page.title,
-      description: page.description
+      description: page.description,
+      images: defaultOgImages
     }
   };
 }

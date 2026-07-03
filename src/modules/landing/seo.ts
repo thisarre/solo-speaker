@@ -4,6 +4,10 @@ import { getLocalizedPathAlternates, localizedPath, type Locale } from "@/i18n/r
 
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://solospeaker.com";
 
+// Explicit og:image list: the file-convention opengraph-image is dropped whenever a
+// page supplies its own openGraph object, so every builder must pass images itself.
+export const defaultOgImages = [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Solo Speaker Studio" }];
+
 const landingKeywords = [
     "AI speech coach",
     "AI teleprompter",
@@ -31,12 +35,14 @@ export function buildLandingMetadata(locale: Locale): Metadata {
       description: messages.seo.landingDescription,
       siteName: messages.common.appName,
       type: "website",
-      url: canonical
+      url: canonical,
+      images: defaultOgImages
     },
     twitter: {
       card: "summary_large_image",
       title: messages.seo.landingTitle,
-      description: messages.seo.landingDescription
+      description: messages.seo.landingDescription,
+      images: defaultOgImages
     }
   };
 }
@@ -131,7 +137,9 @@ export function buildLandingJsonLd(locale: Locale = "en", baseUrl = siteUrl) {
         "@type": "Organization",
         "@id": `${url}#organization`,
         name: "Solo Speaker Studio",
-        url
+        url,
+        logo: absoluteUrl("/icon-512.png", baseUrl),
+        email: "contact@solospeaker.com"
       },
       {
         "@type": "WebSite",

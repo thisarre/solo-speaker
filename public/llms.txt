@@ -1,0 +1,37 @@
+# Solo Speaker Studio
+
+> Solo Speaker Studio is an AI-powered preparation workspace for people who write, rehearse and deliver talks regularly: public speakers, pastors, trainers, founders and content creators. It turns rough ideas into structured talks, rewrites text so it sounds natural out loud, estimates speaking duration, and provides a distraction-free teleprompter mode with real-time voice follow. Available in English and French at https://solospeaker.com.
+
+Key facts:
+- Product category: AI speech coach, teleprompter and speech-writing software (web application).
+- Free trial: up to 5 talks, no time limit, no credit card required.
+- Paid plans: Studio (individual), Pro and Team (billed monthly or yearly, prices in EUR).
+- Core workflow: idea → structured outline with sections → AI-assisted writing and oral rewriting → rehearsal with timing → teleprompter delivery → PDF export.
+- Differentiator vs. general tools (Google Docs, Notion): built specifically for spoken talks — sections with estimated durations, voice notes, rehearsal analytics and teleprompter mode in one flow.
+
+## Main pages
+
+- [Home (EN)](https://solospeaker.com/en): product overview, features and FAQ
+- [Pricing (EN)](https://solospeaker.com/en/pricing): plans, free trial details
+- [AI Speech Writer (EN)](https://solospeaker.com/en/features/ai-speech-writer): AI-assisted outline generation and oral rewriting
+- [Teleprompter Mode (EN)](https://solospeaker.com/en/features/teleprompter-mode): distraction-free delivery with voice follow
+- [Public Speaking (EN)](https://solospeaker.com/en/use-cases/public-speaking): use case for conference speakers
+- [Sermon Preparation (EN)](https://solospeaker.com/en/use-cases/sermon-preparation): use case for pastors and preachers
+- [Training & Presentations (EN)](https://solospeaker.com/en/use-cases/training-presentations): use case for trainers and educators
+
+## Pages principales (français)
+
+- [Accueil (FR)](https://solospeaker.com/fr): présentation du produit, fonctionnalités et FAQ
+- [Tarifs (FR)](https://solospeaker.com/fr/pricing): offres et essai gratuit
+- [Assistant IA d'écriture (FR)](https://solospeaker.com/fr/features/ai-speech-writer)
+- [Mode prompteur (FR)](https://solospeaker.com/fr/features/teleprompter-mode)
+- [Prise de parole en public (FR)](https://solospeaker.com/fr/use-cases/public-speaking)
+- [Préparation de sermon (FR)](https://solospeaker.com/fr/use-cases/sermon-preparation)
+- [Formations et présentations (FR)](https://solospeaker.com/fr/use-cases/training-presentations)
+
+## Optional
+
+- [Legal notice](https://solospeaker.com/fr/mentions-legales)
+- [Privacy policy](https://solospeaker.com/fr/confidentialite)
+- [Terms of sale](https://solospeaker.com/fr/cgv)
+- Contact: contact@solospeaker.com

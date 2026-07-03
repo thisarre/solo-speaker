@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { siteUrl } from "@/modules/landing/seo";
+import { defaultOgImages, siteUrl } from "@/modules/landing/seo";
 import { defaultLocale, isLocale } from "@/i18n/routing";
 import "./globals.css";
 
@@ -21,6 +21,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Solo Speaker",
   description: "AI preparation and speaking studio for talks.",
+  openGraph: {
+    siteName: "Solo Speaker Studio",
+    type: "website",
+    images: defaultOgImages
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: defaultOgImages
+  },
   icons: {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
     icon: [

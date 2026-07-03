@@ -12,7 +12,7 @@ import {
 test("landing metadata targets AI speech coach search intent", () => {
   const frenchMetadata = buildLandingMetadata("fr");
 
-  assert.equal(landingMetadata.title, "Solo Speaker Studio: AI Speech Coach and Teleprompter for Speakers");
+  assert.equal(landingMetadata.title, "AI Speech Coach & Teleprompter | Solo Speaker Studio");
   assert.equal(
     landingMetadata.description,
     "Prepare, improve, rehearse and deliver better talks with Solo Speaker Studio, an AI-powered workspace for speakers, pastors, trainers and founders."
@@ -20,7 +20,7 @@ test("landing metadata targets AI speech coach search intent", () => {
   assert.equal(landingMetadata.alternates?.canonical, "/en");
   assert.equal(landingMetadata.alternates?.languages?.fr, "/fr");
   assert.equal(frenchMetadata.alternates?.canonical, "/fr");
-  assert.equal(frenchMetadata.title, "Solo Speaker Studio : Coach IA et prompteur pour prises de parole");
+  assert.equal(frenchMetadata.title, "Coach IA et prompteur pour discours | Solo Speaker Studio");
   assert.match(String(landingMetadata.keywords), /AI speech coach/);
 });
 
