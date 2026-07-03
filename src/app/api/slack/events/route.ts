@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { dispatchWorkflow } from "@/lib/github/repo";
 import { postSlackMessage } from "@/lib/slack/client";
 import { extractTaskText, isAuthorizedSlackUser, verifySlackSignature } from "@/modules/slack/verify";
-import { routeSlackCommand } from "@/modules/slack/router";
+import { resolveChannelRole, routeSlackCommand, type ChannelRole } from "@/modules/slack/router";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,22 +24,32 @@ type SlackEnvelope = {
   event?: SlackEvent;
 };
 
-const HELP = [
-  "🤖 *Solo Speaker — agents*",
-  "",
+const HELP_DEV = [
   "*Dev* — mentionne-moi avec une tâche → je code, teste et j'ouvre une *Pull Request* avec boutons *Merger / Rejeter*.",
   "_ex : `@bot corrige le bug du bouton de connexion`_",
-  "",
+  "_Une demande de *feature* passe d'abord par un spec Marketing + PO à valider ; un `fix`/`bug` va direct en Dev → QA._"
+].join("\n");
+
+const HELP_INFRA = [
   "*Infra* :",
   "• `état prod` — santé du site + erreurs",
   "• `déploie` — redéployer la prod (avec confirmation)",
   "• `rollback` — revenir au dernier état (avec confirmation)",
-  "• `logs` — dernières lignes de logs",
-  "",
+  "• `logs` — dernières lignes de logs"
+].join("\n");
+
+const HELP_MARKETING = [
   "*Marketing* (résultats dans #analytics) :",
   "• `analyse le funnel` — données PostHog + insights",
   "• `idées d'A/B test` — propositions d'expériences"
 ].join("\n");
+
+const HELP_BY_ROLE: Record<ChannelRole, string> = {
+  auto: ["🤖 *Solo Speaker — agents*", "", HELP_DEV, "", HELP_INFRA, "", HELP_MARKETING].join("\n"),
+  dev: `🤖 Canal dédié *Dev*\n\n${HELP_DEV}`,
+  infra: `🤖 Canal dédié *Infra*\n\n${HELP_INFRA}`,
+  marketing: `🤖 Canal dédié *Marketing*\n\n${HELP_MARKETING}`
+};
 
 function ok() {
   return NextResponse.json({ ok: true });
@@ -85,10 +95,15 @@ export async function POST(request: NextRequest) {
   const threadTs = event.thread_ts ?? event.ts;
   if (!channel) return ok();
 
-  const route = routeSlackCommand(extractTaskText(event.text));
+  const role = resolveChannelRole(channel, {
+    devChannel: process.env.SLACK_DEV_CHANNEL,
+    infraChannel: process.env.SLACK_INFRA_CHANNEL,
+    marketingChannel: process.env.SLACK_MARKETING_CHANNEL
+  });
+  const route = routeSlackCommand(extractTaskText(event.text), role);
 
   if (route.type === "help") {
-    await postSlackMessage({ channel, text: HELP, thread_ts: threadTs });
+    await postSlackMessage({ channel, text: HELP_BY_ROLE[role], thread_ts: threadTs });
     return ok();
   }
 

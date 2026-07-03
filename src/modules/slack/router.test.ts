@@ -58,3 +58,59 @@ test("routeSlackCommand routes dev tasks and splits feature vs fix", () => {
   // "ajoute des logs au module de paiement" is a dev task, not the infra logs command
   assert.equal(routeSlackCommand("ajoute des logs au module de paiement").type, "dev");
 });
+
+test("resolveChannelRole pins agents to their dedicated channel", async () => {
+  const { resolveChannelRole } = await import("./router");
+  const env = { devChannel: "C_DEV", infraChannel: "C_INFRA", marketingChannel: "C_MKT" };
+
+  assert.equal(resolveChannelRole("C_DEV", env), "dev");
+  assert.equal(resolveChannelRole("C_INFRA", env), "infra");
+  assert.equal(resolveChannelRole("C_MKT", env), "marketing");
+  assert.equal(resolveChannelRole("C_AGENTS", env), "auto");
+  assert.equal(resolveChannelRole(undefined, env), "auto");
+  // unset env vars never match (empty string channel ids must not pin)
+  assert.equal(resolveChannelRole("C_ANY", {}), "auto");
+});
+
+test("dev channel: everything is a dev task, keyword split fix/feature kept", () => {
+  assert.deepEqual(routeSlackCommand("analyse le funnel", "dev"), {
+    type: "dev",
+    prompt: "analyse le funnel",
+    track: "feature"
+  });
+  assert.deepEqual(routeSlackCommand("corrige la typo du footer", "dev"), {
+    type: "dev",
+    prompt: "corrige la typo du footer",
+    track: "fix"
+  });
+  assert.deepEqual(routeSlackCommand("aide", "dev"), { type: "help" });
+});
+
+test("marketing channel: everything is an analytics question", () => {
+  assert.deepEqual(routeSlackCommand("pourquoi les inscriptions baissent ?", "marketing"), {
+    type: "marketing",
+    question: "pourquoi les inscriptions baissent ?"
+  });
+});
+
+test("infra channel: loose phrasing maps to commands, unknown falls back to help", () => {
+  assert.deepEqual(routeSlackCommand("tu me dire si la mise en ligne a fonctionner correctement", "infra"), {
+    type: "infra",
+    action: "status"
+  });
+  assert.deepEqual(routeSlackCommand("annule le dernier déploiement", "infra"), { type: "infra", action: "rollback" });
+  assert.deepEqual(routeSlackCommand("relance un déploiement", "infra"), { type: "infra", action: "deploy" });
+  assert.deepEqual(routeSlackCommand("montre les journaux", "infra"), { type: "infra", action: "logs" });
+  assert.deepEqual(routeSlackCommand("chante une chanson", "infra"), { type: "help" });
+});
+
+test("auto mode: a deploy-status question routes to infra status, not the feature pipeline", () => {
+  // the exact message that was misrouted to refine on 2026-07-03
+  assert.deepEqual(routeSlackCommand("tu me dire si la mise en ligne a fonctionner correctement"), {
+    type: "infra",
+    action: "status"
+  });
+  assert.deepEqual(routeSlackCommand("est-ce que le déploiement a marché ?"), { type: "infra", action: "status" });
+  // ...but a dev task that mentions the site working stays dev
+  assert.equal(routeSlackCommand("ajoute un bouton sur le site qui marche bien").type, "dev");
+});
