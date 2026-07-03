@@ -1,9 +1,9 @@
-name: LinkedIn posts (weekly)
+name: LinkedIn post (daily)
 
 on:
   schedule:
-    # Monday 07:00 UTC (~09:00 Paris) — 4 drafts ready for the week.
-    - cron: "0 7 * * 1"
+    # Tous les jours 07:00 UTC (~09:00 Paris) — 1 post prêt à publier.
+    - cron: "0 7 * * *"
   workflow_dispatch:
 
 permissions:
@@ -29,43 +29,50 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           {
-            echo "PR mergées récentes :"
-            gh pr list --state merged --limit 15 --json number,title -q '.[] | "- #\(.number) \(.title)"' 2>/dev/null || true
+            echo "PR mergées depuis 48h :"
+            gh pr list --state merged --limit 10 --json number,title,mergedAt \
+              -q '.[] | select(.mergedAt > (now - 172800 | todate)) | "- #\(.number) \(.title)"' 2>/dev/null || true
             echo
-            echo "Commits récents :"
-            git log --oneline -30
+            echo "Commits des dernières 48h :"
+            git log --oneline --since="48 hours ago" || true
           } > "$RUNNER_TEMP/news.txt"
           cat "$RUNNER_TEMP/news.txt"
 
-      - name: Write 4 LinkedIn posts (commercial agent)
+      - name: Write the daily LinkedIn post (social agent)
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
           npm install -g @anthropic-ai/claude-code
           NEWS=$(cat "$RUNNER_TEMP/news.txt")
-          PROMPT="Tu es le responsable marketing/commercial de Solo Speaker (SaaS IA de préparation de prise de parole, solospeaker.com). Actualité produit récente (PR mergées + commits) :
+          PROMPT="Tu es l'agent social de Solo Speaker (SaaS IA de préparation de prise de parole, solospeaker.com). Actualité produit des dernières 48h (PR mergées + commits) :
           $NEWS
 
-          Rédige EXACTEMENT 4 posts LinkedIn en français, dans la voix du fondateur (authentique, concret, pas corporate), sur ces nouveautés (ignore les commits purement techniques/CI sans intérêt utilisateur). Pour CHAQUE post :
-          - *Accroche* : 1 ligne qui arrête le scroll
-          - *Corps* : 3 à 6 lignes, une seule idée, bénéfice concret, storytelling léger (principes : preuve, spécificité, curiosité, aversion à la perte)
-          - *CTA* : essai gratuit / solospeaker.com
-          - *Hashtags* : 3 à 5
-          - *🎨 Brief visuel Canva* : format (carré 1080x1080 ou 1200x627), couleur de marque #6E6CF7, le texte exact à afficher sur le visuel, et le concept graphique
-          Varie les angles (nouvelle feature, coulisses/fondateur, problème résolu, chiffre/preuve). Markdown clair, un séparateur '---' entre chaque post. Tu peux lire le code (read-only) pour préciser une feature."
+          Rédige LE post LinkedIn du jour, en français, dans la voix du fondateur (authentique, concret, pas corporate). Choix du sujet :
+          - S'il y a une nouveauté produit avec un intérêt UTILISATEUR dans l'actu ci-dessus → post produit (ignore les commits purement techniques/CI).
+          - Sinon → fais 1-2 recherches web (WebSearch) sur une actu CHAUDE du domaine IA ou de la prise de parole (annonce, étude, tendance datée de cette semaine) et rédige un post d'opinion/valeur qui s'y rattache, avec un pont naturel vers Solo Speaker (sans forcer la vente).
+
+          Format de sortie, prêt à copier-coller (AUCUN placeholder) :
+          *Type* : produit | actu IA (+ source datée si actu)
+          *Post* :
+          - Accroche : 1 ligne qui arrête le scroll
+          - Corps : 3 à 6 lignes, une seule idée, bénéfice concret (principes : preuve, spécificité, curiosité)
+          - CTA : essai gratuit / solospeaker.com (léger si post d'opinion)
+          - 3 à 5 hashtags
+          *🎨 Visuel* : si un visuel renforce le post — format (1080x1080 ou 1200x627), couleur de marque #6E6CF7, le TEXTE EXACT à afficher dessus, le concept graphique en 2 lignes. Si le post est plus fort en texte seul, écris 'texte seul'.
+          Tu peux lire le code (read-only) pour préciser une feature."
           printf '%s' "$PROMPT" | claude -p \
             --dangerously-skip-permissions \
-            --allowedTools "Read,Grep,Glob" \
+            --allowedTools "Read,Grep,Glob,WebSearch,WebFetch" \
             --model claude-sonnet-4-6 \
-            --max-turns 20 | tee "$RUNNER_TEMP/posts.md"
+            --max-turns 25 | tee "$RUNNER_TEMP/posts.md"
 
-      - name: Post drafts to #marketing
+      - name: Post draft to #marketing
         if: always()
         run: |
           if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$MARKETING_CHANNEL" ]; then exit 0; fi
-          POSTS=$(head -c 14000 "$RUNNER_TEMP/posts.md" 2>/dev/null)
+          POSTS=$(head -c 6000 "$RUNNER_TEMP/posts.md" 2>/dev/null)
           [ -z "$POSTS" ] && POSTS="(génération indisponible, relance le workflow)"
-          TEXT=$(printf '📣 *4 posts LinkedIn de la semaine* — brouillons à valider + briefs Canva. Tu postes toi-même.\n\n%s' "$POSTS")
+          TEXT=$(printf '📣 *Post LinkedIn du jour* — prêt à publier (tu postes toi-même).\n\n%s' "$POSTS")
           PAYLOAD=$(jq -n --arg ch "$MARKETING_CHANNEL" --arg txt "$TEXT" '{channel:$ch, text:$txt}')
           curl -s -X POST https://slack.com/api/chat.postMessage \
             -H "Authorization: Bearer $SLACK_BOT_TOKEN" \

@@ -1,4 +1,4 @@
-name: Browser monitoring
+name: Browser monitoring + QA agent
 
 on:
   schedule:
@@ -9,6 +9,9 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      QA_CHANNEL: ${{ vars.SLACK_QA_CHANNEL || vars.SLACK_ANALYTICS_CHANNEL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,7 +21,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Run browser checks against production
-        run: npx playwright test --config e2e/playwright.config.ts
+        run: |
+          set -o pipefail
+          npx playwright test --config e2e/playwright.config.ts 2>&1 | tee "$RUNNER_TEMP/playwright.txt"
         env:
           BASE_URL: https://solospeaker.com
       - name: Email the browser report
@@ -27,3 +32,77 @@ jobs:
         env:
           REPORT_URL: https://solospeaker.com/api/cron/browser-report
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: QA agent — chasse aux bugs
+        if: always()
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          POSTHOG_API_HOST: ${{ vars.POSTHOG_API_HOST }}
+          POSTHOG_PROJECT_ID: ${{ vars.POSTHOG_PROJECT_ID }}
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          PW=$(head -c 6000 "$RUNNER_TEMP/playwright.txt" 2>/dev/null || echo "(sortie playwright indisponible)")
+          HOST="${POSTHOG_API_HOST:-https://us.posthog.com}"
+          EXCEPTIONS="n/a"
+          if [ -n "$POSTHOG_PERSONAL_API_KEY" ]; then
+            Q="SELECT properties.\$exception_types AS t, properties.\$current_url AS u, count() AS c FROM events WHERE event='\$exception' AND timestamp > now() - INTERVAL 1 DAY GROUP BY t, u ORDER BY c DESC LIMIT 10"
+            EXCEPTIONS=$(curl -s -m 30 -X POST "$HOST/api/projects/$POSTHOG_PROJECT_ID/query/" \
+              -H "Authorization: Bearer $POSTHOG_PERSONAL_API_KEY" -H "content-type: application/json" \
+              --data "$(jq -n --arg q "$Q" '{query:{kind:"HogQLQuery", query:$q}}')" | jq -c '.results // "n/a"')
+          fi
+          PROMPT="Tu es l'agent QA quotidien de Solo Speaker (solospeaker.com, Next.js 16 + Supabase). Ta mission : verifier l'etat du site et des fonctionnalites, et chercher des bugs.
+
+          Resultats Playwright du jour (tests e2e contre la prod) :
+          $PW
+
+          Exceptions JS remontees par PostHog (24h) :
+          $EXCEPTIONS
+
+          En plus de ces donnees : sonde (WebFetch) les pages cles — /en, /fr, /en/pricing, /en/login, /en/signup — et verifie qu'elles repondent avec le bon contenu (titre coherent, pas de page d'erreur, CTA present). Tu peux lire le code (lecture seule) pour comprendre un echec.
+
+          Sortie en francais, markdown Slack simple, CONCIS (~1000 caracteres hors lignes BUG) :
+          *Etat* : ✅ tout va bien / ⚠️ degradations / 🔴 incident — puis 3-5 lignes de synthese (tests passes/echoues, exceptions, pages sondees).
+          Puis, UNIQUEMENT s'il y a de vrais problemes reproductibles, AU MAXIMUM 3 lignes commencant EXACTEMENT par 'BUG: ' — chacune une consigne de correction autonome pour un agent developpeur (~200 caracteres, symptome + page/fichier). Pas de bug speculatif : si tout est vert, aucune ligne BUG."
+          printf '%s' "$PROMPT" | claude -p \
+            --dangerously-skip-permissions \
+            --allowedTools "Read,Glob,Grep,WebFetch" \
+            --model claude-sonnet-4-6 \
+            --max-turns 25 | tee "$RUNNER_TEMP/qa.txt" || true
+
+      - name: Post QA digest to Slack
+        if: always()
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$QA_CHANNEL" ]; then exit 0; fi
+          OUT="$RUNNER_TEMP/qa.txt"
+          REPORT=$(grep -v '^BUG: ' "$OUT" 2>/dev/null | head -c 2800)
+          [ -z "$REPORT" ] && REPORT="(digest QA indisponible — verifier le run browser-monitoring)"
+          mapfile -t BUGS < <(grep '^BUG: ' "$OUT" 2>/dev/null | sed 's/^BUG: //' | head -3)
+
+          HEADER="🔎 *QA quotidienne* — $(date -u +%d/%m/%Y)"
+          BLOCKS=$(jq -n --arg h "$HEADER" --arg r "$REPORT" '[
+            {type:"section", text:{type:"mrkdwn", text:$h}},
+            {type:"section", text:{type:"mrkdwn", text:$r}}
+          ]')
+
+          if [ "${#BUGS[@]}" -gt 0 ]; then
+            LIST=""
+            BUTTONS='[]'
+            for i in "${!BUGS[@]}"; do
+              N=$((i+1))
+              BUG=$(printf '%s' "${BUGS[$i]}" | head -c 1900)
+              LIST="$LIST\n*$N.* $BUG"
+              BUTTONS=$(jq --arg n "🛠️ Corriger $N" --arg v "$BUG" '. + [{type:"button", text:{type:"plain_text", text:$n}, style:"danger", action_id:"bug_fix", value:$v}]' <<< "$BUTTONS")
+            done
+            LIST_TEXT=$(printf '🐛 *Bugs détectés* (clic = correctif Dev direct + QA) :%b' "$LIST")
+            BLOCKS=$(jq --arg t "$LIST_TEXT" --argjson btns "$BUTTONS" '. + [
+              {type:"section", text:{type:"mrkdwn", text:$t}},
+              {type:"actions", elements:$btns}
+            ]' <<< "$BLOCKS")
+          fi
+
+          PAYLOAD=$(jq -n --arg ch "$QA_CHANNEL" --arg txt "$HEADER" --argjson blocks "$BLOCKS" '{channel:$ch, text:$txt, blocks:$blocks}')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            --data "$PAYLOAD" | jq -r 'if .ok then "posted" else "slack error: \(.error)" end'

@@ -79,6 +79,35 @@ export async function POST(request: NextRequest) {
       await respondToSlackAction(responseUrl, dispatched.ok ? "✅ Spec validé. L'agent *Dev* code… PR + QA à suivre." : `❌ Lancement impossible : ${dispatched.error}`);
     } else if (action.action_id === "spec_reject") {
       await respondToSlackAction(responseUrl, "🚫 Spec rejeté. Reformule la demande si besoin.");
+    } else if (action.action_id === "improve_approve") {
+      // Weekly-insights proposal: hand it to the feature pipeline (Marketing +
+      // PO spec first, then the usual validation gate before any code).
+      const improvement = String(action.value ?? "");
+      const dispatched = await dispatchWorkflow("slack-refine", {
+        prompt: improvement,
+        channel: payload.channel?.id ?? "",
+        thread_ts: payload.message?.thread_ts ?? payload.message?.ts ?? "",
+        user: payload.user?.id ?? ""
+      });
+      await respondToSlackAction(
+        responseUrl,
+        dispatched.ok ? "📋 Amélioration transmise aux agents *Marketing* + *PO*… spec à valider à suivre." : `❌ Lancement impossible : ${dispatched.error}`,
+        { replaceOriginal: false }
+      );
+    } else if (action.action_id === "bug_fix") {
+      // Daily-QA finding: a bug goes straight to Dev on the fix track (no spec).
+      const bug = String(action.value ?? "");
+      const dispatched = await dispatchWorkflow("slack-code", {
+        prompt: `fix: ${bug}`,
+        channel: payload.channel?.id ?? "",
+        thread_ts: payload.message?.thread_ts ?? payload.message?.ts ?? "",
+        user: payload.user?.id ?? ""
+      });
+      await respondToSlackAction(
+        responseUrl,
+        dispatched.ok ? "🛠️ Correctif lancé chez l'agent *Dev*… PR + QA à suivre." : `❌ Lancement impossible : ${dispatched.error}`,
+        { replaceOriginal: false }
+      );
     }
   }
 

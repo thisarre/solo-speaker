@@ -16,13 +16,18 @@ export async function postSlackMessage(args: { channel: string; text: string; th
   }
 }
 
-// Updates the original message a button belongs to, via Slack's response_url.
-export async function respondToSlackAction(responseUrl: string, text: string): Promise<void> {
+// Replies to a button click via Slack's response_url. By default replaces the
+// original message (consumes its buttons); replaceOriginal: false posts a
+// follow-up instead, keeping the remaining buttons clickable.
+export async function respondToSlackAction(responseUrl: string, text: string, options?: { replaceOriginal?: boolean }): Promise<void> {
+  const replaceOriginal = options?.replaceOriginal ?? true;
   try {
     await fetch(responseUrl, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ replace_original: true, text })
+      body: JSON.stringify(
+        replaceOriginal ? { replace_original: true, text } : { replace_original: false, response_type: "in_channel", text }
+      )
     });
   } catch {
     // best-effort

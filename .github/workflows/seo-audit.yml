@@ -1,0 +1,102 @@
+name: PO agent (audit SEO/GEO/AEO bi-hebdo)
+
+# L'agent PO audite le référencement deux fois par semaine (mardi + vendredi),
+# note SEO / GEO / AEO sur 10, et tant que l'excellence (>= 8 partout) n'est
+# pas atteinte, propose les 3 actions les plus rentables — chacune avec un
+# bouton "Lancer" qui la dispatch au pipeline feature (spec à valider -> Dev
+# -> QA). Le PO est le donneur d'ordre; le clic humain reste la validation.
+
+on:
+  schedule:
+    - cron: "0 8 * * 2,5" # mardi et vendredi 08:00 UTC
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [seo-audit]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      PO_CHANNEL: ${{ vars.SLACK_PO_CHANNEL || vars.SLACK_ANALYTICS_CHANNEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Crawl du site (signaux on-page)
+        run: |
+          node scripts/seo-crawl.mjs https://solospeaker.com > "$RUNNER_TEMP/crawl.json"
+          head -c 1500 "$RUNNER_TEMP/crawl.json"
+
+      - name: Audit PO — scores + plan d'action
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          set -o pipefail
+          npm install -g @anthropic-ai/claude-code
+          CRAWL=$(head -c 14000 "$RUNNER_TEMP/crawl.json")
+          PROMPT="Tu es l'agent PO (donneur d'ordre) de Solo Speaker Studio (solospeaker.com). Tu pilotes le referencement avec un audit bi-hebdomadaire SEO (recherche classique), GEO (moteurs IA : llms.txt, schema, E-E-A-T, crawlers IA) et AEO (featured snippets, FAQ/HowTo schema, question headings, reponses directes).
+
+          Signaux crawles a l'instant (toutes les pages du sitemap + robots/llms.txt) :
+          $CRAWL
+
+          Bareme : 1-3 critique, 4-5 sous la moyenne, 6-7 socle correct, 8-9 solide, 10 exemplaire. References attendues : pages metier >= 500 mots, FAQ schema au-dela de l'accueil, maillage interne, og:image partout, titres 50-60c.
+
+          Tu peux lire le code (lecture seule) pour verifier ce que le crawl ne montre pas (JSON-LD genere, sitemap, redirections).
+
+          Sortie en francais, markdown Slack simple, CONCIS (~1200 caracteres hors lignes SCORES/IMPROVE) :
+          1) Premiere ligne EXACTEMENT : 'SCORES: seo=X geo=Y aeo=Z' (entiers 1-10).
+          2) *Verdict* : 2-3 lignes — quoi a progresse depuis le dernier audit (si visible), quoi bloque.
+          3) *Detail* : 1 ligne par dimension avec le point limitant.
+          4) Si au moins un score < 8 : AU MAXIMUM 3 lignes commencant EXACTEMENT par 'IMPROVE: ' — les actions les plus rentables pour monter les notes, chacune une consigne autonome et actionnable pour un agent developpeur (~200 caracteres, page/fichier inclus). Si tout est >= 8 : aucune ligne IMPROVE, felicite et propose de passer en veille mensuelle."
+          printf '%s' "$PROMPT" | claude -p \
+            --dangerously-skip-permissions \
+            --allowedTools "Read,Glob,Grep" \
+            --model claude-sonnet-4-6 \
+            --max-turns 25 | tee "$RUNNER_TEMP/audit.txt"
+
+      - name: Post audit + dispatch boutons
+        if: always()
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$PO_CHANNEL" ]; then exit 0; fi
+          OUT="$RUNNER_TEMP/audit.txt"
+          SCORES=$(grep '^SCORES: ' "$OUT" 2>/dev/null | head -1 | sed 's/^SCORES: //')
+          REPORT=$(grep -v '^IMPROVE: \|^SCORES: ' "$OUT" 2>/dev/null | head -c 2600)
+          [ -z "$REPORT" ] && REPORT="(audit indisponible — verifier le run seo-audit)"
+          mapfile -t IMPROVES < <(grep '^IMPROVE: ' "$OUT" 2>/dev/null | sed 's/^IMPROVE: //' | head -3)
+
+          HEADER="🎯 *Audit SEO/GEO/AEO* — $(date -u +%d/%m/%Y)"
+          [ -n "$SCORES" ] && HEADER="$HEADER — \`$SCORES\`"
+          BLOCKS=$(jq -n --arg h "$HEADER" --arg r "$REPORT" '[
+            {type:"section", text:{type:"mrkdwn", text:$h}},
+            {type:"section", text:{type:"mrkdwn", text:$r}}
+          ]')
+
+          if [ "${#IMPROVES[@]}" -gt 0 ]; then
+            LIST=""
+            BUTTONS='[]'
+            for i in "${!IMPROVES[@]}"; do
+              N=$((i+1))
+              IMP=$(printf '%s' "${IMPROVES[$i]}" | head -c 1900)
+              LIST="$LIST\n*$N.* $IMP"
+              BUTTONS=$(jq --arg n "🚀 Lancer $N" --arg v "$IMP" '. + [{type:"button", text:{type:"plain_text", text:$n}, action_id:"improve_approve", value:$v}]' <<< "$BUTTONS")
+            done
+            LIST_TEXT=$(printf '📌 *Ordres du PO* (clic = spec à valider avant tout code) :%b' "$LIST")
+            BLOCKS=$(jq --arg t "$LIST_TEXT" --argjson btns "$BUTTONS" '. + [
+              {type:"section", text:{type:"mrkdwn", text:$t}},
+              {type:"actions", elements:$btns}
+            ]' <<< "$BLOCKS")
+          fi
+
+          PAYLOAD=$(jq -n --arg ch "$PO_CHANNEL" --arg txt "$HEADER" --argjson blocks "$BLOCKS" '{channel:$ch, text:$txt, blocks:$blocks}')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            --data "$PAYLOAD" | jq -r 'if .ok then "posted" else "slack error: \(.error)" end'
