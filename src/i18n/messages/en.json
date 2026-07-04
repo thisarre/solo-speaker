@@ -936,8 +936,9 @@
   },
   "seoPages": {
     "backToHome": "Back to home",
-    "coverTitle": "What this page will cover",
-    "coverBody": "This SEO page is prepared as a focused content hub for {audience}. It will expand into examples, workflows, comparison copy and internal links as Solo Speaker Studio grows its search footprint.",
+    "coverTitle": "At a glance",
+    "coverBody": "Solo Speaker Studio gives {audience} a complete preparation environment: AI outlines, oral rewriting, teleprompter rehearsal and PDF export.",
+    "faqTitle": "Frequently asked questions",
     "tryTitle": "Try the studio",
     "tryBody": "Start with 5 talks, no time limit and no credit card: teleprompter mode, voice notes and limited AI assistance.",
     "sermon-preparation": {
@@ -945,35 +946,190 @@
       "description": "Prepare sermons with AI-assisted structure, section development, oral rewriting, estimated duration and a focused teleprompter mode for rehearsal.",
       "eyebrow": "Use case",
       "highlights": ["Sermon outline generation", "Section-based preparation", "Rehearsal before preaching"],
-      "title": "AI sermon preparation software for pastors"
+      "title": "Sermon prep software for pastors",
+      "body": [
+        "Sermon preparation is one of the most demanding weekly disciplines a pastor faces. Between text study, illustration gathering, structural choices and rehearsal, the path from a passage to a well-delivered message can consume dozens of hours. The blank-page pressure is real — every week, regardless of what else is happening in your schedule. Solo Speaker Studio gives you a dedicated workspace to move through that process section by section, at a consistent pace, without losing the thread of what you are trying to say.",
+        "Start with the AI outline generator. Enter your passage, a central idea and the tension your congregation is carrying, and Solo Speaker builds a structured sermon plan — introduction, main points, illustrations, application and conclusion — that you can reshape freely. The outline reflects your theological direction, not a generic template. Every heading is editable, every section is movable, and you can add or remove blocks at any point before you begin writing.",
+        "Once the structure is in place, develop each section inside the editor. The AI assistant helps you expand bullet points into full paragraphs, suggests natural transitions and flags sentences that read more like writing than speaking. Oral rewriting is one of Solo Speaker's key tools: it takes dense written prose and returns shorter, more direct sentences that land better when spoken aloud in front of a congregation. The result is a sermon that sounds like a person speaking, not a document being read.",
+        "With a finished draft, move into teleprompter mode. Solo Speaker's focused reading environment strips away every distraction, leaving only your text and a gentle auto-scroll you can control with your voice. Rehearse the full message from start to finish. Check the estimated duration against your slot. Note where the pacing feels too rushed or where a section needs one more sentence — you want to surface those issues during preparation, not while standing at the pulpit.",
+        "Every section stores its target duration, so you know in advance whether the introduction is running too long or the application needs more room. Adjust the content, not your delivery instincts. The PDF export gives you clean, formatted preaching notes to keep at the pulpit, share with a co-preacher or archive alongside the recording.",
+        "Solo Speaker is built for the pace of regular preaching ministry. Whether you prepare a new message every week, lead a teaching series or preach at special events, the workflow stays consistent — outline, develop, rehearse, refine. The dashboard shows you what is ready, what needs more work and what is coming up next. Over time your library of prepared talks becomes a searchable record of your teaching, and the preparation habit becomes a reliable part of your weekly rhythm.",
+        "Good sermons are written twice — once in preparation and once in delivery. The preparation draft gives you clarity; the teleprompter rehearsal gives you command. The combination is what separates a sermon that was merely written from one that was truly lived. Solo Speaker is the workspace where that transformation happens, and it is available to any pastor willing to invest the preparation time the message deserves."
+      ],
+      "faq": [
+        {
+          "q": "How does Solo Speaker help me prepare a sermon?",
+          "a": "Solo Speaker gives you an outline generator, a section editor with oral rewriting and a teleprompter rehearsal mode. Enter your passage and central idea, build the structure, develop each section and rehearse the full message with a timer before you preach."
+        },
+        {
+          "q": "Does the AI suggest Bible verses or commentary?",
+          "a": "When you create a sermon talk type, the Bible module is active by default. It suggests relevant passages and cross-references as you write sections. You accept, edit or discard each suggestion — the final theological content is always yours."
+        },
+        {
+          "q": "Can I keep all my sermons in one place?",
+          "a": "Yes. Solo Speaker stores all your talks in a dashboard with status labels — draft, in progress, ready. You can archive past sermons and filter by type, keeping your active preparation clean and easy to navigate."
+        },
+        {
+          "q": "How long does it take to prepare a sermon with Solo Speaker?",
+          "a": "Most pastors find the outline-to-draft stage takes 30 to 60 minutes rather than several hours. Total preparation time varies by complexity, but the structured workflow removes the blank-page friction that often costs the most time."
+        },
+        {
+          "q": "Is Solo Speaker suitable for weekly sermon prep?",
+          "a": "Yes. The workflow is designed for repeatable, high-frequency preparation. The dashboard shows what is ready, what needs more work and what is coming next, making it practical for pastors who prepare a new message every week."
+        }
+      ]
     },
     "public-speaking": {
       "audience": "speakers and conference presenters",
       "description": "Turn keynote ideas and conference notes into structured talks that are easier to rehearse, time and deliver with confidence.",
       "eyebrow": "Use case",
       "highlights": ["Conference talk structure", "Oral flow improvements", "Teleprompter rehearsal"],
-      "title": "AI public speaking preparation for speakers"
+      "title": "AI public speaking preparation",
+      "body": [
+        "Conference talks, keynotes and panel presentations share a common challenge: the gap between what you want to say and what the audience actually takes away. Most speakers prepare too late, rely on slide decks as a safety net and leave little time for real rehearsal. Solo Speaker Studio helps public speakers close that gap with a structured preparation workflow built for people who speak regularly and need a repeatable method to move from idea to a polished, stage-ready talk.",
+        "Start by defining the structure of your talk. Solo Speaker's AI outline generator takes your title, your central argument and the two or three ideas you want the audience to leave with, then builds a scaffolded talk plan with sections, transitions and a suggested conclusion. The plan is fully editable — adjust the order, rename sections and add the specific examples and stories only you can bring. You are never locked into what the AI generates.",
+        "With the structure set, write each section inside the editor. The AI assistant can help you expand rough notes into full paragraphs, tighten opening lines and rewrite dense sentences into a more direct spoken style. Good conference talks sound like conversations at scale, not like documents read aloud. Solo Speaker's oral rewriting mode helps you hit that register without rewriting everything by hand. The difference shows immediately when you read the revised text out loud.",
+        "Before a live event, use teleprompter mode to rehearse the full talk under real conditions. You see your text at the pace you choose, with a timer running alongside. Identify the sections that consistently run long, spot the transitions that do not land and adjust the script before the day — not during it. Repeated rehearsals in teleprompter mode build the kind of delivery confidence that a first read-through in your head never produces.",
+        "The dashboard keeps all your talks organised by status, so you always know which ones are ready to present and which still need work. Whether you speak at a few events a year or several times a month, Solo Speaker gives you a preparation method that scales with your speaking schedule.",
+        "Public speaking performance is almost entirely a function of preparation quality. Audiences forgive stumbles, energy fluctuations and imperfect wording. What they notice — and what loses them — is structural confusion and a speaker who is uncertain about where the talk is going. Solo Speaker helps you eliminate that uncertainty. When you walk onto the stage, you have already delivered the talk at least once. You know the rhythm, you know the transitions and you know exactly how the conclusion lands. That is the confidence that makes the real delivery look effortless.",
+        "Great public speaking is a practiced skill, not an innate talent. Every speaker you admire worked through a preparation process to arrive at that level. Solo Speaker gives you a reliable, repeatable method: a clear structure, an oral draft and enough rehearsal time to walk onto the stage knowing the talk rather than hoping it works. The preparation is invisible to the audience. The confidence it creates is not."
+      ],
+      "faq": [
+        {
+          "q": "How do I structure a conference talk with Solo Speaker?",
+          "a": "Enter your title, core argument and the key ideas you want the audience to remember. The AI outline generator builds an editable structure with introduction, main sections and conclusion. You adjust, reorder and fill in your specific examples from there."
+        },
+        {
+          "q": "Can Solo Speaker help me stay within my time slot?",
+          "a": "Yes. Each section has a target duration and Solo Speaker shows a cumulative estimated time for the full talk. Teleprompter rehearsal mode runs a live timer so you can see exactly where you are and where you tend to run long."
+        },
+        {
+          "q": "What is oral rewriting?",
+          "a": "Oral rewriting is a feature that takes written text — which tends to use long sentences, passive constructions and complex clauses — and returns a shorter, more direct version that sounds natural when spoken aloud. It is especially useful when adapting written notes into a live talk."
+        },
+        {
+          "q": "Can I rehearse on the day of a presentation using Solo Speaker?",
+          "a": "Yes. Teleprompter mode is designed for both full rehearsals and quick last-minute run-throughs. You can adjust scroll speed, font size and the amount of text shown at once to match your preferred delivery rhythm."
+        },
+        {
+          "q": "Does Solo Speaker work for panel discussions and short talks?",
+          "a": "Yes. Solo Speaker works for any format where preparation helps — from five-minute lightning talks to ninety-minute keynotes. Shorter talks often benefit from more careful structure, and the section-based workflow applies regardless of length."
+        }
+      ]
     },
     "training-presentations": {
       "audience": "trainers, educators and workshop leaders",
       "description": "Build training presentations and workshop talks with clear sections, practical timing and a delivery workflow designed for live teaching.",
       "eyebrow": "Use case",
       "highlights": ["Course and workshop talks", "Timed sections", "PDF export for delivery notes"],
-      "title": "AI training presentation software for workshops"
+      "title": "Training presentation builder",
+      "body": [
+        "Training and workshop presentations have a different job than keynotes or sermons. They need to transfer skills, not just inspire. Participants leave with either a method they can apply immediately or a gap they can now name and act on. Solo Speaker Studio helps trainers build presentations that hold that structure deliberately — with clear sections, timed steps and a delivery workflow designed for live instruction.",
+        "Begin by defining the learning objective. What should participants be able to do after the session that they could not do before? Solo Speaker's AI outline generator takes that objective, the target audience and the training format — a half-day workshop, a ninety-minute session, a step-by-step demonstration — and returns a section plan with an introduction, the main instructional blocks, a practice prompt and a conclusion. You edit the structure from there.",
+        "Develop each section in the editor. The AI assistant helps you turn bullet points into clear instructional paragraphs, write precise step-by-step instructions and flag explanations that are too abstract for a live audience. Training content often suffers from being written for readers rather than listeners — it is detailed but not digestible when spoken. Solo Speaker's oral rewriting mode helps you catch that pattern and fix it before you walk into the room.",
+        "Use section duration targets to plan realistic timing. Trainers frequently underestimate how long exercises, demonstrations and participant questions take. Solo Speaker lets you assign a target duration to each section and shows the cumulative estimate in real time, so you can adjust the content before the session rather than cutting exercises on the fly or running past the scheduled end time.",
+        "When the presentation is ready, export a clean PDF of your delivery notes to use at the front of the room or share with co-trainers and managers. Teleprompter mode gives you a focused reading environment for run-throughs when exact phrasing matters — particularly for regulated training, compliance content or new-hire onboarding sessions where precision is important.",
+        "With Solo Speaker, your training presentations improve session by session because the preparation process stays consistent. Each version of the talk is stored in the dashboard. You can review what changed between iterations, duplicate a past talk for a new cohort and adjust the timing without starting from scratch. Trainers who prepare this way spend less time rebuilding materials and more time sharpening the content that actually changes learner behaviour. The dashboard also shows which training talks are ready to deliver and which need another pass — useful when you are managing multiple programmes or briefing a co-trainer who needs access to your session notes.",
+        "A well-prepared trainer is not just more confident — they are more present. When the structure is solid and the timing is planned, you can focus on the room rather than on your notes. You notice when a participant is confused, when a concept needs an extra example and when the group is ready to move on. Solo Speaker gives you the preparation depth that makes that kind of responsive, participant-centred teaching possible."
+      ],
+      "faq": [
+        {
+          "q": "How does Solo Speaker help trainers build better presentations?",
+          "a": "Solo Speaker gives trainers a structured outline builder, a section editor with AI assistance and timing tools to plan realistic session lengths. It helps you move from learning objective to a timed, well-worded presentation without the last-minute scramble."
+        },
+        {
+          "q": "Can I export my training presentation as a PDF?",
+          "a": "Yes. Solo Speaker exports a clean PDF of your talk with all sections and content. Use it as personal delivery notes, distribute it to co-trainers or keep it as a record of the session design for future iterations."
+        },
+        {
+          "q": "How does section timing work?",
+          "a": "Each section has a target duration field. Solo Speaker totals the durations and shows a cumulative time estimate for the full presentation. This helps you plan exercises and questions realistically and adjust before the session, not during it."
+        },
+        {
+          "q": "Can I use Solo Speaker for remote or virtual training?",
+          "a": "Yes. The preparation workflow is the same regardless of delivery format. Teleprompter mode is particularly useful for remote sessions where reading notes from a second screen is natural and does not disrupt camera eye contact when positioned correctly."
+        },
+        {
+          "q": "Does Solo Speaker support recurring training courses?",
+          "a": "Yes. You can keep past training talks in the dashboard and archive completed sessions. For recurring courses, duplicate an existing talk and update the content — the structure and timing transfer immediately."
+        }
+      ]
     },
     "ai-speech-writer": {
       "audience": "speakers who want help shaping first drafts",
       "description": "Use AI to generate outlines, develop sections and rewrite text into a more natural spoken style without turning the talk into a generic script.",
       "eyebrow": "Feature",
       "highlights": ["AI outline generation", "Oral style rewriting", "Section development"],
-      "title": "AI speech writer for structured talks"
+      "title": "AI speech writer for talks",
+      "body": [
+        "Writing a speech is harder than most people expect. The same skill that produces clear emails or reports does not automatically translate to spoken language. Sentences that read well on paper often feel stiff or rushed when delivered aloud — the rhythm is wrong, the breath points are missing and the vocabulary is too formal for the room. Solo Speaker Studio's AI speech writer helps you move from raw ideas to a structured, naturally spoken talk without turning your voice into something generic or automated.",
+        "The process starts with an outline. Describe the topic, the audience, the context and the central message you want to land, and Solo Speaker's AI generates a scaffolded structure — opening, main argument, supporting points and close. The outline is a working hypothesis, not a prescription. Every section is editable, deletable and reorderable. You can generate the structure in seconds and spend the rest of your preparation time on the substance.",
+        "From the outline, develop each section with AI assistance. You can write the content yourself and ask the AI to refine a sentence, expand a bullet point or sharpen a transition. Or generate a complete first draft section by section and then reshape it in your own voice. The AI is a collaborator, not a ghostwriter. It handles the structural heavy lifting so you can focus on the ideas, stories and specific details that only you can add.",
+        "Oral rewriting is one of the most powerful tools in the AI speech writer workflow. Paste in a block of written text — meeting notes, an email thread, a set of slides — and Solo Speaker rewrites it into shorter, more direct sentences that are easier to say and easier for your audience to follow. The rewrite preserves your core meaning while removing the written-prose patterns — passive voice, long relative clauses, abstract nouns — that slow down spoken delivery.",
+        "When the draft is complete, rehearse it in teleprompter mode. Reading the full talk out loud is the final quality check that no text review can replace. You will hear the sentences that still sound written, the transitions that need one more word and the conclusion that arrives too quickly. This is the step most speakers skip, and it is usually where the most valuable revisions happen.",
+        "Solo Speaker's AI speech writer is built for people who write their own material. The AI does not replace your voice — it accelerates the path from blank page to something worth saying out loud. Whether you are preparing a five-minute talk or a forty-minute keynote, the process is the same: outline, draft, refine, rehearse. Each iteration produces a cleaner, more natural version until the talk sounds exactly the way you want it to.",
+        "The best talks are not written by AI. They are developed by a speaker who uses AI to move faster, see farther and catch the gaps that solo editing misses. Solo Speaker keeps the human voice at the centre of every talk while removing the friction that stops most people from preparing as thoroughly as they could — and as thoroughly as their audience deserves."
+      ],
+      "faq": [
+        {
+          "q": "How does the AI speech writer work in Solo Speaker?",
+          "a": "Describe your topic, audience and central message. The AI generates a structured outline with sections and transitions. Develop each section in the editor, refine with AI assistance or oral rewriting, and rehearse the final draft in teleprompter mode."
+        },
+        {
+          "q": "Will the AI write the full speech for me?",
+          "a": "The AI can generate a complete first draft section by section if you choose. The best results come from using it as a collaborator — generating structure and drafts, then editing to restore your specific voice, examples and insights."
+        },
+        {
+          "q": "What is the difference between AI drafting and oral rewriting?",
+          "a": "AI drafting generates new content from your inputs — outline or section description. Oral rewriting transforms existing text you paste in, making it shorter and more natural when spoken. You can use both in the same talk preparation workflow."
+        },
+        {
+          "q": "Can I use Solo Speaker to adapt a written article into a talk?",
+          "a": "Yes. Paste your written article or notes into a section, use the oral rewriting tool to convert it into spoken language, then adjust the result to match your delivery style. This is one of the most common uses of the AI speech writer."
+        },
+        {
+          "q": "How do I make sure the AI output still sounds like me?",
+          "a": "Edit every generated section before you consider it final. The AI gives you a starting point, not a finished product. Change the examples, adjust the rhythm, add your specific references and remove any phrasing that does not fit how you actually speak."
+        }
+      ]
     },
     "teleprompter-mode": {
       "audience": "speakers who rehearse and present live",
       "description": "Practice and deliver talks with a focused teleprompter mode, auto-scroll, timer and voice-follow options for smoother delivery.",
       "eyebrow": "Feature",
       "highlights": ["Focused reading mode", "Auto-scroll", "Voice-follow options"],
-      "title": "Teleprompter mode for speeches and sermons"
+      "title": "Teleprompter for speeches",
+      "body": [
+        "Most speakers rehearse too little and too late. Reading through notes in your head is not the same as speaking full sentences out loud at pace, and that gap shows on stage. The hesitations, the dropped eye contact, the sections that felt clear on the page but dissolve mid-sentence — these are the problems that only emerge when you actually speak. Solo Speaker Studio's teleprompter mode gives you a focused, distraction-free environment to rehearse and deliver talks the way real performance requires.",
+        "Teleprompter mode strips away every element of the editor that is not the text and the controls. What remains is a clean scrolling reading environment designed to keep you in the content. You choose the font size, the scroll speed and the amount of text visible at once. The layout adapts to any device — desktop, tablet or phone mounted in front of you at a lectern or stand — so the rehearsal environment matches the delivery environment.",
+        "Auto-scroll moves the text at a steady pace you set before the session. If your delivery speeds up or slows down, you can adjust the scroll rate mid-session without losing your place. For speakers who want hands-free operation, voice-follow mode tracks your speech in real time and scrolls the text to keep pace with what you are actually saying — no foot pedal, no remote clicker, no assistant required.",
+        "A visible timer runs throughout the session so you always know how far you are into the talk. This matters in high-stakes situations — a TED-style slot, a wedding speech, a board presentation, a sermon with a fixed service time — where running over is not an option. The teleprompter display also shows the target duration for the section you are reading, giving you continuous real-time feedback on your pacing.",
+        "Using teleprompter mode for full rehearsals builds the kind of delivery fluency that shorter run-throughs cannot produce. You learn the rhythm of your own material. You find the sentences that need one more revision. You identify the transition that sounds abrupt when spoken, even though it looked fine on the page. And you arrive at the event having already delivered the talk — which is an entirely different kind of confidence.",
+        "Solo Speaker's teleprompter mode is accessible from any device, any time. You do not need a dedicated teleprompter app, a second screen or specialist hardware. Open the talk on your phone, set the scroll speed and rehearse in the kitchen, the car or the hotel room. For remote and hybrid presentations, position the device close to your camera and use voice-follow to keep your eyes forward rather than down. The environment you rehearsed in becomes the environment you perform in — consistent, familiar and under your control.",
+        "The gap between a rehearsed speaker and an unrehearsed one is visible from the audience within seconds. The rehearsed speaker owns the room because they own the material. Solo Speaker's teleprompter mode is how you close that gap — one full run-through at a time, on whatever device is in front of you, until the talk belongs to you completely."
+      ],
+      "faq": [
+        {
+          "q": "How does teleprompter mode work in Solo Speaker?",
+          "a": "Open any talk in teleprompter mode to see your full text in a clean, scrolling display. Set your preferred font size and scroll speed, then start reading. Auto-scroll moves the text at a steady pace. Voice-follow mode adjusts the scroll in real time to match your speech."
+        },
+        {
+          "q": "What is voice-follow and how does it work?",
+          "a": "Voice-follow uses your device microphone to detect your speech in real time and keeps the teleprompter scroll aligned with the words you are actually saying. It is useful for speakers whose pace varies or who tend to diverge from the script mid-talk."
+        },
+        {
+          "q": "Can I adjust the scroll speed during a session?",
+          "a": "Yes. The scroll speed controls are accessible during a session so you can speed up or slow down without stopping. You can also pause the scroll entirely and resume it manually at any moment."
+        },
+        {
+          "q": "Does the teleprompter mode work on mobile?",
+          "a": "Yes. Teleprompter mode adapts to phone and tablet screens. Many speakers use it on a phone mounted on a stand at the lectern, or on a tablet propped in front of them during remote sessions."
+        },
+        {
+          "q": "How is rehearsal different from presentation mode?",
+          "a": "There is no separate mode — teleprompter mode serves both rehearsal and live presentation. In rehearsal you stop, adjust and reread sections; in presentation you run the full talk through. Both use the same focused reading environment."
+        }
+      ]
     }
   },
   "team": {

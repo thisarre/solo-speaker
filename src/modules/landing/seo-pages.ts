@@ -7,8 +7,10 @@ export type SeoPageKey = (typeof seoPageKeys)[number];
 
 export type SeoPageContent = {
   audience: string;
+  body: string[];
   description: string;
   eyebrow: string;
+  faq: { q: string; a: string }[];
   highlights: string[];
   key: SeoPageKey;
   slug: string;
