@@ -90,17 +90,19 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
           </aside>
         </div>
 
-        <section className="mt-14">
-          <h2 className="m-0 text-[28px] font-semibold tracking-[0]">{seoPages.faqTitle}</h2>
-          <div className="mt-6 grid gap-4">
-            {page.faq.map(({ q, a }, i) => (
-              <div className="rounded-[12px] border border-line bg-surface p-5" key={i}>
-                <h3 className="m-0 text-[16px] font-semibold">{q}</h3>
-                <p className="m-0 mt-2 text-[14px] leading-7 text-muted">{a}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {page.faq.length > 0 ? (
+          <section className="mt-14">
+            <h2 className="m-0 text-[28px] font-semibold tracking-[0]">{seoPages.faqTitle}</h2>
+            <div className="mt-6 grid gap-4">
+              {page.faq.map(({ q, a }, i) => (
+                <div className="rounded-[12px] border border-line bg-surface p-5" key={i}>
+                  <h3 className="m-0 text-[16px] font-semibold">{q}</h3>
+                  <p className="m-0 mt-2 text-[14px] leading-7 text-muted">{a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </section>
     </main>
   );
