@@ -114,7 +114,7 @@ jobs:
               N=$((i+1))
               ACTION=$(printf '%s' "${DOS[$i]}" | head -c 1900)
               LIST="$LIST\n*$N.* $ACTION"
-              BUTTONS=$(jq --arg n "🚀 Lancer $N" --arg v "$ACTION" '. + [{type:"button", text:{type:"plain_text", text:$n}, action_id:"improve_approve", value:$v}]' <<< "$BUTTONS")
+              BUTTONS=$(jq --arg n "🚀 Lancer $N" --arg n2 "$N" --arg v "$ACTION" '. + [{type:"button", text:{type:"plain_text", text:$n}, action_id:("improve_approve_" + $n2), value:$v}]' <<< "$BUTTONS")
             done
             LIST_TEXT=$(printf '📌 *Ordres de la semaine* (clic = spec à valider avant tout code) :%b' "$LIST")
             BLOCKS=$(jq --arg t "$LIST_TEXT" --argjson btns "$BUTTONS" '. + [

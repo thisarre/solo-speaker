@@ -79,7 +79,9 @@ export async function POST(request: NextRequest) {
       await respondToSlackAction(responseUrl, dispatched.ok ? "✅ Spec validé. L'agent *Dev* code… PR + QA à suivre." : `❌ Lancement impossible : ${dispatched.error}`);
     } else if (action.action_id === "spec_reject") {
       await respondToSlackAction(responseUrl, "🚫 Spec rejeté. Reformule la demande si besoin.");
-    } else if (action.action_id === "improve_approve") {
+    } else if (action.action_id?.startsWith("improve_approve")) {
+      // Suffixed ids (improve_approve_1, _2…): Slack requires unique action_ids
+      // within one actions block.
       // Weekly-insights proposal: hand it to the feature pipeline (Marketing +
       // PO spec first, then the usual validation gate before any code).
       const improvement = String(action.value ?? "");
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest) {
         dispatched.ok ? "📋 Amélioration transmise aux agents *Marketing* + *PO*… spec à valider à suivre." : `❌ Lancement impossible : ${dispatched.error}`,
         { replaceOriginal: false }
       );
-    } else if (action.action_id === "bug_fix") {
+    } else if (action.action_id?.startsWith("bug_fix")) {
       // Daily-QA finding: a bug goes straight to Dev on the fix track (no spec).
       const bug = String(action.value ?? "");
       const dispatched = await dispatchWorkflow("slack-code", {

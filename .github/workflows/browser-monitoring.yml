@@ -102,7 +102,7 @@ jobs:
               N=$((i+1))
               BUG=$(printf '%s' "${BUGS[$i]}" | head -c 1900)
               LIST="$LIST\n*$N.* $BUG"
-              BUTTONS=$(jq --arg n "🛠️ Corriger $N" --arg v "$BUG" '. + [{type:"button", text:{type:"plain_text", text:$n}, style:"danger", action_id:"bug_fix", value:$v}]' <<< "$BUTTONS")
+              BUTTONS=$(jq --arg n "🛠️ Corriger $N" --arg n2 "$N" --arg v "$BUG" '. + [{type:"button", text:{type:"plain_text", text:$n}, style:"danger", action_id:("bug_fix_" + $n2), value:$v}]' <<< "$BUTTONS")
             done
             LIST_TEXT=$(printf '🐛 *Bugs détectés* (clic = correctif Dev direct + QA) :%b' "$LIST")
             BLOCKS=$(jq --arg t "$LIST_TEXT" --argjson btns "$BUTTONS" '. + [
