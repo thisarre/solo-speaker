@@ -36,7 +36,7 @@ jobs:
           *Marketing* : 1-2 phrases sur le pourquoi/l'impact + 1 metrique de succes.
           *PO* : une user story, 3 a 5 criteres d'acceptation testables, et le scope (Inclus / Exclu). Si la demande implique une visibilite ou une page PUBLIQUE, precise-le explicitement.
 
-          Inspecte le code en lecture seule si utile. IMPERATIF: reste sous ~1100 caracteres au total (ce spec sera place dans un bouton Slack)."
+          Redige le spec entierement a l'IMPERATIF (consignes a executer : 'Ajoute...', 'Cree...'), JAMAIS au passe ni au descriptif — il sera transmis tel quel a un agent developpeur. Inspecte le code en lecture seule si utile. IMPERATIF: reste sous ~1100 caracteres au total (ce spec sera place dans un bouton Slack)."
           printf '%s' "$REFINE_PROMPT" | claude -p \
             --dangerously-skip-permissions \
             --allowedTools "Read,Bash,Glob,Grep" \

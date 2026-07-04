@@ -39,7 +39,13 @@ jobs:
           npm install -g @anthropic-ai/claude-code
           # No pipefail: if the agent hits max-turns it still leaves partial work → a PR opens
           # for review; a real auth failure produces no file changes → "aucun changement" (no empty PR).
-          printf '%s' "$PROMPT" | claude -p \
+          # The spec is wrapped in an explicit implement-order: refine specs are sometimes
+          # phrased descriptively/past tense and the agent must never answer instead of coding.
+          DEV_PROMPT="Tu es l'agent Dev de Solo Speaker (Next.js 16 + Supabase). IMPLEMENTE dans le code la tache ci-dessous : realise les modifications de fichiers necessaires. Meme si le texte est redige au passe ou de facon descriptive, c'est un ordre a executer, pas une affirmation a verifier. Ne reponds JAMAIS par du texte seul : si tu ne modifies aucun fichier, la tache est un echec. Reste minimal, suis le style du code existant.
+
+          TACHE :
+          $PROMPT"
+          printf '%s' "$DEV_PROMPT" | claude -p \
             --dangerously-skip-permissions \
             --allowedTools "Edit,Write,Read,Bash,Glob,Grep" \
             --model claude-sonnet-4-6 \
