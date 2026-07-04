@@ -6,6 +6,10 @@ on:
     - cron: "10 7 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
@@ -72,9 +76,15 @@ jobs:
 
       - name: Post QA digest to Slack
         if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$QA_CHANNEL" ]; then exit 0; fi
           OUT="$RUNNER_TEMP/qa.txt"
+          # Un bug est à la fois actionnable tout de suite (bouton) et tracé au backlog.
+          if grep -q '^BUG: ' "$OUT" 2>/dev/null; then
+            grep '^BUG: ' "$OUT" | sed 's/^BUG: //' | head -3 | bash scripts/backlog-add.sh bug > /dev/null || true
+          fi
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$QA_CHANNEL" ]; then exit 0; fi
           REPORT=$(grep -v '^BUG: ' "$OUT" 2>/dev/null | head -c 2800)
           [ -z "$REPORT" ] && REPORT="(digest QA indisponible — verifier le run browser-monitoring)"
           mapfile -t BUGS < <(grep '^BUG: ' "$OUT" 2>/dev/null | sed 's/^BUG: //' | head -3)

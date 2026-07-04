@@ -1,0 +1,129 @@
+name: PO agent (plan de la semaine)
+
+# Le PO est l'arbitre : chaque lundi il lit le backlog (issues label `agent`
+# alimentées par les agents analytics/QA/SEO/revue-site), croise avec les
+# métriques PostHog et juge l'effet des PR mergées la semaine passée (boucle
+# de feedback), puis propose LE plan de la semaine — top 3 priorisé, un seul
+# message, trois boutons. Stratégie de phase : acquisition d'abord.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # lundi 08:00 UTC, après le rapport analytics de 07:30
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [po-plan]
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      PO_CHANNEL: ${{ vars.SLACK_PO_CHANNEL || vars.SLACK_ANALYTICS_CHANNEL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 60
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Collecte (backlog, merges, métriques)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          POSTHOG_API_HOST: ${{ vars.POSTHOG_API_HOST }}
+          POSTHOG_PROJECT_ID: ${{ vars.POSTHOG_PROJECT_ID }}
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+        run: |
+          HOST="${POSTHOG_API_HOST:-https://us.posthog.com}"
+          hog() {
+            [ -z "$POSTHOG_PERSONAL_API_KEY" ] && { echo "n/a"; return; }
+            curl -s -m 30 -X POST "$HOST/api/projects/$POSTHOG_PROJECT_ID/query/" \
+              -H "Authorization: Bearer $POSTHOG_PERSONAL_API_KEY" -H "content-type: application/json" \
+              --data "$(jq -n --arg q "$1" '{query:{kind:"HogQLQuery", query:$q}}')" | jq -c '.results // "n/a"'
+          }
+          {
+            echo "=== BACKLOG (issues ouvertes proposées par les agents) ==="
+            gh issue list --state open --label agent --limit 40 \
+              --json number,title,labels,createdAt \
+              -q '.[] | "#\(.number) [\([.labels[].name] | join(","))] \(.title) (créée \(.createdAt | split("T")[0]))"' || echo "(backlog vide)"
+            echo
+            echo "=== PR MERGÉES CES 7 DERNIERS JOURS (boucle de feedback) ==="
+            gh pr list --state merged --limit 20 --json number,title,mergedAt \
+              -q '.[] | select(.mergedAt > (now - 604800 | todate)) | "#\(.number) \(.title) (mergée \(.mergedAt | split("T")[0]))"' || true
+            echo
+            echo "=== MÉTRIQUES (7j vs 7-14j) ==="
+            echo "Pageviews 7j: $(hog "SELECT count() FROM events WHERE event='\$pageview' AND timestamp > now() - INTERVAL 7 DAY")"
+            echo "Pageviews 7-14j: $(hog "SELECT count() FROM events WHERE event='\$pageview' AND timestamp BETWEEN now() - INTERVAL 14 DAY AND now() - INTERVAL 7 DAY")"
+            echo "Signups 7j: $(hog "SELECT count() FROM events WHERE event='user_signed_up' AND timestamp > now() - INTERVAL 7 DAY")"
+            echo "Signups 7-14j: $(hog "SELECT count() FROM events WHERE event='user_signed_up' AND timestamp BETWEEN now() - INTERVAL 14 DAY AND now() - INTERVAL 7 DAY")"
+            echo "Exceptions 7j: $(hog "SELECT count() FROM events WHERE event='\$exception' AND timestamp > now() - INTERVAL 7 DAY")"
+          } > "$RUNNER_TEMP/context.txt"
+          cat "$RUNNER_TEMP/context.txt"
+
+      - name: Arbitrage PO
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          set -o pipefail
+          npm install -g @anthropic-ai/claude-code
+          CONTEXT=$(head -c 12000 "$RUNNER_TEMP/context.txt")
+          PROMPT="Tu es le PO donneur d'ordre de Solo Speaker Studio (solospeaker.com, SaaS IA de preparation de prises de parole, lance il y a quelques jours). Chaque lundi tu arbitres le backlog et tu proposes LE plan de la semaine.
+
+          STRATEGIE DE PHASE (imperative) : le produit est solide mais le trafic est quasi nul. Priorite absolue = ACQUISITION : contenu des pages metier, SEO/GEO, distribution. Les bugs reels passent toujours en premier. Les nouvelles features ne sont retenues QUE si les donnees les justifient. En cas de doute, choisis ce qui rapproche un visiteur inconnu du signup.
+
+          CONTEXTE DU JOUR (backlog, PR mergees 7j, metriques week-over-week) :
+          $CONTEXT
+
+          Sortie en francais, markdown Slack simple, CONCIS (~1400 caracteres hors lignes DO) :
+          1) *Boucle de feedback* : pour les PR mergees la semaine passee, dis honnetement si un effet est visible dans les metriques (souvent : trop tot / volume trop faible — dis-le) et ce qu'il faudrait mesurer.
+          2) *Lecture de la semaine* : 2-3 lignes sur les metriques.
+          3) *Plan de la semaine* : le top 3 du backlog, chacun justifie en 1 ligne (pourquoi lui, pourquoi maintenant). Si le backlog est vide ou faible, propose toi-meme les actions d'acquisition les plus rentables.
+          Puis EXACTEMENT une ligne par action retenue (max 3) commencant par 'DO: ' — si elle vient d'une issue, commence par 'DO: [#numero] ' — chacune une consigne autonome et actionnable pour un agent developpeur (~200 caracteres). Tu peux lire le code en lecture seule."
+          printf '%s' "$PROMPT" | claude -p \
+            --dangerously-skip-permissions \
+            --allowedTools "Read,Glob,Grep" \
+            --model claude-sonnet-4-6 \
+            --max-turns 20 | tee "$RUNNER_TEMP/plan.txt"
+
+      - name: Post plan de la semaine
+        if: always()
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$PO_CHANNEL" ]; then exit 0; fi
+          OUT="$RUNNER_TEMP/plan.txt"
+          REPORT=$(grep -v '^DO: ' "$OUT" 2>/dev/null | head -c 2800)
+          [ -z "$REPORT" ] && REPORT="(plan indisponible — verifier le run po-weekly-plan)"
+          mapfile -t DOS < <(grep '^DO: ' "$OUT" 2>/dev/null | sed 's/^DO: //' | head -3)
+
+          HEADER="🗓️ *Plan de la semaine* — PO, $(date -u +%d/%m/%Y)"
+          BLOCKS=$(jq -n --arg h "$HEADER" --arg r "$REPORT" '[
+            {type:"section", text:{type:"mrkdwn", text:$h}},
+            {type:"section", text:{type:"mrkdwn", text:$r}}
+          ]')
+
+          if [ "${#DOS[@]}" -gt 0 ]; then
+            LIST=""
+            BUTTONS='[]'
+            for i in "${!DOS[@]}"; do
+              N=$((i+1))
+              ACTION=$(printf '%s' "${DOS[$i]}" | head -c 1900)
+              LIST="$LIST\n*$N.* $ACTION"
+              BUTTONS=$(jq --arg n "🚀 Lancer $N" --arg v "$ACTION" '. + [{type:"button", text:{type:"plain_text", text:$n}, action_id:"improve_approve", value:$v}]' <<< "$BUTTONS")
+            done
+            LIST_TEXT=$(printf '📌 *Ordres de la semaine* (clic = spec à valider avant tout code) :%b' "$LIST")
+            BLOCKS=$(jq --arg t "$LIST_TEXT" --argjson btns "$BUTTONS" '. + [
+              {type:"section", text:{type:"mrkdwn", text:$t}},
+              {type:"actions", elements:$btns}
+            ]' <<< "$BLOCKS")
+          fi
+
+          PAYLOAD=$(jq -n --arg ch "$PO_CHANNEL" --arg txt "$HEADER" --argjson blocks "$BLOCKS" '{channel:$ch, text:$txt, blocks:$blocks}')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "content-type: application/json; charset=utf-8" \
+            --data "$PAYLOAD" | jq -r 'if .ok then "posted" else "slack error: \(.error)" end'

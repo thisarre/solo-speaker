@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   audit:
@@ -62,40 +63,29 @@ jobs:
             --model claude-sonnet-4-6 \
             --max-turns 25 | tee "$RUNNER_TEMP/audit.txt"
 
-      - name: Post audit + dispatch boutons
+      - name: Backlog + audit Slack
         if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$PO_CHANNEL" ]; then exit 0; fi
           OUT="$RUNNER_TEMP/audit.txt"
+          ADDED=0
+          if grep -q '^IMPROVE: ' "$OUT" 2>/dev/null; then
+            ADDED=$(grep '^IMPROVE: ' "$OUT" | sed 's/^IMPROVE: //' | head -3 | bash scripts/backlog-add.sh seo)
+          fi
+
+          if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$PO_CHANNEL" ]; then exit 0; fi
           SCORES=$(grep '^SCORES: ' "$OUT" 2>/dev/null | head -1 | sed 's/^SCORES: //')
           REPORT=$(grep -v '^IMPROVE: \|^SCORES: ' "$OUT" 2>/dev/null | head -c 2600)
           [ -z "$REPORT" ] && REPORT="(audit indisponible — verifier le run seo-audit)"
-          mapfile -t IMPROVES < <(grep '^IMPROVE: ' "$OUT" 2>/dev/null | sed 's/^IMPROVE: //' | head -3)
+          [ "$ADDED" -gt 0 ] && REPORT=$(printf '%s\n\n📥 %s action(s) ajoutée(s) au backlog `seo` — arbitrage dans le plan du lundi.' "$REPORT" "$ADDED")
 
           HEADER="🎯 *Audit SEO/GEO/AEO* — $(date -u +%d/%m/%Y)"
           [ -n "$SCORES" ] && HEADER="$HEADER — \`$SCORES\`"
-          BLOCKS=$(jq -n --arg h "$HEADER" --arg r "$REPORT" '[
+          PAYLOAD=$(jq -n --arg ch "$PO_CHANNEL" --arg h "$HEADER" --arg r "$REPORT" '{channel:$ch, text:$h, blocks:[
             {type:"section", text:{type:"mrkdwn", text:$h}},
             {type:"section", text:{type:"mrkdwn", text:$r}}
-          ]')
-
-          if [ "${#IMPROVES[@]}" -gt 0 ]; then
-            LIST=""
-            BUTTONS='[]'
-            for i in "${!IMPROVES[@]}"; do
-              N=$((i+1))
-              IMP=$(printf '%s' "${IMPROVES[$i]}" | head -c 1900)
-              LIST="$LIST\n*$N.* $IMP"
-              BUTTONS=$(jq --arg n "🚀 Lancer $N" --arg v "$IMP" '. + [{type:"button", text:{type:"plain_text", text:$n}, action_id:"improve_approve", value:$v}]' <<< "$BUTTONS")
-            done
-            LIST_TEXT=$(printf '📌 *Ordres du PO* (clic = spec à valider avant tout code) :%b' "$LIST")
-            BLOCKS=$(jq --arg t "$LIST_TEXT" --argjson btns "$BUTTONS" '. + [
-              {type:"section", text:{type:"mrkdwn", text:$t}},
-              {type:"actions", elements:$btns}
-            ]' <<< "$BLOCKS")
-          fi
-
-          PAYLOAD=$(jq -n --arg ch "$PO_CHANNEL" --arg txt "$HEADER" --argjson blocks "$BLOCKS" '{channel:$ch, text:$txt, blocks:$blocks}')
+          ]}')
           curl -s -X POST https://slack.com/api/chat.postMessage \
             -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
             -H "content-type: application/json; charset=utf-8" \
