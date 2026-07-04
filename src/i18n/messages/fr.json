@@ -934,8 +934,9 @@
   },
   "seoPages": {
     "backToHome": "Retour à l’accueil",
-    "coverTitle": "Ce que cette page couvrira",
-    "coverBody": "Cette page SEO est préparée comme un hub de contenu ciblé pour {audience}. Elle évoluera avec des exemples, workflows, comparaisons et liens internes à mesure que Solo Speaker Studio développe sa visibilité.",
+    "coverTitle": "En bref",
+    "coverBody": "Solo Speaker Studio donne à {audience} un environnement de préparation complet : plans IA, réécriture orale, répétition avec prompteur et export PDF.",
+    "faqTitle": "Questions fréquentes",
     "tryTitle": "Tester le studio",
     "tryBody": "Commencez avec 5 prises de parole, sans limite de temps et sans carte bancaire : le mode prompteur, les mémos vocaux et l’assistance IA limitée.",
     "sermon-preparation": {
@@ -943,35 +944,190 @@
       "description": "Préparez des sermons avec une structure assistée par IA, le développement des sections, la réécriture orale, la durée estimée et un mode prompteur concentré pour répéter.",
       "eyebrow": "Cas d’usage",
       "highlights": ["Génération de plan de sermon", "Préparation par sections", "Répétition avant de prêcher"],
-      "title": "Logiciel IA de préparation de sermons pour pasteurs"
+      "title": "Logiciel de préparation de sermons",
+      "body": [
+        "La préparation d’un sermon est l’une des disciplines hebdomadaires les plus exigeantes pour un pasteur. Entre l’étude du texte, la recherche d’illustrations, les choix de structure et la répétition, le chemin d’un passage à un message bien présenté peut prendre des dizaines d’heures. La pression de la page blanche est réelle — chaque semaine, quelle que soit votre charge par ailleurs. Solo Speaker Studio vous offre un espace de travail dédié pour traverser ce processus section par section, à un rythme régulier, sans perdre le fil de ce que vous voulez dire.",
+        "Commencez par le générateur de plans assisté par IA. Entrez votre passage, une idée centrale et la tension que porte votre congrégation, et Solo Speaker construit un plan de sermon structuré — introduction, points principaux, illustrations, application et conclusion — que vous pouvez remodeler librement. Le plan reflète votre direction théologique, pas un modèle générique. Chaque titre est modifiable, chaque section est déplaçable, et vous pouvez ajouter ou supprimer des blocs à tout moment avant de commencer à rédiger.",
+        "Une fois la structure en place, développez chaque section dans l’éditeur. L’assistant IA vous aide à étoffer les puces en paragraphes complets, propose des transitions naturelles et signale les phrases qui sonnent plus à l’écrit qu’à l’oral. La réécriture orale est l’un des outils clés de Solo Speaker : elle transforme la prose écrite dense en phrases plus courtes et directes qui passent mieux quand elles sont prononcées devant une congrégation. Le résultat est un sermon qui sonne comme une personne qui parle, pas comme un document lu à voix haute.",
+        "Avec un brouillon finalisé, passez en mode prompteur. L’environnement de lecture concentré de Solo Speaker supprime toutes les distractions, ne laissant que le texte et un défilement doux que vous contrôlez par la voix. Répétez l’intégralité du message du début à la fin. Vérifiez la durée estimée par rapport à votre créneau. Notez où le rythme est trop rapide ou où une section a besoin d’une phrase de plus — vous voulez repérer ces problèmes pendant la préparation, pas debout devant votre congrégation.",
+        "Chaque section conserve sa durée cible, afin que vous sachiez à l’avance si l’introduction est trop longue ou si l’application a besoin de plus d’espace. Ajustez le contenu, pas vos instincts de présentation. L’export PDF vous donne des notes de prédication claires et formatées à garder à la chaire, à partager avec un co-prédicateur ou à archiver avec l’enregistrement.",
+        "Solo Speaker est conçu pour le rythme d’un ministère de prédication régulier. Que vous prépariez un nouveau message chaque semaine, dirigiez une série d’enseignements ou prêchiez lors d’événements spéciaux, le flux de travail reste le même — plan, développement, répétition, affinement. Le tableau de bord vous montre ce qui est prêt, ce qui nécessite plus de travail et ce qui arrive ensuite. Au fil du temps, votre bibliothèque de prises de parole préparées devient un dossier consultable de votre enseignement.",
+        "Les bons sermons sont écrits deux fois — une fois dans la préparation et une fois dans la présentation. Le brouillon de préparation vous donne la clarté ; la répétition avec prompteur vous donne la maîtrise. La combinaison est ce qui sépare un sermon simplement écrit d’un sermon vraiment vécu. Solo Speaker est l’espace de travail où cette transformation se produit, accessible à tout pasteur prêt à investir le temps de préparation que son message mérite."
+      ],
+      "faq": [
+        {
+          "q": "Comment Solo Speaker m’aide-t-il à préparer un sermon ?",
+          "a": "Solo Speaker vous donne un générateur de plans, un éditeur de sections avec réécriture orale et un mode de répétition avec prompteur. Entrez votre passage et votre idée centrale, construisez la structure, développez chaque section et répétez le message complet avec un minuteur avant de prêcher."
+        },
+        {
+          "q": "L’IA suggère-t-elle des versets bibliques ou des commentaires ?",
+          "a": "Quand vous créez une prise de parole de type sermon, le module Bible est actif par défaut. Il propose des passages pertinents et des références croisées pendant que vous rédigez les sections. Vous acceptez, modifiez ou ignorez chaque suggestion — le contenu théologique final vous appartient toujours."
+        },
+        {
+          "q": "Puis-je conserver tous mes sermons au même endroit ?",
+          "a": "Oui. Solo Speaker stocke toutes vos prises de parole dans un tableau de bord avec des étiquettes de statut : brouillon, en cours, prêt. Vous pouvez archiver les sermons passés et filtrer par type pour garder votre préparation active claire et facile à naviguer."
+        },
+        {
+          "q": "Combien de temps faut-il pour préparer un sermon avec Solo Speaker ?",
+          "a": "La plupart des pasteurs constatent que l’étape plan-brouillon prend 30 à 60 minutes plutôt que plusieurs heures. Le temps total varie selon la complexité, mais le flux de travail structuré supprime le blocage de la page blanche qui coûte souvent le plus de temps."
+        },
+        {
+          "q": "Solo Speaker est-il adapté à la préparation hebdomadaire de sermons ?",
+          "a": "Oui. Le flux de travail est conçu pour une préparation reproductible et à haute fréquence. Le tableau de bord montre ce qui est prêt, ce qui nécessite plus de travail et ce qui arrive ensuite, ce qui le rend pratique pour les pasteurs qui préparent un nouveau message chaque semaine."
+        }
+      ]
     },
     "public-speaking": {
       "audience": "les conférenciers et intervenants",
       "description": "Transformez idées de discours d’ouverture et notes de conférence en prises de parole structurées, plus faciles à répéter, chronométrer et présenter avec confiance.",
       "eyebrow": "Cas d’usage",
       "highlights": ["Structure de conférence", "Amélioration du flux oral", "Répétition avec prompteur"],
-      "title": "Préparation IA de prise de parole pour conférenciers"
+      "title": "Préparation IA prise de parole",
+      "body": [
+        "Les conférences, discours d’ouverture et tables rondes partagent un défi commun : l’écart entre ce que vous voulez dire et ce que le public retient vraiment. La plupart des orateurs préparent trop tard, s’appuient sur leurs diapositives comme filet de sécurité et laissent peu de temps pour une vraie répétition. Solo Speaker Studio aide les orateurs à combler cet écart grâce à un flux de préparation structuré, conçu pour ceux qui prennent la parole régulièrement et ont besoin d’une méthode fiable.",
+        "Commencez par définir la structure de votre discours. Le générateur de plans IA de Solo Speaker prend votre titre, votre argument central et les deux ou trois idées avec lesquelles vous voulez que le public reparte, puis construit un plan structuré avec sections, transitions et conclusion suggérée. Le plan est entièrement modifiable — ajustez l’ordre, renommez les sections et ajoutez les exemples et histoires spécifiques que vous seul pouvez apporter. Vous n’êtes jamais enfermé dans ce que l’IA génère.",
+        "Une fois la structure définie, rédigez chaque section dans l’éditeur. L’assistant IA peut vous aider à développer des notes brutes en paragraphes complets, à resserrer les introductions et à réécrire des phrases denses dans un style parlé plus direct. Les bonnes conférences sonnent comme des conversations à grande échelle, pas comme des documents lus à voix haute. Le mode réécriture orale de Solo Speaker vous aide à trouver ce registre sans tout réécrire manuellement. La différence est immédiatement perceptible quand vous lisez le texte révisé à voix haute.",
+        "Avant un événement en direct, utilisez le mode prompteur pour répéter l’intégralité de la conférence dans des conditions réelles. Vous voyez votre texte au rythme que vous choisissez, avec un minuteur qui défile en parallèle. Identifiez les sections systématiquement trop longues, repérez les transitions qui ne fonctionnent pas et ajustez le script avant le jour J — pas pendant. Les répétitions régulières en mode prompteur construisent le type de confiance qu’une première lecture dans la tête ne produit jamais.",
+        "Le tableau de bord garde toutes vos prises de parole organisées par statut, afin que vous sachiez toujours lesquelles sont prêtes et lesquelles ont encore besoin de travail. Que vous parliez lors de quelques événements par an ou plusieurs fois par mois, Solo Speaker vous offre une méthode de préparation qui s’adapte à votre calendrier d’intervention.",
+        "La performance en prise de parole publique est presque entièrement une question de qualité de préparation. Le public pardonne les hésitations, les variations d’énergie et les formulations imparfaites. Ce qu’il remarque — et ce qui le perd — c’est la confusion structurelle et un orateur incertain de la direction de sa prise de parole. Solo Speaker vous aide à éliminer cette incertitude. Quand vous montez sur scène, vous avez déjà présenté la prise de parole au moins une fois. Vous connaissez le rythme, les transitions et exactement comment la conclusion atterrit.",
+        "La grande prise de parole publique est une compétence pratiquée, pas un talent inné. Chaque orateur que vous admirez a travaillé à travers un processus de préparation pour en arriver là. Solo Speaker vous donne une méthode fiable et reproductible : une structure claire, un brouillon oral et suffisamment de temps de répétition pour monter sur scène en connaissant la prise de parole plutôt qu’en espérant qu’elle fonctionne. La préparation est invisible pour le public. La confiance qu’elle crée ne l’est pas."
+      ],
+      "faq": [
+        {
+          "q": "Comment structurer une conférence avec Solo Speaker ?",
+          "a": "Entrez votre titre, argument central et les idées clés que vous voulez que le public retienne. Le générateur de plans IA construit une structure modifiable avec introduction, sections principales et conclusion. Vous ajustez, réorganisez et remplissez vos exemples spécifiques à partir de là."
+        },
+        {
+          "q": "Solo Speaker peut-il m’aider à respecter mon créneau horaire ?",
+          "a": "Oui. Chaque section a une durée cible et Solo Speaker affiche une durée estimée cumulative pour l’ensemble de la prise de parole. Le mode répétition avec prompteur affiche un minuteur en direct pour voir exactement où vous en êtes et où vous avez tendance à dépasser."
+        },
+        {
+          "q": "Qu’est-ce que la réécriture orale ?",
+          "a": "La réécriture orale prend un texte écrit — qui tend à utiliser des phrases longues, des constructions passives et des propositions complexes — et renvoie une version plus courte et directe qui sonne naturellement quand on la dit à voix haute. Elle est particulièrement utile pour adapter des notes écrites en prise de parole vivante."
+        },
+        {
+          "q": "Puis-je répéter le jour d’une présentation avec Solo Speaker ?",
+          "a": "Oui. Le mode prompteur est conçu pour les répétitions complètes comme pour les derniers passages rapides. Vous pouvez ajuster la vitesse de défilement, la taille de police et la quantité de texte affichée pour correspondre à votre rythme de présentation préféré."
+        },
+        {
+          "q": "Solo Speaker fonctionne-t-il pour les tables rondes et les courtes prises de parole ?",
+          "a": "Oui. Solo Speaker fonctionne pour tout format où la préparation aide — des présentations de cinq minutes aux discours de quatre-vingt-dix minutes. Les prises de parole courtes bénéficient souvent d’une structure plus soignée, et le flux de travail par sections s’applique quelle que soit la durée."
+        }
+      ]
     },
     "training-presentations": {
       "audience": "les formateurs, enseignants et animateurs d’ateliers",
       "description": "Construisez formations et ateliers avec des sections claires, un minutage pratique et un flux de présentation pensé pour l’enseignement en direct.",
       "eyebrow": "Cas d’usage",
       "highlights": ["Cours et ateliers", "Sections chronométrées", "Export PDF pour notes de présentation"],
-      "title": "Logiciel IA de présentation de formation"
+      "title": "Logiciel de formation IA",
+      "body": [
+        "Les formations et présentations d’ateliers ont un objectif différent des conférences ou des sermons. Elles doivent transférer des compétences, pas seulement inspirer. Les participants repartent soit avec une méthode qu’ils peuvent appliquer immédiatement, soit avec un manque qu’ils peuvent maintenant nommer et travailler. Solo Speaker Studio aide les formateurs à construire des présentations qui tiennent cette structure délibérément — avec des sections claires, des étapes minutées et un flux de présentation conçu pour l’enseignement en direct.",
+        "Commencez par définir l’objectif d’apprentissage. Que doivent pouvoir faire les participants après la session qu’ils ne pouvaient pas faire avant ? Le générateur de plans IA de Solo Speaker prend cet objectif, le public cible et le format de formation — un atelier d’une demi-journée, une session de 90 minutes, une démonstration étape par étape — et renvoie un plan de sections avec introduction, blocs pédagogiques principaux, exercice pratique et conclusion. Vous modifiez la structure à partir de là.",
+        "Développez chaque section dans l’éditeur. L’assistant IA vous aide à transformer les puces en paragraphes pédagogiques clairs, à rédiger des instructions étape par étape précises et à signaler les explications trop abstraites pour un public en direct. Le contenu de formation souffre souvent d’être rédigé pour des lecteurs plutôt que pour des auditeurs — il est détaillé mais pas digeste quand il est prononcé. Le mode réécriture orale de Solo Speaker vous aide à détecter ce problème et à le corriger avant d’entrer dans la salle.",
+        "Utilisez les objectifs de durée par section pour planifier un minutage réaliste. Les formateurs sous-estiment souvent le temps que prennent les exercices, les démonstrations et les questions des participants. Solo Speaker vous permet d’assigner une durée cible à chaque section et affiche l’estimation cumulée en temps réel, afin d’ajuster le contenu avant la session plutôt que de couper des exercices au fil de l’eau ou de dépasser l’heure prévue.",
+        "Une fois la présentation prête, exportez des notes de présentation propres en PDF à utiliser devant la salle ou à partager avec des co-formateurs et des responsables. Le mode prompteur vous offre un environnement de lecture concentré pour les répétitions quand la formulation précise est importante — notamment pour les formations réglementaires, les contenus de conformité ou les sessions d’intégration des nouveaux collaborateurs.",
+        "Avec Solo Speaker, vos formations s’améliorent session après session car le processus de préparation reste cohérent. Chaque version de la prise de parole est conservée dans le tableau de bord. Vous pouvez examiner ce qui a changé entre les itérations, dupliquer une formation passée pour un nouveau groupe et ajuster le minutage sans repartir de zéro. Les formateurs qui préparent ainsi passent moins de temps à reconstruire des diapositives et plus de temps à affiner le contenu qui change vraiment le comportement des apprenants.",
+        "Un formateur bien préparé n’est pas seulement plus confiant — il est plus présent. Quand la structure est solide et le minutage planifié, vous pouvez vous concentrer sur la salle plutôt que sur vos notes. Vous remarquez quand un participant est confus, quand un concept a besoin d’un exemple supplémentaire et quand le groupe est prêt à avancer. Solo Speaker vous donne la profondeur de préparation qui rend ce type d’enseignement réactif et centré sur les participants possible."
+      ],
+      "faq": [
+        {
+          "q": "Comment Solo Speaker aide-t-il les formateurs à construire de meilleures présentations ?",
+          "a": "Solo Speaker donne aux formateurs un constructeur de plans structuré, un éditeur de sections avec assistance IA et des outils de minutage pour planifier des durées de session réalistes. Il vous aide à passer de l’objectif d’apprentissage à une présentation minutée et bien formulée sans la précipitation de dernière minute."
+        },
+        {
+          "q": "Puis-je exporter ma présentation de formation en PDF ?",
+          "a": "Oui. Solo Speaker exporte un PDF propre de votre prise de parole avec toutes les sections et le contenu. Utilisez-le comme notes de présentation personnelles, distribuez-le aux co-formateurs ou conservez-le comme archive de la conception de session pour les futures itérations."
+        },
+        {
+          "q": "Comment fonctionne le minutage par section ?",
+          "a": "Chaque section a un champ de durée cible. Solo Speaker additionne les durées et affiche une estimation de temps cumulée pour la présentation complète. Cela vous aide à planifier les exercices et les questions de manière réaliste et à ajuster avant la session, pas pendant."
+        },
+        {
+          "q": "Puis-je utiliser Solo Speaker pour une formation à distance ou virtuelle ?",
+          "a": "Oui. Le flux de préparation est le même quel que soit le format. Le mode prompteur est particulièrement utile pour les sessions à distance où lire des notes sur un second écran est naturel et ne perturbe pas le contact visuel avec la caméra quand il est correctement positionné."
+        },
+        {
+          "q": "Solo Speaker supporte-t-il les formations récurrentes ?",
+          "a": "Oui. Vous pouvez conserver les formations passées dans le tableau de bord et archiver les sessions terminées. Pour les cours récurrents, dupliquez une prise de parole existante et mettez le contenu à jour — la structure et le minutage se transfèrent immédiatement."
+        }
+      ]
     },
     "ai-speech-writer": {
       "audience": "les orateurs qui veulent structurer leurs premiers brouillons",
       "description": "Utilisez l’IA pour générer des plans, développer des sections et réécrire un texte dans un style plus oral sans transformer la prise de parole en script générique.",
       "eyebrow": "Fonctionnalité",
       "highlights": ["Génération de plan IA", "Réécriture orale", "Développement de sections"],
-      "title": "Assistant IA d’écriture de discours structurés"
+      "title": "Rédacteur de discours IA",
+      "body": [
+        "Écrire un discours est plus difficile que la plupart des gens ne le pensent. Les mêmes compétences qui produisent des emails ou des rapports clairs ne se traduisent pas automatiquement en langage parlé. Les phrases qui se lisent bien sur papier semblent souvent rigides ou précipitées quand elles sont prononcées à voix haute — le rythme est faux, les points de respiration manquent et le vocabulaire est trop formel pour la salle. Le rédacteur de discours IA de Solo Speaker Studio vous aide à passer d’idées brutes à une prise de parole structurée et naturellement orale, sans transformer votre voix en quelque chose de générique ou automatisé.",
+        "Le processus commence par un plan. Décrivez le sujet, le public, le contexte et le message central que vous voulez faire passer, et l’IA de Solo Speaker génère une structure — ouverture, argument principal, points d’appui et conclusion. Le plan est une hypothèse de travail, pas une prescription. Chaque section est modifiable, supprimable et réordonnable. Vous pouvez générer la structure en quelques secondes et consacrer le reste de votre préparation à la substance.",
+        "À partir du plan, développez chaque section avec l’assistance IA. Vous pouvez rédiger le contenu vous-même et demander à l’IA d’affiner une phrase, d’étoffer un point ou d’améliorer une transition. Ou générez un premier brouillon complet section par section, puis remodeler dans votre propre voix. L’IA est un collaborateur, pas un rédacteur fantôme. Elle gère le travail structurel lourd pour que vous puissiez vous concentrer sur les idées, histoires et détails spécifiques que vous seul pouvez apporter.",
+        "La réécriture orale est l’un des outils les plus puissants du flux de rédacteur de discours IA. Collez un bloc de texte écrit — notes de réunion, fil d’emails, diapositives — et Solo Speaker le réécrit en phrases plus courtes et directes, plus faciles à dire et à suivre pour votre public. La réécriture préserve votre sens essentiel tout en supprimant les tournures de prose écrite — voix passive, longues propositions relatives, noms abstraits — qui ralentissent le débit oral.",
+        "Une fois le brouillon terminé, répétez-le en mode prompteur. Lire l’intégralité de la prise de parole à voix haute est le dernier contrôle qualité qu’aucune relecture textuelle ne peut remplacer. Vous entendrez les phrases qui sonnent encore à l’écrit, les transitions qui ont besoin d’un mot de plus et la conclusion qui arrive trop vite. C’est l’étape que la plupart des orateurs sautent, et c’est généralement là que les révisions les plus précieuses ont lieu.",
+        "Le rédacteur de discours IA de Solo Speaker est conçu pour les personnes qui écrivent leur propre contenu. L’IA ne remplace pas votre voix — elle accélère le chemin de la page blanche à quelque chose qui mérite d’être dit à voix haute. Que vous prépariez une prise de parole de cinq minutes ou un discours de quarante minutes, le processus est le même : plan, brouillon, affinement, répétition. Chaque itération produit une version plus propre et plus naturelle.",
+        "Les meilleures prises de parole ne sont pas écrites par l’IA. Elles sont développées par un orateur qui utilise l’IA pour aller plus vite, voir plus loin et combler les lacunes que la relecture solo manque. Solo Speaker garde la voix humaine au centre de chaque prise de parole tout en supprimant la friction qui empêche la plupart des gens de se préparer aussi soigneusement qu’ils le pourraient — et aussi soigneusement que leur public le mérite."
+      ],
+      "faq": [
+        {
+          "q": "Comment fonctionne le rédacteur de discours IA dans Solo Speaker ?",
+          "a": "Décrivez votre sujet, votre public et votre message central. L’IA génère un plan structuré avec sections et transitions. Développez chaque section dans l’éditeur, affinez avec l’assistance IA ou la réécriture orale, et répétez le brouillon final en mode prompteur."
+        },
+        {
+          "q": "L’IA écrira-t-elle tout le discours à ma place ?",
+          "a": "L’IA peut générer un premier brouillon complet section par section si vous le choisissez. Les meilleurs résultats viennent de son utilisation comme collaborateur — générer structure et brouillons, puis les éditer pour restaurer votre voix spécifique, vos exemples et vos idées."
+        },
+        {
+          "q": "Quelle est la différence entre la génération IA et la réécriture orale ?",
+          "a": "La génération IA crée un nouveau contenu à partir de vos entrées — plan ou description de section. La réécriture orale transforme un texte existant que vous collez, le rendant plus court et plus naturel quand il est parlé. Vous pouvez utiliser les deux dans le même flux de préparation."
+        },
+        {
+          "q": "Puis-je utiliser Solo Speaker pour adapter un article écrit en prise de parole ?",
+          "a": "Oui. Collez votre article ou vos notes dans une section, utilisez l’outil de réécriture orale pour les convertir en langage parlé, puis ajustez le résultat pour correspondre à votre style. C’est l’une des utilisations les plus courantes du rédacteur de discours IA."
+        },
+        {
+          "q": "Comment m’assurer que le résultat IA sonne toujours comme moi ?",
+          "a": "Modifiez chaque section générée avant de la considérer comme finale. L’IA vous donne un point de départ, pas un produit fini. Changez les exemples, ajustez le rythme, ajoutez vos références spécifiques et supprimez toute formulation qui ne correspond pas à la façon dont vous parlez vraiment."
+        }
+      ]
     },
     "teleprompter-mode": {
       "audience": "les orateurs qui répètent et présentent en direct",
       "description": "Répétez et présentez avec un mode prompteur concentré, le défilement automatique, un minuteur et des options de suivi vocal pour une présentation plus fluide.",
       "eyebrow": "Fonctionnalité",
       "highlights": ["Mode de lecture concentré", "Défilement automatique", "Options de suivi vocal"],
-      "title": "Mode prompteur pour discours et sermons"
+      "title": "Prompteur pour discours",
+      "body": [
+        "La plupart des orateurs répètent trop peu et trop tard. Parcourir des notes dans sa tête n’est pas la même chose que prononcer des phrases complètes à voix haute au rythme réel, et cet écart se voit sur scène. Les hésitations, la perte de contact visuel, les sections qui semblaient claires sur papier mais qui se dissolvent à mi-phrase — ce sont les problèmes qui n’émergent que lorsqu’on parle vraiment. Le mode prompteur de Solo Speaker Studio vous offre un environnement concentré et sans distraction pour répéter et présenter des prises de parole comme l’exige la performance réelle.",
+        "Le mode prompteur supprime tous les éléments de l’éditeur qui ne sont pas le texte et les contrôles. Ce qui reste est un environnement de lecture défilant, propre, conçu pour vous maintenir dans le contenu. Vous choisissez la taille de police, la vitesse de défilement et la quantité de texte visible à la fois. La mise en page s’adapte à n’importe quel appareil — ordinateur de bureau, tablette ou téléphone monté devant vous sur un lutrin ou un trépied — pour que l’environnement de répétition corresponde à l’environnement de présentation.",
+        "Le défilement automatique fait avancer le texte à un rythme régulier que vous définissez avant la session. Si votre débit s’accélère ou ralentit, vous pouvez ajuster la vitesse en cours de session sans perdre votre place. Pour les orateurs qui veulent une utilisation sans les mains, le mode suivi vocal suit votre discours en temps réel et fait défiler le texte pour rester en phase avec ce que vous dites réellement — sans pédale, sans télécommande, sans assistant.",
+        "Un minuteur visible tourne pendant toute la session pour que vous sachiez toujours où vous en êtes dans la prise de parole. Cela est important dans des situations à enjeux élevés — un format TED, un discours de mariage, une présentation au conseil, un sermon avec un temps de service fixe — où dépasser le temps n’est pas une option. L’affichage du prompteur montre également la durée cible de la section que vous lisez, vous donnant un retour en temps réel sur votre rythme.",
+        "Utiliser le mode prompteur pour des répétitions complètes construit le type de fluidité de présentation que les passages rapides ne peuvent pas produire. Vous apprenez le rythme de votre propre contenu. Vous trouvez les phrases qui ont besoin d’une dernière révision. Vous identifiez la transition qui semble abrupte quand elle est prononcée, même si elle paraissait correcte sur la page. Et vous arrivez à l’événement ayant déjà présenté la prise de parole — ce qui est un tout autre type de confiance.",
+        "Le mode prompteur de Solo Speaker est accessible depuis n’importe quel appareil, à tout moment. Vous n’avez pas besoin d’une application dédiée, d’un second écran ou de matériel spécialisé. Ouvrez la prise de parole sur votre téléphone, définissez la vitesse de défilement et répétez. Pour les présentations à distance et hybrides, positionnez l’appareil près de votre caméra et utilisez le suivi vocal pour garder les yeux en face. L’environnement dans lequel vous répétez est celui dans lequel vous vous produisez.",
+        "L’écart entre un orateur répété et un orateur non répété est visible du public en quelques secondes. L’orateur répété possède la salle parce qu’il possède le contenu. Le mode prompteur de Solo Speaker est la façon dont vous comblez cet écart — une répétition complète à la fois, sur l’appareil qui est devant vous, jusqu’à ce que la prise de parole vous appartienne complètement."
+      ],
+      "faq": [
+        {
+          "q": "Comment fonctionne le mode prompteur dans Solo Speaker ?",
+          "a": "Ouvrez n’importe quelle prise de parole en mode prompteur pour voir votre texte complet dans un affichage défilant propre. Définissez votre taille de police et vitesse de défilement préférées, puis commencez à lire. Le défilement automatique fait avancer le texte à un rythme régulier. Le mode suivi vocal ajuste le défilement en temps réel pour correspondre à votre discours."
+        },
+        {
+          "q": "Qu’est-ce que le suivi vocal et comment ça fonctionne ?",
+          "a": "Le suivi vocal utilise le microphone de votre appareil pour détecter votre discours en temps réel et maintient le défilement du prompteur aligné avec les mots que vous dites réellement. C’est utile pour les orateurs dont le rythme varie ou qui ont tendance à s’éloigner du script en cours de prise de parole."
+        },
+        {
+          "q": "Puis-je ajuster la vitesse de défilement pendant une session ?",
+          "a": "Oui. Les contrôles de vitesse de défilement sont accessibles pendant une session pour accélérer ou ralentir sans s’arrêter. Vous pouvez également mettre le défilement en pause et le reprendre manuellement à tout moment."
+        },
+        {
+          "q": "Le mode prompteur fonctionne-t-il sur mobile ?",
+          "a": "Oui. Le mode prompteur s’adapte aux écrans de téléphone et de tablette. De nombreux orateurs l’utilisent sur un téléphone fixé sur un trépied au lutrin, ou sur une tablette posée devant eux lors de sessions à distance."
+        },
+        {
+          "q": "Quelle est la différence entre la répétition et le mode présentation ?",
+          "a": "Il n’y a pas de mode séparé — le mode prompteur sert à la fois pour la répétition et la présentation en direct. En répétition, vous vous arrêtez, ajustez et relisez les sections ; en présentation, vous faites défiler l’intégralité de la prise de parole. Les deux utilisent le même environnement de lecture concentré."
+        }
+      ]
     }
   },
   "team": {

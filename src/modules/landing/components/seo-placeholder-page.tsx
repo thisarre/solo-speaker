@@ -3,6 +3,7 @@ import { ArrowLeft, Check } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { buttonClassName } from "@/components/ui/Button";
 import type { SeoPageContent } from "@/modules/landing/seo-pages";
+import { absoluteUrl, siteUrl } from "@/modules/landing/seo";
 import { getMessages } from "@/i18n/messages";
 import { localizedPath, type Locale } from "@/i18n/routing";
 
@@ -10,8 +11,35 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
   const messages = getMessages(locale);
   const seoPages = messages.seoPages;
 
+  const pageUrl = absoluteUrl(localizedPath(page.slug, locale), siteUrl);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        name: page.title,
+        description: page.description,
+        url: pageUrl
+      },
+      // Google rejette un FAQPage sans mainEntity : ne l'émettre que si la page a une FAQ.
+      ...(page.faq.length > 0
+        ? [
+            {
+              "@type": "FAQPage",
+              mainEntity: page.faq.map(({ q, a }) => ({
+                "@type": "Question",
+                name: q,
+                acceptedAnswer: { "@type": "Answer", text: a }
+              }))
+            }
+          ]
+        : [])
+    ]
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <script dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replaceAll("</script>", "<\\/script>") }} type="application/ld+json" />
       <header className="border-b border-line">
         <div className="mx-auto flex h-14 w-full max-w-[1180px] items-center justify-between px-5 md:px-8">
           <Link aria-label={messages.common.appName} href={localizedPath("/", locale)}>
@@ -29,7 +57,13 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
         <h1 className="m-0 mt-3 max-w-4xl text-[42px] font-semibold leading-[1.02] tracking-[0] md:text-[64px]">{page.title}</h1>
         <p className="m-0 mt-5 max-w-2xl text-[16px] leading-8 text-muted">{page.description}</p>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="mt-8 grid gap-5">
+          {page.body.map((para, i) => (
+            <p className="m-0 max-w-3xl text-[15px] leading-8 text-muted" key={i}>{para}</p>
+          ))}
+        </div>
+
+        <div className="mt-10 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
           <section className="rounded-[14px] border border-line bg-surface p-5 md:p-6">
             <h2 className="m-0 text-[24px] font-semibold tracking-[0]">{seoPages.coverTitle}</h2>
             <p className="m-0 mt-3 text-[14px] leading-7 text-muted">
@@ -55,6 +89,20 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
             </Link>
           </aside>
         </div>
+
+        {page.faq.length > 0 ? (
+          <section className="mt-14">
+            <h2 className="m-0 text-[28px] font-semibold tracking-[0]">{seoPages.faqTitle}</h2>
+            <div className="mt-6 grid gap-4">
+              {page.faq.map(({ q, a }, i) => (
+                <div className="rounded-[12px] border border-line bg-surface p-5" key={i}>
+                  <h3 className="m-0 text-[16px] font-semibold">{q}</h3>
+                  <p className="m-0 mt-2 text-[14px] leading-7 text-muted">{a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </section>
     </main>
   );
