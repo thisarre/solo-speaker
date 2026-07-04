@@ -91,7 +91,7 @@ jobs:
           fi
 
           if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$ANALYTICS_CHANNEL" ]; then exit 0; fi
-          REPORT=$(grep -v '^IMPROVE: ' "$OUT" 2>/dev/null | head -c 2800)
+          REPORT=$(grep -v '^IMPROVE: ' "$OUT" 2>/dev/null | head -c 2800 | iconv -f utf-8 -t utf-8 -c)
           [ -z "$REPORT" ] && REPORT="(rapport indisponible cette semaine — verifier le run weekly-insights)"
           [ "$ADDED" -gt 0 ] && REPORT=$(printf '%s\n\n📥 %s proposition(s) ajoutée(s) au backlog `growth` — le PO arbitrera lundi.' "$REPORT" "$ADDED")
 

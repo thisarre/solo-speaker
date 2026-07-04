@@ -85,7 +85,7 @@ jobs:
             grep '^BUG: ' "$OUT" | sed 's/^BUG: //' | head -3 | bash scripts/backlog-add.sh bug > /dev/null || true
           fi
           if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$QA_CHANNEL" ]; then exit 0; fi
-          REPORT=$(grep -v '^BUG: ' "$OUT" 2>/dev/null | head -c 2800)
+          REPORT=$(grep -v '^BUG: ' "$OUT" 2>/dev/null | head -c 2800 | iconv -f utf-8 -t utf-8 -c)
           [ -z "$REPORT" ] && REPORT="(digest QA indisponible — verifier le run browser-monitoring)"
           mapfile -t BUGS < <(grep '^BUG: ' "$OUT" 2>/dev/null | sed 's/^BUG: //' | head -3)
 
@@ -111,8 +111,6 @@ jobs:
             ]' <<< "$BLOCKS")
           fi
 
+          printf '%s\n\n%s\n\n%s\n' "$HEADER" "$REPORT" "${LIST_TEXT:-}" > "$RUNNER_TEMP/fallback.txt"
           PAYLOAD=$(jq -n --arg ch "$QA_CHANNEL" --arg txt "$HEADER" --argjson blocks "$BLOCKS" '{channel:$ch, text:$txt, blocks:$blocks}')
-          curl -s -X POST https://slack.com/api/chat.postMessage \
-            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-            -H "content-type: application/json; charset=utf-8" \
-            --data "$PAYLOAD" | jq -r 'if .ok then "posted" else "slack error: \(.error)" end'
+          printf '%s' "$PAYLOAD" | bash scripts/slack-post-blocks.sh "$QA_CHANNEL" "$RUNNER_TEMP/fallback.txt"

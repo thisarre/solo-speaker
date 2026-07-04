@@ -76,7 +76,7 @@ jobs:
 
           if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$PO_CHANNEL" ]; then exit 0; fi
           SCORES=$(grep '^SCORES: ' "$OUT" 2>/dev/null | head -1 | sed 's/^SCORES: //')
-          REPORT=$(grep -v '^IMPROVE: \|^SCORES: ' "$OUT" 2>/dev/null | head -c 2600)
+          REPORT=$(grep -v '^IMPROVE: \|^SCORES: ' "$OUT" 2>/dev/null | head -c 2600 | iconv -f utf-8 -t utf-8 -c)
           [ -z "$REPORT" ] && REPORT="(audit indisponible — verifier le run seo-audit)"
           [ "$ADDED" -gt 0 ] && REPORT=$(printf '%s\n\n📥 %s action(s) ajoutée(s) au backlog `seo` — arbitrage dans le plan du lundi.' "$REPORT" "$ADDED")
 
