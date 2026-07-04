@@ -70,8 +70,8 @@ export function routeSlackCommand(rawText: string | undefined | null, role: Chan
   if (/^(logs?|journaux|journal)( (prod|du site))?$/.test(t)) return { type: "infra", action: "logs" };
 
   // The deploy-status question that used to fall through to the feature
-  // pipeline: "dis-moi si la mise en ligne a fonctionné". Requires an
-  // ask-verb so "ajoute un bouton sur le site qui marche bien" stays a dev task.
+  // pipeline (a check-verb + deploy-noun + worked-verb combination). Requires
+  // the ask-verb so a dev task mentioning the site working stays a dev task.
   const askVerb = /\b(dis|dire|verifie|verifier|regarde|check|confirme|confirmer|savoir si)\b|est ?-?ce que/.test(t);
   const deployNoun = /\b(mise en ligne|deploiement|deploy|site|prod)\b/.test(t);
   const workedVerb = /\b(fonctionne|marche|reussi|passe|ok|en ligne)/.test(t);

@@ -21,20 +21,25 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
         description: page.description,
         url: pageUrl
       },
-      {
-        "@type": "FAQPage",
-        mainEntity: page.faq.map(({ q, a }) => ({
-          "@type": "Question",
-          name: q,
-          acceptedAnswer: { "@type": "Answer", text: a }
-        }))
-      }
+      // Google rejette un FAQPage sans mainEntity : ne l'émettre que si la page a une FAQ.
+      ...(page.faq.length > 0
+        ? [
+            {
+              "@type": "FAQPage",
+              mainEntity: page.faq.map(({ q, a }) => ({
+                "@type": "Question",
+                name: q,
+                acceptedAnswer: { "@type": "Answer", text: a }
+              }))
+            }
+          ]
+        : [])
     ]
   };
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <script dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} type="application/ld+json" />
+      <script dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replaceAll("</script>", "<\\/script>") }} type="application/ld+json" />
       <header className="border-b border-line">
         <div className="mx-auto flex h-14 w-full max-w-[1180px] items-center justify-between px-5 md:px-8">
           <Link aria-label={messages.common.appName} href={localizedPath("/", locale)}>
@@ -88,8 +93,8 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
         <section className="mt-14">
           <h2 className="m-0 text-[28px] font-semibold tracking-[0]">{seoPages.faqTitle}</h2>
           <div className="mt-6 grid gap-4">
-            {page.faq.map(({ q, a }) => (
-              <div className="rounded-[12px] border border-line bg-surface p-5" key={q}>
+            {page.faq.map(({ q, a }, i) => (
+              <div className="rounded-[12px] border border-line bg-surface p-5" key={i}>
                 <h3 className="m-0 text-[16px] font-semibold">{q}</h3>
                 <p className="m-0 mt-2 text-[14px] leading-7 text-muted">{a}</p>
               </div>
