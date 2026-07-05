@@ -834,6 +834,9 @@
       "tooLong": "Prise de parole trop longue",
       "tooShort": "Prise de parole trop courte",
       "notReady": "Statut pas encore prêt"
+    },
+    "diagnostic": {
+      "title": "Diagnostic — points bloquants"
     }
   },
   "helpAssistant": {

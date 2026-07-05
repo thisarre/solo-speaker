@@ -7,6 +7,7 @@ import { ProgressionMetricsGrid } from "./progression-metrics-grid";
 import { ProgressionRecommendations } from "./progression-recommendations";
 import { ReadyTalksList } from "./ready-talks-list";
 import { StatusDistributionCard } from "./status-distribution-card";
+import { TalkDiagnosticList } from "./talk-diagnostic-list";
 import { TalksToFinishList } from "./talks-to-finish-list";
 import { TypeDistributionCard } from "./type-distribution-card";
 import type { GlobalProgressionReport } from "@/modules/progression/types";
@@ -16,6 +17,7 @@ import { localizedPath } from "@/i18n/routing";
 export function ProgressionPage({ report }: { report: GlobalProgressionReport }) {
   const { locale, messages } = useI18n();
   const copy = messages.progression;
+  const lowScoreTalks = report.readiness.filter((r) => !r.isArchived && r.score < 70);
 
   return (
     <main className="studio-scroll h-[100svh] min-w-0 overflow-y-auto overflow-x-hidden px-6 py-8 md:px-11">
@@ -34,6 +36,12 @@ export function ProgressionPage({ report }: { report: GlobalProgressionReport })
           <div className="mt-7">
             <ProgressionMetricsGrid metrics={report.metrics} />
           </div>
+
+          {lowScoreTalks.length > 0 && (
+            <div className="mt-5">
+              <TalkDiagnosticList talks={lowScoreTalks} />
+            </div>
+          )}
 
           <section className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
             <div className="grid min-w-0 gap-5">
