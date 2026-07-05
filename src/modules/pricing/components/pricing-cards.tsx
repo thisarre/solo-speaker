@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
+import posthog from "posthog-js";
 import { type Locale } from "@/i18n/routing";
 import { TrackedLinkButton } from "@/modules/landing/components/tracked-link-button";
 import type { BillingCycle, PricingCard } from "@/modules/pricing/plans";
@@ -29,6 +30,15 @@ function eurosOf(price: string): number {
 export function PricingCards({ cards, labels, locale }: PricingCardsProps) {
   const [cycle, setCycle] = useState<BillingCycle>("yearly");
   const [seatsByCard, setSeatsByCard] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    return posthog.onFeatureFlags(() => {
+      const variant = posthog.getFeatureFlag("pricing_cycle_default");
+      const resolved: BillingCycle = variant === "test" ? "yearly" : "monthly";
+      setCycle(resolved);
+      posthog.capture("pricing_variant_assigned", { variant: variant ?? "control", cycle: resolved });
+    });
+  }, []);
 
   return (
     <div data-scroll-reveal>
