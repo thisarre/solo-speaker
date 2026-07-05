@@ -836,6 +836,9 @@
       "tooLong": "Talk too long",
       "tooShort": "Talk too short",
       "notReady": "Status not ready yet"
+    },
+    "diagnostic": {
+      "title": "Diagnostic — blocking points"
     }
   },
   "helpAssistant": {
