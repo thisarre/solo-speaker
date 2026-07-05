@@ -42,14 +42,14 @@ export function PricingPage({ locale = "en", returnHref = "/" }: { locale?: Loca
         <div className="mt-9 rounded-[14px] border border-accent bg-[color-mix(in_oklab,var(--accent)_7%,var(--surface))] p-5 md:p-6">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
             <div>
-              <p className="m-0 inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent-ink">
+              <p className="m-0 flex flex-wrap items-center gap-1.5 text-[13px] font-semibold text-accent-ink">
                 <Sparkles className="size-4" />
                 {pricing.trialCta}
               </p>
               <p className="m-0 mt-1.5 text-[12.5px] text-muted">{pricing.riskReversal}</p>
             </div>
             <Link
-              className={buttonClassName({ className: "whitespace-nowrap", variant: "primary" })}
+              className={buttonClassName({ className: "overflow-hidden text-ellipsis max-w-full", variant: "primary" })}
               href={localizedPath("/signup?plan=trial", locale)}
             >
               {pricing.trialCta}
