@@ -34,7 +34,7 @@ export function ModularDashboard({ profile, talks }: { profile?: OnboardingProfi
   const profileRecommendations = onboardingRecommendations.filter((recommendation) => recommendation.id !== "onboarding-help");
 
   return (
-    <div className="studio-scroll h-[100svh] overflow-x-hidden overflow-y-auto px-6 py-8 md:px-11">
+    <div className="studio-scroll h-[100svh] overflow-x-hidden overflow-y-auto px-6 pt-8 pb-[88px] md:px-11 md:pb-8">
       <section className="rounded-[8px] border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(20,20,25,.04)] md:p-6" data-tour="dashboard-home">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">

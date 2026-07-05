@@ -100,7 +100,7 @@ export function HelpAssistantWidget() {
   }
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 md:bottom-5 md:right-5">
+    <div className="fixed bottom-20 left-4 z-50 md:bottom-5 md:left-auto md:right-5">
       {open ? (
         <section className="solo-help-panel mb-3 grid max-h-[min(720px,calc(100vh-120px))] w-[min(440px,calc(100vw-28px))] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-[22px] border border-[color-mix(in_oklab,var(--accent)_22%,var(--line))] bg-[color-mix(in_oklab,var(--surface)_92%,var(--panel))] shadow-[0_26px_90px_rgba(10,10,16,.28)] backdrop-blur-xl">
           <header className="relative overflow-hidden border-b border-[color-mix(in_oklab,var(--accent)_14%,var(--line))] bg-[linear-gradient(135deg,color-mix(in_oklab,var(--surface)_92%,var(--accent-bg)),var(--panel))] p-4">
