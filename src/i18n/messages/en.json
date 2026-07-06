@@ -944,6 +944,7 @@
     "faqTitle": "Frequently asked questions",
     "tryTitle": "Try the studio",
     "tryBody": "Start with 5 talks, no time limit and no credit card: teleprompter mode, voice notes and limited AI assistance.",
+    "relatedTitle": "Related",
     "sermon-preparation": {
       "audience": "pastors and preaching teams",
       "description": "Prepare sermons with AI-assisted structure, section development, oral rewriting, estimated duration and a focused teleprompter mode for rehearsal.",
@@ -1211,6 +1212,13 @@
     "terms": "Terms of sale",
     "privacy": "Privacy policy",
     "rights": "All rights reserved.",
-    "poweredByAi": "Powered by AI"
+    "poweredByAi": "Powered by AI",
+    "features": "Features",
+    "useCases": "Use cases",
+    "aiSpeechWriter": "AI speech writer",
+    "teleprompterMode": "Teleprompter mode",
+    "publicSpeaking": "Public speaking",
+    "sermonPreparation": "Sermon preparation",
+    "trainingPresentations": "Training sessions"
   }
 }

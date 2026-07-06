@@ -2,16 +2,33 @@ import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { buttonClassName } from "@/components/ui/Button";
-import type { SeoPageContent } from "@/modules/landing/seo-pages";
+import { getSeoPage, type SeoPageContent, type SeoPageKey } from "@/modules/landing/seo-pages";
 import { absoluteUrl, siteUrl } from "@/modules/landing/seo";
 import { getMessages } from "@/i18n/messages";
 import { localizedPath, type Locale } from "@/i18n/routing";
+import { LandingFooter } from "./landing-footer";
+
+const RELATED_KEYS: Record<SeoPageKey, SeoPageKey[]> = {
+  "ai-speech-writer": ["public-speaking", "training-presentations"],
+  "teleprompter-mode": ["public-speaking", "sermon-preparation"],
+  "public-speaking": ["ai-speech-writer", "teleprompter-mode"],
+  "sermon-preparation": ["ai-speech-writer", "teleprompter-mode"],
+  "training-presentations": ["ai-speech-writer", "teleprompter-mode"],
+};
 
 export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; page: SeoPageContent }) {
   const messages = getMessages(locale);
   const seoPages = messages.seoPages;
 
   const pageUrl = absoluteUrl(localizedPath(page.slug, locale), siteUrl);
+  const homeUrl = absoluteUrl(localizedPath("/", locale), siteUrl);
+  const isFeature = page.slug.startsWith("/features/");
+  const parentName = isFeature ? messages.navigation.features : messages.navigation.useCases;
+  const parentAnchor = isFeature ? "#features" : "#use-cases";
+  const parentUrl = absoluteUrl(localizedPath(`/${parentAnchor}`, locale), siteUrl);
+
+  const relatedPages = RELATED_KEYS[page.key].map((key) => getSeoPage(locale, key));
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -20,6 +37,14 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
         name: page.title,
         description: page.description,
         url: pageUrl
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: messages.ui.home, item: homeUrl },
+          { "@type": "ListItem", position: 2, name: parentName, item: parentUrl },
+          { "@type": "ListItem", position: 3, name: page.title, item: pageUrl }
+        ]
       },
       // Google rejette un FAQPage sans mainEntity : ne l'émettre que si la page a une FAQ.
       ...(page.faq.length > 0
@@ -103,7 +128,26 @@ export function SeoPlaceholderPage({ locale = "en", page }: { locale?: Locale; p
             </div>
           </section>
         ) : null}
+
+        <section className="mt-14">
+          <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{seoPages.relatedTitle}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedPages.map((related) => (
+              <Link
+                className="rounded-[12px] border border-line bg-surface p-4 transition hover:border-[color-mix(in_oklab,var(--accent)_40%,var(--line))] hover:bg-[color-mix(in_oklab,var(--accent)_4%,var(--surface))]"
+                href={localizedPath(related.slug, locale)}
+                key={related.key}
+              >
+                <p className="m-0 font-mono text-[9px] uppercase tracking-[.12em] text-faint">{related.eyebrow}</p>
+                <p className="m-0 mt-1 text-[14px] font-[550]">{related.title}</p>
+                <p className="m-0 mt-1 line-clamp-2 text-[13px] leading-6 text-muted">{related.description}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
       </section>
+
+      <LandingFooter locale={locale} />
     </main>
   );
 }
