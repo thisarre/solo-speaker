@@ -29,12 +29,20 @@ type TargetRect = {
 
 function readStoredProgress() {
   if (typeof window === "undefined") return 0;
-  return getOnboardingTourProgress(Number(window.localStorage.getItem(onboardingTourProgressKey) ?? 0));
+  try {
+    return getOnboardingTourProgress(Number(window.localStorage.getItem(onboardingTourProgressKey) ?? 0));
+  } catch {
+    return 0;
+  }
 }
 
 function readCompleted() {
   if (typeof window === "undefined") return true;
-  return window.localStorage.getItem(onboardingTourStorageKey) === "completed";
+  try {
+    return window.localStorage.getItem(onboardingTourStorageKey) === "completed";
+  } catch {
+    return true;
+  }
 }
 
 export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboardingTourProps) {
@@ -99,7 +107,11 @@ export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboarding
 
   useEffect(() => {
     if (!hydrated || completed) return;
-    window.localStorage.setItem(onboardingTourProgressKey, String(stepIndex));
+    try {
+      window.localStorage.setItem(onboardingTourProgressKey, String(stepIndex));
+    } catch {
+      // localStorage quota exceeded or access denied
+    }
   }, [completed, hydrated, stepIndex]);
 
   const step = onboardingTourSteps[stepIndex];
@@ -112,7 +124,11 @@ export function GuidedOnboardingTour({ enabled, latestTalkId }: GuidedOnboarding
   if (!enabled || !hydrated || completed || !step || !stepCopy) return null;
 
   function finishTour() {
-    window.localStorage.setItem(onboardingTourStorageKey, "completed");
+    try {
+      window.localStorage.setItem(onboardingTourStorageKey, "completed");
+    } catch {
+      // localStorage quota exceeded or access denied
+    }
     setCompleted(true);
   }
 

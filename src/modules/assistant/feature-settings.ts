@@ -36,13 +36,17 @@ export function readAssistantFeatureSettings(): AssistantFeatureSettings {
 }
 
 function writeAssistantFeatureSettings(settings: AssistantFeatureSettings) {
-  window.localStorage.setItem(
-    assistantFeatureSettingsKey,
-    JSON.stringify({
-      extraEnabledFeatures: uniqueFeatures(settings.extraEnabledFeatures)
-    })
-  );
-  window.dispatchEvent(new Event(assistantFeatureSettingsEvent));
+  try {
+    window.localStorage.setItem(
+      assistantFeatureSettingsKey,
+      JSON.stringify({
+        extraEnabledFeatures: uniqueFeatures(settings.extraEnabledFeatures)
+      })
+    );
+    window.dispatchEvent(new Event(assistantFeatureSettingsEvent));
+  } catch {
+    // localStorage quota exceeded or access denied
+  }
 }
 
 export function applyAssistantFeatureSettingsDefaults(defaults: AssistantFeatureSettings) {
