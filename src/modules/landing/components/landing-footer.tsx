@@ -11,12 +11,29 @@ export function LandingFooter({ locale }: { locale: Locale }) {
 
   return (
     <footer className="border-t border-line bg-panel">
-      <div className="mx-auto grid w-full max-w-[1480px] gap-10 px-5 py-12 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] md:px-8">
+      <div className="mx-auto grid w-full max-w-[1480px] gap-10 px-5 py-12 md:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))] md:px-8">
         <div>
           <Link aria-label={common.appName} href={home}>
             <Logo />
           </Link>
           <p className="m-0 mt-4 max-w-xs text-[13.5px] leading-6 text-muted">{footer.tagline}</p>
+        </div>
+
+        <div>
+          <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{footer.features}</p>
+          <ul className="m-0 mt-3 grid list-none gap-2 p-0 text-[13.5px] text-muted">
+            <li><Link className="transition hover:text-foreground" href={localizedPath("/features/ai-speech-writer", locale)}>{footer.aiSpeechWriter}</Link></li>
+            <li><Link className="transition hover:text-foreground" href={localizedPath("/features/teleprompter-mode", locale)}>{footer.teleprompterMode}</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{footer.useCases}</p>
+          <ul className="m-0 mt-3 grid list-none gap-2 p-0 text-[13.5px] text-muted">
+            <li><Link className="transition hover:text-foreground" href={localizedPath("/use-cases/public-speaking", locale)}>{footer.publicSpeaking}</Link></li>
+            <li><Link className="transition hover:text-foreground" href={localizedPath("/use-cases/sermon-preparation", locale)}>{footer.sermonPreparation}</Link></li>
+            <li><Link className="transition hover:text-foreground" href={localizedPath("/use-cases/training-presentations", locale)}>{footer.trainingPresentations}</Link></li>
+          </ul>
         </div>
 
         <div>

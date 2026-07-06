@@ -942,6 +942,7 @@
     "faqTitle": "Questions fréquentes",
     "tryTitle": "Tester le studio",
     "tryBody": "Commencez avec 5 prises de parole, sans limite de temps et sans carte bancaire : le mode prompteur, les mémos vocaux et l’assistance IA limitée.",
+    "relatedTitle": "Voir aussi",
     "sermon-preparation": {
       "audience": "les pasteurs et équipes de prédication",
       "description": "Préparez des sermons avec une structure assistée par IA, le développement des sections, la réécriture orale, la durée estimée et un mode prompteur concentré pour répéter.",
@@ -1209,6 +1210,13 @@
     "terms": "Conditions générales de vente",
     "privacy": "Politique de confidentialité",
     "rights": "Tous droits réservés.",
-    "poweredByAi": "Propulsé par IA"
+    "poweredByAi": "Propulsé par IA",
+    "features": "Fonctionnalités",
+    "useCases": "Cas d’usage",
+    "aiSpeechWriter": "Rédacteur IA",
+    "teleprompterMode": "Mode prompteur",
+    "publicSpeaking": "Prise de parole",
+    "sermonPreparation": "Préparation de sermons",
+    "trainingPresentations": "Formations"
   }
 }
