@@ -25,7 +25,7 @@ import {
   Text,
   Trash2,
   Volume2,
-  Wand2, MoreHorizontal } from "lucide-react";
+  Wand2, MoreHorizontal, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { deleteTalk, createTalkSection, deleteTalkSection, reorderTalkSections, updateTalk, updateTalkSection } from "@/modules/talks/actions";
 import { formatDuration, sectionSeconds, wordCount } from "@/lib/utils";
 import { Alert } from "@/components/ui/Alert";
@@ -161,6 +161,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
   const [deleteTalkRequested, setDeleteTalkRequested] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<EditableSection | null>(null);
   const [aiEnabled, setAiEnabled] = useStoredBoolean(aiEnabledStorageKey, true);
+  const [sectionRailCollapsed, setSectionRailCollapsed] = useStoredBoolean("editor-section-rail-collapsed", false);
   const [predictiveWritingEnabled, setPredictiveWritingEnabled] = useStoredBoolean(predictiveWritingStorageKey, false);
   const [prediction, setPrediction] = useState("");
   const [predictionContextKey, setPredictionContextKey] = useState("");
@@ -821,10 +822,23 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
 
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex min-h-0 flex-1">
-        {showSectionRail ? <aside className="hidden w-[236px] shrink-0 border-r border-border bg-background px-3 py-5 lg:block">
+        {showSectionRail && sectionRailCollapsed ? (
+          <aside className="hidden shrink-0 border-r border-border bg-background px-1.5 py-4 lg:flex lg:flex-col lg:items-center lg:gap-2">
+            <Button aria-label={editor.expandRail} onClick={() => setSectionRailCollapsed(false)} size="icon" title={editor.expandRail} type="button" variant="quiet">
+              <PanelLeftOpen className="size-4" />
+            </Button>
+            <span className="font-mono text-[10px] text-faint">{draft.sections.length}</span>
+          </aside>
+        ) : null}
+        {showSectionRail && !sectionRailCollapsed ? <aside className="hidden w-[236px] shrink-0 border-r border-border bg-background px-3 py-5 lg:block">
           <div className="mb-2 flex items-center justify-between px-2.5">
             <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{editor.plan}</p>
-            <span className="font-mono text-[10px] text-faint">{draft.sections.length}</span>
+            <span className="flex items-center gap-1 font-mono text-[10px] text-faint">
+              {draft.sections.length}
+              <button aria-label={editor.collapseRail} className="ml-1 flex size-6 items-center justify-center rounded-[6px] text-faint transition hover:bg-panel hover:text-foreground" onClick={() => setSectionRailCollapsed(true)} title={editor.collapseRail} type="button">
+                <PanelLeftClose className="size-3.5" />
+              </button>
+            </span>
           </div>
           <div className="mb-3 rounded-[10px] border border-border bg-surface p-3">
             <div className="mb-2 flex items-center justify-between gap-3">

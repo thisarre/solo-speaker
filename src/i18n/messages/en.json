@@ -406,6 +406,8 @@
     "talkTitlePlaceholder": "Talk title",
     "estimatedDuration": "Estimated duration",
     "moreActions": "More actions",
+    "collapseRail": "Collapse the plan",
+    "expandRail": "Expand the plan",
     "targetShort": "target",
     "volume": "Volume",
     "readySections": "Ready sections",
