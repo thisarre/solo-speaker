@@ -30,6 +30,8 @@ jobs:
           npx playwright test --config e2e/playwright.config.ts 2>&1 | tee "$RUNNER_TEMP/playwright.txt"
         env:
           BASE_URL: https://solospeaker.com
+          # CTA wiring + redirections logged-out uniquement — aucun paiement réel (cf. e2e/billing-*.spec.ts).
+          BILLING_E2E: "1"
       - name: Email the browser report
         if: always()
         run: node e2e/report.mjs
