@@ -1220,5 +1220,21 @@
     "publicSpeaking": "Public speaking",
     "sermonPreparation": "Sermon preparation",
     "trainingPresentations": "Training sessions"
+  },
+  "billing": {
+    "title": "Subscription",
+    "eyebrow": "Billing",
+    "description": "Manage your current plan and cancellation.",
+    "currentPlan": "Current plan",
+    "activeLabel": "Active",
+    "scheduledCancellation": "Scheduled cancellation",
+    "accessUntil": "Your access continues until {date}.",
+    "cancelButton": "Cancel subscription",
+    "cancelModalTitle": "Cancel your subscription?",
+    "cancelModalBodyScheduled": "You'll keep full access until {date}. After that, your account returns to the free plan.",
+    "cancelModalBodyImmediate": "You subscribed less than 14 days ago. Your subscription will be cancelled immediately and you'll receive a full refund.",
+    "cancelModalConfirm": "Yes, cancel",
+    "cancelModalAbort": "Keep my subscription",
+    "canceling": "Cancelling…"
   }
 }

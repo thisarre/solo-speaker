@@ -1218,5 +1218,21 @@
     "publicSpeaking": "Prise de parole",
     "sermonPreparation": "Préparation de sermons",
     "trainingPresentations": "Formations"
+  },
+  "billing": {
+    "title": "Abonnement",
+    "eyebrow": "Facturation",
+    "description": "Gérez votre offre en cours et l'annulation.",
+    "currentPlan": "Offre en cours",
+    "activeLabel": "Actif",
+    "scheduledCancellation": "Résiliation programmée",
+    "accessUntil": "Ton accès continue jusqu'au {date}.",
+    "cancelButton": "Annuler l'abonnement",
+    "cancelModalTitle": "Annuler ton abonnement ?",
+    "cancelModalBodyScheduled": "Tu garderas l'accès complet jusqu'au {date}. Ensuite, ton compte repasse sur l'offre gratuite.",
+    "cancelModalBodyImmediate": "Tu t'es abonné il y a moins de 14 jours. L'abonnement sera annulé immédiatement et tu recevras un remboursement complet.",
+    "cancelModalConfirm": "Oui, annuler",
+    "cancelModalAbort": "Garder mon abonnement",
+    "canceling": "Annulation…"
   }
 }
