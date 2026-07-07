@@ -21,6 +21,7 @@ export type AssistantTalkContext = {
 export type AssistantSectionContext = {
   heading: string;
   body: string;
+  targetDurationMin?: number;
 };
 
 export type AssistantRequest = {

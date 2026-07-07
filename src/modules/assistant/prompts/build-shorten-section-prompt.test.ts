@@ -28,3 +28,22 @@ test("shorten prompt gives the model a concrete target word count", () => {
 test("shorten target keeps very small sections usable", () => {
   assert.equal(getShortenTargetWordCount(20), 16);
 });
+
+test("expand prompt sizes the rewrite to the section target duration", async () => {
+  const { buildSectionExpandPrompt } = await import("./build-section-expand-prompt");
+  const talk = {
+    title: "Test",
+    type: "conference" as const,
+    audience: "Développeurs",
+    objective: "Convaincre",
+    targetDurationMin: 60,
+    language: "FR" as const
+  };
+
+  const sized = buildSectionExpandPrompt(talk, { heading: "Ouverture", body: "Brouillon.", targetDurationMin: 6 });
+  assert.match(sized, /Durée cible de cette section: 6 minutes/);
+  assert.match(sized, /environ 780 mots/);
+
+  const unsized = buildSectionExpandPrompt(talk, { heading: "Ouverture", body: "Brouillon." });
+  assert.doesNotMatch(unsized, /Durée cible de cette section/);
+});

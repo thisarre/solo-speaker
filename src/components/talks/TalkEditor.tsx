@@ -172,6 +172,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
   const [bibleSuggestionLoading, setBibleSuggestionLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [showVoiceSimulator, setShowVoiceSimulator] = useState(false);
+  const [developAllProgress, setDevelopAllProgress] = useState<{ current: number; total: number } | null>(null);
   const preSimulatorPresetRef = useRef<Parameters<typeof setPreset>[0] | null>(null);
   const lastSavedRef = useRef(JSON.stringify(toDraft(talk)));
   const hydratedRef = useRef(false);
@@ -452,6 +453,52 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
     closeAiPreview();
   }
 
+  async function developAllSections() {
+    const targets = draft.sections.filter((section) => !section.pending);
+    if (!targets.length || developAllProgress) return;
+
+    posthog.capture("ai_develop_all_used", { sections: targets.length, talk_type: draft.type });
+
+    try {
+      for (let index = 0; index < targets.length; index += 1) {
+        const section = targets[index];
+        setDevelopAllProgress({ current: index + 1, total: targets.length });
+
+        const result = await generateAssistantContent({
+          action: "expand-section",
+          talkId: talk.id,
+          talk: {
+            title: draft.title,
+            type: draft.type,
+            audience: draft.audience,
+            objective: "",
+            targetDurationMin: draft.targetDurationMinutes,
+            language: draft.language
+          },
+          section: {
+            heading: section.heading,
+            body: section.body,
+            targetDurationMin: section.targetDurationSec ? Math.max(1, Math.round(section.targetDurationSec / 60)) : undefined
+          }
+        });
+
+        if (result.kind !== "section") continue;
+        const heading = result.heading || section.heading || editor.untitled;
+        updateSection(section.id, { heading, body: result.body });
+        await updateTalkSection({
+          id: section.id,
+          talkId: talk.id,
+          heading,
+          body: result.body
+        });
+      }
+    } catch (developError) {
+      setError(developError instanceof Error ? developError.message : saveFailedMessage);
+    } finally {
+      setDevelopAllProgress(null);
+    }
+  }
+
   function replaceActiveSection(result: Extract<AssistantGenerateResult, { kind: "section" }>) {
     if (!activeSection) return;
 
@@ -651,6 +698,9 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             audience={draft.audience}
             className="border-0 bg-transparent p-0 shadow-none"
             durationMinutes={draft.targetDurationMinutes}
+            developAllProgress={developAllProgress}
+            hasSectionTargets={draft.sections.some((section) => Boolean(section.targetDurationSec))}
+            onDevelopAll={developAllSections}
             onDurationChange={(minutes) => setDraft((current) => ({ ...current, targetDurationMinutes: minutes }))}
             language={draft.language}
             onResult={setAssistantResult}
@@ -1117,6 +1167,9 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                     activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
                     audience={draft.audience}
                     durationMinutes={draft.targetDurationMinutes}
+                    developAllProgress={developAllProgress}
+                    hasSectionTargets={draft.sections.some((section) => Boolean(section.targetDurationSec))}
+                    onDevelopAll={developAllSections}
                     onDurationChange={(minutes) => setDraft((current) => ({ ...current, targetDurationMinutes: minutes }))}
                     language={draft.language}
                     onResult={setAssistantResult}

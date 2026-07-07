@@ -30,6 +30,9 @@ type AssistantPanelProps = {
   type: AssistantTalkContext["type"];
   audience: string;
   onDurationChange?: (minutes: number) => void;
+  developAllProgress?: { current: number; total: number } | null;
+  hasSectionTargets?: boolean;
+  onDevelopAll?: () => void;
 };
 
 export function AssistantPanel({
@@ -38,6 +41,9 @@ export function AssistantPanel({
   className,
   durationMinutes,
   onDurationChange,
+  developAllProgress = null,
+  hasSectionTargets = false,
+  onDevelopAll,
   language,
   onResult,
   talkId,
@@ -136,6 +142,14 @@ export function AssistantPanel({
         <div className="grid gap-2">
           {enabledFeatures.has("outline") ? <AssistantActionButton description={copy.outlineDescription} loading={loadingAction === "outline"} onClick={() => runAssistant("outline")}>
             {copy.outline}
+          </AssistantActionButton> : null}
+          {onDevelopAll && hasSectionTargets ? <AssistantActionButton
+            description={developAllProgress ? copy.developAllProgress.replace("{current}", String(developAllProgress.current)).replace("{total}", String(developAllProgress.total)) : copy.developAllDescription}
+            disabled={loadingAction !== null}
+            loading={developAllProgress !== null}
+            onClick={onDevelopAll}
+          >
+            {copy.developAll}
           </AssistantActionButton> : null}
           {enabledFeatures.has("expand-section") ? <AssistantActionButton description={copy.expandDescription} disabled={isSectionActionDisabled} loading={loadingAction === "expand-section"} onClick={() => runAssistant("expand-section")}>
             {copy.expand}

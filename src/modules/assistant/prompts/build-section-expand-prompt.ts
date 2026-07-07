@@ -13,6 +13,11 @@ export function buildSectionExpandPrompt(talk: AssistantTalkContext, section: As
     "Texte actuel:",
     section.body || "(section vide)",
     "Développe cette section avec une progression claire, des transitions orales et un exemple concret si utile.",
+    ...(section.targetDurationMin
+      ? [
+          `Durée cible de cette section: ${section.targetDurationMin} minute${section.targetDurationMin > 1 ? "s" : ""} à l'oral — vise environ ${section.targetDurationMin * 130} mots (±15 %).`
+        ]
+      : []),
     "Garde un ton naturel, utilisable à l'oral. N'ajoute pas de markdown décoratif."
   ].join("\n");
 }

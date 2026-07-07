@@ -101,9 +101,12 @@ function parseSection(value: unknown): AssistantSectionContext | null {
   const record = asRecord(value);
   if (!record) return null;
 
+  const targetMin = Number(record.targetDurationMin);
+
   return {
     heading: cleanString(record.heading),
-    body: cleanString(record.body)
+    body: cleanString(record.body),
+    ...(Number.isFinite(targetMin) && targetMin > 0 ? { targetDurationMin: Math.min(120, Math.round(targetMin)) } : {})
   };
 }
 
