@@ -646,7 +646,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
             audience={draft.audience}
             className="border-0 bg-transparent p-0 shadow-none"
-            durationMinutes={durationMinutes}
+            durationMinutes={talk.durationMinutes}
             language={draft.language}
             onResult={setAssistantResult}
             talkId={talk.id}
@@ -786,9 +786,9 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                 key={section.id}
                 onClick={() => setActiveSectionId(section.id)}
               >
-                <span className="flex min-w-0 items-center gap-2">
+                <span className="flex min-w-0 items-start gap-2">
                   <span className={`font-mono text-[10px] ${active ? "text-accent-ink" : "text-faint"}`}>{String(index + 1).padStart(2, "0")}</span>
-                  <span className="truncate">{section.heading || editor.untitled}</span>
+                  <span className="break-words">{section.heading || editor.untitled}</span>
                 </span>
                 <span className="flex items-center justify-between gap-2 font-mono text-[10px] text-faint">
                   <span>{sectionWordCount} {editor.words}</span>
@@ -836,7 +836,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                   <EditorStat label={editor.readySections} value={`${preparedSections}/${draft.sections.length}`} />
                   <EditorStat label={editor.activeSection} value={activeSectionIndex >= 0 ? `${activeSectionIndex + 1} · ${activeSectionWords} ${editor.words} · ${formatDuration(activeSectionDuration)}` : "-"} />
                 </div> : null}
-                {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[1fr_132px_132px_84px]">
+                {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[1fr_160px_160px_128px]">
                   <input
                     className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
                     onChange={(event) => setDraft((current) => ({ ...current, audience: event.target.value }))}
@@ -1108,7 +1108,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                   <AssistantPanel
                     activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
                     audience={draft.audience}
-                    durationMinutes={durationMinutes}
+                    durationMinutes={talk.durationMinutes}
                     language={draft.language}
                     onResult={setAssistantResult}
                     talkId={talk.id}

@@ -146,7 +146,7 @@ export function AssistantPanel({
         </div>
 
         {activeSection ? (
-          <p className="m-0 truncate font-mono text-[10.5px] text-faint">{copy.activeSection.replace("{title}", activeSection.heading || copy.untitled)}</p>
+          <p className="m-0 break-words font-mono text-[10.5px] text-faint">{copy.activeSection.replace("{title}", activeSection.heading || copy.untitled)}</p>
         ) : (
           <p className="m-0 text-[12px] leading-5 text-muted">{copy.noSection}</p>
         )}
