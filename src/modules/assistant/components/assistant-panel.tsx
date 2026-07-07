@@ -29,6 +29,7 @@ type AssistantPanelProps = {
   title: string;
   type: AssistantTalkContext["type"];
   audience: string;
+  onDurationChange?: (minutes: number) => void;
 };
 
 export function AssistantPanel({
@@ -36,6 +37,7 @@ export function AssistantPanel({
   audience,
   className,
   durationMinutes,
+  onDurationChange,
   language,
   onResult,
   talkId,
@@ -119,7 +121,11 @@ export function AssistantPanel({
               aria-label={copy.targetDurationAria}
               className="studio-input min-w-0 flex-1 bg-transparent px-3 text-foreground outline-none"
               min={1}
-              onChange={(event) => setTargetMinutes(event.target.value)}
+              onChange={(event) => {
+                setTargetMinutes(event.target.value);
+                const parsed = Math.round(Number(event.target.value));
+                if (Number.isFinite(parsed) && parsed >= 1) onDurationChange?.(parsed);
+              }}
               type="number"
               value={targetMinutes}
             />

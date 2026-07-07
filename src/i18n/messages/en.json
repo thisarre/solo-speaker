@@ -405,6 +405,7 @@
     "target": "Target",
     "talkTitlePlaceholder": "Talk title",
     "estimatedDuration": "Estimated duration",
+    "targetShort": "target",
     "volume": "Volume",
     "readySections": "Ready sections",
     "activeSection": "Active section",

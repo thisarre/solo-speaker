@@ -10,6 +10,7 @@ export type TalkSection = {
   body: string;
   position: number;
   minutes?: number;
+  targetDurationSec?: number | null;
 };
 
 export type Talk = {

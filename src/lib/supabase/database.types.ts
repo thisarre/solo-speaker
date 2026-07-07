@@ -163,6 +163,7 @@ export type Database = {
           heading: string;
           body: string;
           position: number;
+          target_duration_sec: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -172,6 +173,7 @@ export type Database = {
           heading: string;
           body?: string;
           position?: number;
+          target_duration_sec?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -181,6 +183,7 @@ export type Database = {
           heading?: string;
           body?: string;
           position?: number;
+          target_duration_sec?: number | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -33,6 +33,7 @@ export type AssistantRequest = {
 export type AssistantOutlineSection = {
   heading: string;
   body: string;
+  targetDurationSec?: number;
 };
 
 export type AssistantGenerateResult =
