@@ -43,6 +43,7 @@ type StripeSubscriptionItem = { quantity?: number; price?: StripePrice };
 type StripeSubscription = {
   id: string;
   status: string;
+  cancel_at_period_end?: boolean;
   customer?: string;
   current_period_start?: number;
   current_period_end?: number;
@@ -185,6 +186,15 @@ export async function POST(request: NextRequest) {
         { owner_id: userId, max_seats: derived.seats },
         { onConflict: "owner_id" }
       );
+    }
+
+    // When cancel_at_period_end is set, mark the DB status as "canceling" so the UI can show the badge.
+    // Stripe keeps status "active" until the period ends, so we track this ourselves.
+    if (type === "customer.subscription.updated" && subscription.cancel_at_period_end) {
+      await admin
+        .from("subscriptions")
+        .update({ status: "canceling", updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
     }
 
     // Confirmation email only on the INITIAL subscription (created), never on every update/renewal.
