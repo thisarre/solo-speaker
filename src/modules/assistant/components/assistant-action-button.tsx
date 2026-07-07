@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { useI18n } from "@/i18n/client";
 
 type AssistantActionButtonProps = {
+  emphasized?: boolean;
   children: ReactNode;
   description?: string;
   disabled?: boolean;
@@ -12,12 +13,12 @@ type AssistantActionButtonProps = {
   onClick: () => void;
 };
 
-export function AssistantActionButton({ children, description, disabled, loading, onClick }: AssistantActionButtonProps) {
+export function AssistantActionButton({ children, description, disabled, emphasized = false, loading, onClick }: AssistantActionButtonProps) {
   const { messages } = useI18n();
 
   return (
     <Button
-      className="h-auto w-full cursor-pointer justify-start px-3 py-2 text-left transition duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_8px_22px_rgba(20,20,25,.08)] active:translate-y-0 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+      className={`h-auto w-full cursor-pointer justify-start px-3 py-2 text-left transition duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_8px_22px_rgba(20,20,25,.08)] active:translate-y-0 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none ${emphasized ? "border-[color-mix(in_oklab,var(--accent)_45%,var(--line))] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))]" : ""}`}
       disabled={disabled || loading}
       onClick={onClick}
       size="sm"

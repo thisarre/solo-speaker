@@ -130,6 +130,14 @@ a {
   display: block;
 }
 
+.solo-logo[data-icon-only="true"] .solo-logo-icon {
+  display: block !important;
+}
+
+.solo-logo[data-icon-only="true"] .solo-logo-full {
+  display: none !important;
+}
+
 .solo-logo[data-compact="true"] .solo-logo-icon {
   display: block;
 }

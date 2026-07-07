@@ -149,6 +149,11 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
   const totalWords = useMemo(() => draft.sections.reduce((total, section) => total + wordCount(`${section.heading} ${section.body}`), 0), [draft.sections]);
   const activeSection = draft.sections.find((section) => section.id === activeSectionId) ?? draft.sections[0];
   const preparedSections = draft.sections.filter((section) => section.heading.trim() && wordCount(section.body) >= 25).length;
+  const hasSectionTargets = draft.sections.some((section) => Boolean(section.targetDurationSec));
+  const developAllHint =
+    hasSectionTargets && totalSeconds < draft.targetDurationMinutes * 36
+      ? editor.developAllHint.replace("{current}", formatDuration(totalSeconds)).replace("{target}", String(draft.targetDurationMinutes))
+      : undefined;
   const preparationPercent = draft.sections.length ? Math.round((preparedSections / draft.sections.length) * 100) : 0;
   const focusModeEnabled = editorLayout.focusModeEnabled;
   const showPanel = useCallback((panelId: Parameters<typeof isEditorPanelVisible>[1]) => isEditorPanelVisible(editorLayout, panelId), [editorLayout]);
@@ -658,7 +663,8 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             className="border-0 bg-transparent p-0 shadow-none"
             durationMinutes={draft.targetDurationMinutes}
             developAllProgress={developAllProgress}
-            hasSectionTargets={draft.sections.some((section) => Boolean(section.targetDurationSec))}
+            developAllHint={developAllHint}
+            hasSectionTargets={hasSectionTargets}
             onDevelopAll={developAllSections}
             onDurationChange={(minutes) => setDraft((current) => ({ ...current, targetDurationMinutes: minutes }))}
             language={draft.language}
@@ -1164,7 +1170,8 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                     audience={draft.audience}
                     durationMinutes={draft.targetDurationMinutes}
                     developAllProgress={developAllProgress}
-                    hasSectionTargets={draft.sections.some((section) => Boolean(section.targetDurationSec))}
+                    developAllHint={developAllHint}
+                    hasSectionTargets={hasSectionTargets}
                     onDevelopAll={developAllSections}
                     onDurationChange={(minutes) => setDraft((current) => ({ ...current, targetDurationMinutes: minutes }))}
                     language={draft.language}

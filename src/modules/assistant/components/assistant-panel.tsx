@@ -31,6 +31,7 @@ type AssistantPanelProps = {
   audience: string;
   onDurationChange?: (minutes: number) => void;
   developAllProgress?: { current: number; total: number } | null;
+  developAllHint?: string;
   hasSectionTargets?: boolean;
   onDevelopAll?: () => void;
 };
@@ -42,6 +43,7 @@ export function AssistantPanel({
   durationMinutes,
   onDurationChange,
   developAllProgress = null,
+  developAllHint,
   hasSectionTargets = false,
   onDevelopAll,
   language,
@@ -144,8 +146,9 @@ export function AssistantPanel({
             {copy.outline}
           </AssistantActionButton> : null}
           {onDevelopAll && hasSectionTargets ? <AssistantActionButton
-            description={developAllProgress ? copy.developAllProgress.replace("{current}", String(developAllProgress.current)).replace("{total}", String(developAllProgress.total)) : copy.developAllDescription}
+            description={developAllProgress ? copy.developAllProgress.replace("{current}", String(developAllProgress.current)).replace("{total}", String(developAllProgress.total)) : developAllHint ?? copy.developAllDescription}
             disabled={loadingAction !== null}
+            emphasized={Boolean(developAllHint) && !developAllProgress}
             loading={developAllProgress !== null}
             onClick={onDevelopAll}
           >

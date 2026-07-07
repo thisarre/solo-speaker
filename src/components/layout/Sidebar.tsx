@@ -47,9 +47,11 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
     <>
       <aside className={`hidden w-[64px] shrink-0 flex-col border-r border-line bg-panel px-2 pb-4 pt-[18px] md:flex ${collapsed ? "" : "lg:w-[228px] lg:px-3"}`}>
         <div className={`flex justify-center pb-4 ${collapsed ? "" : "lg:block lg:px-2"}`}>
-          <Logo compact />
+          {collapsed ? <Logo iconOnly /> : <Logo compact />}
         </div>
-        <CommandPalette locale={locale} talkCount={talkCount} />
+        <div className={collapsed ? "hidden" : ""}>
+          <CommandPalette locale={locale} talkCount={talkCount} />
+        </div>
         <p className={`hidden px-2 pb-2 font-mono text-[10px] uppercase tracking-[.12em] text-faint ${collapsed ? "" : "lg:block"}`}>{messages.navigation.studio}</p>
         <nav className="flex flex-col gap-0.5">
           {navItems.map((item) => {
@@ -80,7 +82,9 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
           <HelpCircle className="size-4" />
           {messages.common.help}
         </a>
-        <RestartGuidedOnboardingButton />
+        <div className={collapsed ? "hidden" : ""}>
+          <RestartGuidedOnboardingButton />
+        </div>
         {trialReminder ? (
           <Link
             className={`mt-3 hidden rounded-[10px] border border-[color-mix(in_oklab,var(--accent)_18%,var(--line))] bg-surface p-3 text-left transition hover:border-[color-mix(in_oklab,var(--accent)_36%,var(--line))] hover:bg-panel ${collapsed ? "" : "lg:block"}`}
