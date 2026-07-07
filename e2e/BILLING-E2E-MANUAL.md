@@ -30,12 +30,12 @@ not gated — they are a human runbook.
 4. In the DB, confirm a `subscriptions` row for the user exists with:
    `plan = pro`, `cadence = monthly`, `seats = 1`, `status = active`.
 
-### 2. Team checkout with seats=3 → seats persisted
+### 2. Team checkout with seats=5 (minimum) → seats persisted
 
-1. Signed in, go to `/fr/pricing`, on **Équipe** keep the seat stepper at **3**,
+1. Signed in, go to `/fr/pricing`, on **Équipe** keep the seat stepper at **5** (the minimum),
    click **Démarrer avec mon équipe**.
 2. Complete the test checkout.
-3. Confirm `subscriptions.seats = 3` and the team's `teams.max_seats = 3`.
+3. Confirm `subscriptions.seats = 5` and the team's `teams.max_seats = 5`.
 
 ### 3. Studio → Pro upgrade → proration
 

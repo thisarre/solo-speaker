@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { MIN_TEAM_SEATS } from "../src/modules/billing/stripe-prices";
 
 // Billing spine E2E — only run against a deploy that has the new 3-tier pricing.
 // Enable with BILLING_E2E=1 (e.g. against a preview/staging BASE_URL) after deploy.
@@ -68,8 +69,8 @@ test("universal trial CTA sits above the grid, has 'sans carte bancaire', and li
 test("Team seat selector defaults to 3 and cannot go below 3; CTA href carries seats= and plan=team_", async ({ page }) => {
   await page.goto("/fr/pricing", { waitUntil: "networkidle" });
 
-  // Seat stepper value (aria-live region renders "3 Sièges").
-  const seatValue = page.getByText(/^3\s+Sièges$/);
+  // Seat stepper value (aria-live region renders "<MIN_TEAM_SEATS> Sièges").
+  const seatValue = page.getByText(new RegExp(`^${MIN_TEAM_SEATS}\\s+Sièges$`));
   await expect(seatValue).toBeVisible();
 
   // Clicking decrease must NOT drop below the 3-seat minimum (control is disabled).
@@ -77,12 +78,12 @@ test("Team seat selector defaults to 3 and cannot go below 3; CTA href carries s
   await expect(decrease).toBeDisabled();
   // Force the click even though disabled, to prove the value is unchanged.
   await decrease.click({ force: true }).catch(() => undefined);
-  await expect(page.getByText(/^3\s+Sièges$/)).toBeVisible();
+  await expect(page.getByText(new RegExp(`^${MIN_TEAM_SEATS}\\s+Sièges$`))).toBeVisible();
 
   // Team CTA href encodes the team plan and the seat count.
   const teamCta = page.locator('a[href*="plan=team_"][href*="seats="]').first();
   await expect(teamCta).toBeVisible();
   const href = await teamCta.getAttribute("href");
   expect(href).toContain("plan=team_");
-  expect(href).toContain("seats=3");
+  expect(href).toContain(`seats=${MIN_TEAM_SEATS}`);
 });

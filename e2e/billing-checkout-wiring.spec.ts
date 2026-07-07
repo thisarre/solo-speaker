@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { MIN_TEAM_SEATS } from "../src/modules/billing/stripe-prices";
 
 // Billing spine E2E — only run against a deploy that has the new 3-tier pricing.
 // Enable with BILLING_E2E=1 (e.g. against a preview/staging BASE_URL) after deploy.
@@ -18,12 +19,12 @@ test("each paid tier CTA points at /api/billing/checkout with the right plan (se
   expect(await studioCta.getAttribute("href")).not.toContain("seats=");
   expect(await proCta.getAttribute("href")).not.toContain("seats=");
 
-  // Team: carries the seat count (defaults to 3).
+  // Team: carries the seat count (defaults to MIN_TEAM_SEATS).
   const teamCta = page.locator('a[href*="/api/billing/checkout"][href*="plan=team_"]').first();
   await expect(teamCta).toBeVisible();
   const teamHref = await teamCta.getAttribute("href");
   expect(teamHref).toContain("plan=team_");
-  expect(teamHref).toContain("seats=3");
+  expect(teamHref).toContain(`seats=${MIN_TEAM_SEATS}`);
 });
 
 test("logged-out checkout for a valid plan redirects to /signup carrying that plan", async ({ page }) => {
@@ -41,7 +42,7 @@ test("explicit seats below the minimum is rejected with error=invalid-seats", as
   expect(page.url()).toContain("error=invalid-seats");
 });
 
-test("Team checkout with NO seats param is old-link-compatible (defaults to 3, no invalid-seats)", async ({ page }) => {
+test("Team checkout with NO seats param is old-link-compatible (defaults to the minimum, no invalid-seats)", async ({ page }) => {
   // Old live Team links have no seats param → must default to 3, never error.
   // Logged out, that means landing on /signup with the team plan, NOT an invalid-seats error.
   await page.goto("/api/billing/checkout?plan=team_yearly&locale=fr", { waitUntil: "domcontentloaded" });
