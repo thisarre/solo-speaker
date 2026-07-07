@@ -25,8 +25,7 @@ import {
   Text,
   Trash2,
   Volume2,
-  Wand2
-} from "lucide-react";
+  Wand2, MoreHorizontal } from "lucide-react";
 import { deleteTalk, createTalkSection, deleteTalkSection, reorderTalkSections, updateTalk, updateTalkSection } from "@/modules/talks/actions";
 import { formatDuration, sectionSeconds, wordCount } from "@/lib/utils";
 import { Alert } from "@/components/ui/Alert";
@@ -49,6 +48,7 @@ import { EditorLayoutSwitcher } from "@/modules/studio-layout/components/editor-
 import { FocusModeToggle } from "@/modules/studio-layout/components/focus-mode-toggle";
 import { isEditorPanelVisible } from "@/modules/studio-layout/editor-layout-presets";
 import { useEditorLayout } from "@/modules/studio-layout/layout-storage";
+import { DetailsMenu } from "@/components/ui/DetailsMenu";
 import { useI18n } from "@/i18n/client";
 import { localizedPath } from "@/i18n/routing";
 import { talkLanguageLabels, talkStatusLabels, talkTypeLabels, type Talk, type TalkLanguage, type TalkSection, type TalkStatus, type TalkType } from "@/types/talk";
@@ -739,70 +739,86 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
           <b className="truncate font-[550] text-foreground">{draft.title || editor.untitled}</b>
         </div>
         <div className="ml-auto flex shrink-0 items-center justify-end gap-2 whitespace-nowrap">
-          <div className="hidden items-center gap-2 lg:flex">
-            <EditorLayoutSwitcher onReset={resetEditorLayout} onSelect={setPreset} value={editorLayout.preset} />
+          <div className="hidden lg:block">
             <FocusModeToggle enabled={focusModeEnabled} onToggle={() => setFocusMode(!focusModeEnabled)} />
           </div>
-          <div className={`hidden items-center gap-2 rounded-[8px] border border-border bg-surface px-2.5 py-1.5 font-mono text-[10.5px] text-faint lg:flex ${showMetadataBar ? "" : "lg:hidden"}`}>
-            <Clock3 className="size-3.5" />
-            <span>{formatDuration(totalSeconds)}</span>
-          </div>
-          {showAssistantPanel ? (
-            <div className="hidden md:block">
-              <Button
-                aria-pressed={aiEnabled}
-                className={aiEnabled ? "" : "text-faint"}
-                leftIcon={<Bot />}
-                onClick={() => {
-                  setAiEnabled((current) => !current);
-                  setPrediction("");
-                  setPredictionError("");
-                  setBibleSuggestion(null);
-                  setBibleSuggestionError("");
-                }}
-                size="sm"
-                type="button"
-                variant={aiEnabled ? "ghost" : "quiet"}
-              >
-                {aiEnabled ? editor.aiActive : editor.aiOff}
-              </Button>
-            </div>
-          ) : null}
           <div className="hidden sm:block">
             <AutosaveStatus state={isPending && status !== "saving" ? "saving" : status} />
           </div>
-          {showExportActions ? <ExportPdfButton talkId={talk.id} title={draft.title} /> : null}
-          {showExportActions ? <ShareButton canShare={canShare} shareToken={talk.shareToken} talkId={talk.id} /> : null}
-          {showExportActions ? <TranslateButton canTranslate={canTranslate} sourceLang={draft.language} talkId={talk.id} /> : null}
-          {showSpeakingActions ? (
-            <Button
-              leftIcon={<Volume2 />}
-              onClick={() => {
-                if (showVoiceSimulator) {
-                  setShowVoiceSimulator(false);
-                  if (preSimulatorPresetRef.current) {
-                    setPreset(preSimulatorPresetRef.current);
-                    preSimulatorPresetRef.current = null;
-                  }
-                } else {
-                  preSimulatorPresetRef.current = editorLayout.preset;
-                  setPreset("rehearsal");
-                  setShowVoiceSimulator(true);
-                }
-              }}
-              size="sm"
-              type="button"
-              variant={showVoiceSimulator ? "accent" : "ghost"}
-            >
-              {editor.simulateVoice}
-            </Button>
-          ) : null}
           {showSpeakingActions ? <Link href={localizedPath(`/talks/${talk.id}/speak`, locale)} data-tour="prompter-action" onClick={() => posthog.capture("speaking_session_started", { talk_type: draft.type, talk_language: draft.language, section_count: draft.sections.length, total_words: totalWords })}>
             <Button leftIcon={<Mic2 />} size="sm" type="button" variant="primary">{editor.present}</Button>
           </Link> : null}
-          {!focusModeEnabled ? <Button aria-label={editor.delete} onClick={() => setDeleteTalkRequested(true)} size="icon" type="button" variant="quiet">
-            <Trash2 className="size-4" />
-          </Button> : null}
+          <DetailsMenu className="relative">
+            <summary aria-label={editor.moreActions} className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-[8px] border border-border bg-surface text-muted transition hover:text-foreground [&::-webkit-details-marker]:hidden" title={editor.moreActions}>
+              <MoreHorizontal className="size-4" />
+            </summary>
+            <div className="absolute right-0 top-[calc(100%+8px)] z-40 grid w-64 gap-1 rounded-[12px] border border-border bg-surface p-2 shadow-[0_16px_40px_rgba(0,0,0,.4)]">
+              <div className="px-1 py-1" data-menu-keep-open="true">
+                <EditorLayoutSwitcher onReset={resetEditorLayout} onSelect={setPreset} value={editorLayout.preset} />
+              </div>
+              <div className="flex items-center justify-between gap-2 px-1 font-mono text-[10.5px] text-faint">
+                <span className="flex items-center gap-1.5"><Clock3 className="size-3.5" />{editor.estimatedDuration}</span>
+                <span>{formatDuration(totalSeconds)}</span>
+              </div>
+              {showAssistantPanel ? (
+                <Button
+                  aria-pressed={aiEnabled}
+                  className={`justify-start ${aiEnabled ? "" : "text-faint"}`}
+                  leftIcon={<Bot />}
+                  onClick={() => {
+                    setAiEnabled((current) => !current);
+                    setPrediction("");
+                    setPredictionError("");
+                    setBibleSuggestion(null);
+                    setBibleSuggestionError("");
+                  }}
+                  size="sm"
+                  type="button"
+                  variant={aiEnabled ? "ghost" : "quiet"}
+                >
+                  {aiEnabled ? editor.aiActive : editor.aiOff}
+                </Button>
+              ) : null}
+              {showSpeakingActions ? (
+                <Button
+                  className="justify-start"
+                  leftIcon={<Volume2 />}
+                  onClick={() => {
+                    if (showVoiceSimulator) {
+                      setShowVoiceSimulator(false);
+                      if (preSimulatorPresetRef.current) {
+                        setPreset(preSimulatorPresetRef.current);
+                        preSimulatorPresetRef.current = null;
+                      }
+                    } else {
+                      preSimulatorPresetRef.current = editorLayout.preset;
+                      setPreset("rehearsal");
+                      setShowVoiceSimulator(true);
+                    }
+                  }}
+                  size="sm"
+                  type="button"
+                  variant={showVoiceSimulator ? "accent" : "ghost"}
+                >
+                  {editor.simulateVoice}
+                </Button>
+              ) : null}
+              {showExportActions ? (
+                <div className="grid gap-1 border-t border-line2 pt-1.5">
+                  <ExportPdfButton talkId={talk.id} title={draft.title} />
+                  <ShareButton canShare={canShare} shareToken={talk.shareToken} talkId={talk.id} />
+                  <TranslateButton canTranslate={canTranslate} sourceLang={draft.language} talkId={talk.id} />
+                </div>
+              ) : null}
+              {!focusModeEnabled ? (
+                <div className="border-t border-line2 pt-1.5">
+                  <Button className="w-full justify-start text-red-500" leftIcon={<Trash2 />} onClick={() => setDeleteTalkRequested(true)} size="sm" type="button" variant="quiet">
+                    {editor.delete}
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </DetailsMenu>
         </div>
       </header>
       ) : null}
