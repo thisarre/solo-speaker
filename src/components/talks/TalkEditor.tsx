@@ -2,7 +2,7 @@
 
 import posthog from "posthog-js";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -49,6 +49,7 @@ import { FocusModeToggle } from "@/modules/studio-layout/components/focus-mode-t
 import { isEditorPanelVisible } from "@/modules/studio-layout/editor-layout-presets";
 import { useEditorLayout } from "@/modules/studio-layout/layout-storage";
 import { DetailsMenu } from "@/components/ui/DetailsMenu";
+import { useStoredBoolean } from "@/lib/use-stored-boolean";
 import { useI18n } from "@/i18n/client";
 import { localizedPath } from "@/i18n/routing";
 import { talkLanguageLabels, talkStatusLabels, talkTypeLabels, type Talk, type TalkLanguage, type TalkSection, type TalkStatus, type TalkType } from "@/types/talk";
@@ -76,8 +77,6 @@ type PendingAssistantResult = {
 const talkTypes = Object.keys(talkTypeLabels) as TalkType[];
 const talkStatuses = Object.keys(talkStatusLabels) as TalkStatus[];
 const languages = Object.keys(talkLanguageLabels) as TalkLanguage[];
-type BooleanStateAction = boolean | ((current: boolean) => boolean);
-
 function toDraft(talk: Talk): TalkDraft {
   return {
     title: talk.title,
@@ -105,44 +104,6 @@ function bibleSuggestionKeyForSection(section: EditableSection) {
   return `${section.id}:${lastSentence.slice(-360)}`;
 }
 
-function getStoredBoolean(key: string, fallback: boolean) {
-  if (typeof window === "undefined") return fallback;
-  const value = window.localStorage.getItem(key);
-  return value === null ? fallback : value === "true";
-}
-
-function useStoredBoolean(key: string, fallback: boolean) {
-  const value = useSyncExternalStore(
-    (onStoreChange) => {
-      const eventName = `solo-speaker-storage:${key}`;
-      const handleStorage = (event: StorageEvent) => {
-        if (event.key === key) onStoreChange();
-      };
-
-      window.addEventListener("storage", handleStorage);
-      window.addEventListener(eventName, onStoreChange);
-
-      return () => {
-        window.removeEventListener("storage", handleStorage);
-        window.removeEventListener(eventName, onStoreChange);
-      };
-    },
-    () => getStoredBoolean(key, fallback),
-    () => fallback
-  );
-
-  const setValue = useCallback(
-    (next: BooleanStateAction) => {
-      const current = getStoredBoolean(key, fallback);
-      const resolved = typeof next === "function" ? next(current) : next;
-      window.localStorage.setItem(key, String(resolved));
-      window.dispatchEvent(new Event(`solo-speaker-storage:${key}`));
-    },
-    [fallback, key]
-  );
-
-  return [value, setValue] as const;
-}
 
 export function TalkEditor({ canShare = false, canTranslate = false, talk }: { canShare?: boolean; canTranslate?: boolean; talk: Talk }) {
   const { locale, messages } = useI18n();

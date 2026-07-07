@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart2, CalendarClock, FileText, HelpCircle, Home, LogOut, MoreHorizontal, Plus, Settings } from "lucide-react";
+import { BarChart2, CalendarClock, FileText, HelpCircle, Home, LogOut, MoreHorizontal, PanelLeftClose, PanelLeftOpen, Plus, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { CommandPalette } from "./CommandPalette";
 import { LogoutButton } from "./LogoutButton";
@@ -12,6 +12,7 @@ import { RestartGuidedOnboardingButton } from "@/modules/onboarding/components/r
 import type { TrialReminder } from "@/modules/billing/trial";
 import { getMessages } from "@/i18n/messages";
 import { getPathWithoutLocale, localizedPath, type Locale } from "@/i18n/routing";
+import { useStoredBoolean } from "@/lib/use-stored-boolean";
 
 function getNavItems(talkCount: number, locale: Locale) {
   const navigation = getMessages(locale).navigation;
@@ -36,6 +37,7 @@ function isActiveNavItem(pathname: string, href: string) {
 
 export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale: Locale; talkCount: number; trialReminder: TrialReminder | null; userName: string }) {
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useStoredBoolean("app-sidebar-collapsed", false);
   const messages = getMessages(locale);
   const navItems = getNavItems(talkCount, locale);
   const helpHref = "mailto:support@solo-speaker.app?subject=Besoin%20d'aide%20Solo%20Speaker";
@@ -43,12 +45,12 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
 
   return (
     <>
-      <aside className="hidden w-[64px] shrink-0 flex-col border-r border-line bg-panel px-2 pb-4 pt-[18px] md:flex lg:w-[228px] lg:px-3">
-        <div className="flex justify-center pb-4 lg:block lg:px-2">
+      <aside className={`hidden w-[64px] shrink-0 flex-col border-r border-line bg-panel px-2 pb-4 pt-[18px] md:flex ${collapsed ? "" : "lg:w-[228px] lg:px-3"}`}>
+        <div className={`flex justify-center pb-4 ${collapsed ? "" : "lg:block lg:px-2"}`}>
           <Logo compact />
         </div>
         <CommandPalette locale={locale} talkCount={talkCount} />
-        <p className="hidden px-2 pb-2 font-mono text-[10px] uppercase tracking-[.12em] text-faint lg:block">{messages.navigation.studio}</p>
+        <p className={`hidden px-2 pb-2 font-mono text-[10px] uppercase tracking-[.12em] text-faint ${collapsed ? "" : "lg:block"}`}>{messages.navigation.studio}</p>
         <nav className="flex flex-col gap-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -56,7 +58,7 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
             return (
               <Link
                 aria-label={item.label}
-                className={`flex h-9 items-center justify-center gap-2.5 rounded-lg px-2 text-[13.5px] transition lg:justify-start lg:py-2 ${
+                className={`flex h-9 items-center justify-center gap-2.5 rounded-lg px-2 text-[13.5px] transition ${collapsed ? "" : "lg:justify-start lg:py-2"} ${
                   active ? "bg-surface font-medium text-ink shadow-[0_1px_2px_rgba(20,20,25,.05)]" : "text-mute hover:bg-surface/70 hover:text-ink"
                 }`}
                 data-tour={item.href === "/settings" ? "settings" : item.href === "/talks/new" ? "create-talk" : undefined}
@@ -65,14 +67,14 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
                 title={item.label}
               >
                 <Icon className="size-4 opacity-85" />
-                <span className="hidden lg:inline">{item.label}</span>
-                {item.count ? <span className="ml-auto hidden font-mono text-[11px] text-faint lg:inline">{item.count}</span> : null}
+                <span className={`hidden ${collapsed ? "" : "lg:inline"}`}>{item.label}</span>
+                {item.count ? <span className={`ml-auto hidden font-mono text-[11px] text-faint ${collapsed ? "" : "lg:inline"}`}>{item.count}</span> : null}
               </Link>
             );
           })}
         </nav>
         <a
-          className="mt-3 hidden h-9 items-center justify-center gap-2.5 rounded-lg border border-line bg-surface px-2 text-[13px] font-medium text-mute transition hover:text-ink lg:flex"
+          className={`mt-3 hidden h-9 items-center justify-center gap-2.5 rounded-lg border border-line bg-surface px-2 text-[13px] font-medium text-mute transition hover:text-ink ${collapsed ? "" : "lg:flex"}`}
           href={helpHref}
         >
           <HelpCircle className="size-4" />
@@ -81,7 +83,7 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
         <RestartGuidedOnboardingButton />
         {trialReminder ? (
           <Link
-            className="mt-3 hidden rounded-[10px] border border-[color-mix(in_oklab,var(--accent)_18%,var(--line))] bg-surface p-3 text-left transition hover:border-[color-mix(in_oklab,var(--accent)_36%,var(--line))] hover:bg-panel lg:block"
+            className={`mt-3 hidden rounded-[10px] border border-[color-mix(in_oklab,var(--accent)_18%,var(--line))] bg-surface p-3 text-left transition hover:border-[color-mix(in_oklab,var(--accent)_36%,var(--line))] hover:bg-panel ${collapsed ? "" : "lg:block"}`}
             href={trialHref}
           >
             <span className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[.12em] text-faint">
@@ -92,27 +94,37 @@ export function Sidebar({ locale, talkCount, trialReminder, userName }: { locale
             <span className="mt-2 block text-[12px] font-[550] text-accent-ink">{trialReminder.ctaLabel}</span>
           </Link>
         ) : null}
+        <button
+          aria-label={collapsed ? messages.navigation.expandSidebar : messages.navigation.collapseSidebar}
+          className="mt-3 hidden h-8 items-center justify-center gap-2 rounded-lg px-2 text-[12px] text-mute transition hover:bg-surface/70 hover:text-ink lg:flex"
+          onClick={() => setCollapsed((current) => !current)}
+          title={collapsed ? messages.navigation.expandSidebar : messages.navigation.collapseSidebar}
+          type="button"
+        >
+          {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+          <span className={`hidden ${collapsed ? "" : "lg:inline"}`}>{messages.navigation.collapseSidebar}</span>
+        </button>
         <div className="mt-auto border-t border-line pt-3">
-          <div className="mb-3 flex justify-center lg:justify-start lg:px-2">
+          <div className={`mb-3 justify-center ${collapsed ? "hidden" : "flex lg:justify-start lg:px-2"}`}>
             <ThemeToggle className="w-[92px] lg:w-[96px]" />
           </div>
-          <div className="mb-3 flex justify-center lg:justify-start lg:px-2">
+          <div className={`mb-3 justify-center ${collapsed ? "hidden" : "flex lg:justify-start lg:px-2"}`}>
             <LanguageSwitcher currentLocale={locale} />
           </div>
-          <div className="flex items-center justify-center gap-2.5 lg:justify-start lg:px-2">
+          <div className={`flex items-center justify-center gap-2.5 ${collapsed ? "" : "lg:justify-start lg:px-2"}`}>
             <div className="flex size-6 items-center justify-center rounded-full bg-accent-bg text-[11px] font-semibold text-accent-ink">
               {userName.slice(0, 2).toUpperCase()}
             </div>
-            <div className="hidden min-w-0 lg:block">
+            <div className={`hidden min-w-0 ${collapsed ? "" : "lg:block"}`}>
               <p className="m-0 truncate text-[12.5px] font-medium">{userName}</p>
               <p className="m-0 truncate text-[11px] text-faint">{messages.navigation.studioOwner}</p>
             </div>
-            <LogoutButton ariaLabel={messages.common.logout} className="ml-auto hidden size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink lg:flex">
+            <LogoutButton ariaLabel={messages.common.logout} className={`ml-auto hidden size-7 items-center justify-center rounded-md text-faint transition hover:bg-surface hover:text-ink ${collapsed ? "" : "lg:flex"}`}>
               <LogOut className="size-4" />
             </LogoutButton>
           </div>
         </div>
-        <div className="mt-2 flex justify-center lg:hidden">
+        <div className={`mt-2 justify-center ${collapsed ? "flex" : "flex lg:hidden"}`}>
           <LogoutButton ariaLabel={messages.common.logout} className="flex size-8 items-center justify-center rounded-[8px] text-faint transition hover:bg-surface hover:text-ink">
             <LogOut className="size-4" />
           </LogoutButton>

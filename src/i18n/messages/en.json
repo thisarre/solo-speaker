@@ -25,7 +25,9 @@
     "newTalk": "New talk",
     "settings": "Settings",
     "analytics": "Analytics",
-    "studioOwner": "Studio owner"
+    "studioOwner": "Studio owner",
+    "collapseSidebar": "Collapse the menu",
+    "expandSidebar": "Expand the menu"
   },
   "landing": {
     "heroBadge": "From idea to stage",

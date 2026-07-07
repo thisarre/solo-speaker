@@ -25,7 +25,9 @@
     "newTalk": "Nouvelle prise de parole",
     "settings": "Réglages",
     "analytics": "Analytiques",
-    "studioOwner": "Propriétaire du studio"
+    "studioOwner": "Propriétaire du studio",
+    "collapseSidebar": "Replier le menu",
+    "expandSidebar": "Déplier le menu"
   },
   "landing": {
     "heroBadge": "De l’idée à la scène",
