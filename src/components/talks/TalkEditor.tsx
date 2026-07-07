@@ -684,7 +684,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
           </Button>
         </Link>
         <div className="flex min-w-0 items-center gap-2 text-[13px] text-muted">
-          <span>{messages.navigation.talks}</span>
+          <span className="hidden whitespace-nowrap sm:inline">{messages.navigation.talks}</span>
           <span className="text-faint">/</span>
           <b className="truncate font-[550] text-foreground">{draft.title || editor.untitled}</b>
         </div>
@@ -844,7 +844,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                   <EditorStat label={editor.readySections} value={`${preparedSections}/${draft.sections.length}`} />
                   <EditorStat label={editor.activeSection} value={activeSectionIndex >= 0 ? `${activeSectionIndex + 1} · ${activeSectionWords} ${editor.words} · ${formatDuration(activeSectionDuration)}` : "-"} />
                 </div> : null}
-                {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[1fr_160px_160px_128px]">
+                {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[minmax(0,2fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)]">
                   <input
                     className="studio-input h-9 rounded-[8px] border border-border bg-background px-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)]"
                     onChange={(event) => setDraft((current) => ({ ...current, audience: event.target.value }))}
@@ -1204,7 +1204,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
 
 function EditorStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[10px] border border-line2 bg-background px-3 py-2">
+    <div className="min-w-0 rounded-[10px] border border-line2 bg-background px-3 py-2">
       <p className="m-0 font-mono text-[10px] uppercase tracking-[.1em] text-faint">{label}</p>
       <p className="m-0 mt-1 truncate text-[13px] font-semibold text-foreground">{value}</p>
     </div>
