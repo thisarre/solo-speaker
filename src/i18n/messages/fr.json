@@ -403,6 +403,7 @@
     "target": "Objectif",
     "talkTitlePlaceholder": "Titre de la prise de parole",
     "estimatedDuration": "Durée estimée",
+    "targetShort": "cible",
     "volume": "Volume",
     "readySections": "Sections prêtes",
     "activeSection": "Section active",

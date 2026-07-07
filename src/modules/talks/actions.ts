@@ -220,15 +220,23 @@ export async function updateTalkSection(input: {
   talkId: string;
   heading: string;
   body: string;
+  targetDurationSec?: number | null;
 }) {
   const { supabase } = await assertOwnTalk(input.talkId);
   const heading = cleanText(input.heading) || copy.editor.untitled;
+  const targetDurationSec =
+    input.targetDurationSec === undefined
+      ? undefined
+      : input.targetDurationSec === null
+        ? null
+        : Math.max(1, Math.round(Number(input.targetDurationSec) || 0)) || null;
 
   const { error } = await supabase
     .from("talk_sections")
     .update({
       heading,
       body: typeof input.body === "string" ? input.body : "",
+      ...(targetDurationSec !== undefined ? { target_duration_sec: targetDurationSec } : {}),
       updated_at: new Date().toISOString()
     })
     .eq("id", input.id)

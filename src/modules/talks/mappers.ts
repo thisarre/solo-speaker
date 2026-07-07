@@ -21,7 +21,8 @@ export function mapSection(row: SectionRow): TalkSection {
     id: row.id,
     heading: row.heading,
     body: row.body,
-    position: row.position
+    position: row.position,
+    targetDurationSec: row.target_duration_sec
   };
 }
 

@@ -64,6 +64,7 @@ type TalkDraft = {
   status: TalkStatus;
   audience: string;
   language: TalkLanguage;
+  targetDurationMinutes: number;
   sections: EditableSection[];
 };
 
@@ -84,6 +85,7 @@ function toDraft(talk: Talk): TalkDraft {
     status: talk.status,
     audience: talk.audience,
     language: talk.language,
+    targetDurationMinutes: Math.max(1, Math.round(talk.durationMinutes || 10)),
     sections: talk.sections
   };
 }
@@ -224,7 +226,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
           type: draft.type,
           status: draft.status,
           audience: draft.audience,
-          durationMinutes,
+          durationMinutes: draft.targetDurationMinutes,
           language: draft.language
         });
 
@@ -250,7 +252,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
     }, 850);
 
     return () => window.clearTimeout(timeoutId);
-  }, [draft, durationMinutes, saveFailedMessage, talk.id]);
+  }, [draft, saveFailedMessage, talk.id]);
 
   useEffect(() => {
     if (!aiEnabled || !predictiveWritingEnabled || !activeSection || activeSection.pending) {
@@ -283,7 +285,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             type: draft.type,
             audience: draft.audience,
             objective: "",
-            targetDurationMin: durationMinutes,
+            targetDurationMin: draft.targetDurationMinutes,
             language: draft.language
           },
           section: {
@@ -302,7 +304,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
     }, 1100);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeSection, aiEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, predictionFailedMessage, predictiveWritingEnabled, talk.id]);
+  }, [activeSection, aiEnabled, draft.audience, draft.language, draft.targetDurationMinutes, draft.title, draft.type, predictionFailedMessage, predictiveWritingEnabled, talk.id]);
 
   useEffect(() => {
     if (!aiEnabled || !bibleSuggestionsEnabled || !activeSection || activeSection.pending) {
@@ -335,7 +337,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             type: draft.type,
             audience: draft.audience,
             objective: "",
-            targetDurationMin: durationMinutes,
+            targetDurationMin: draft.targetDurationMinutes,
             language: draft.language
           },
           section: {
@@ -354,7 +356,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
     }, 1500);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeSection, aiEnabled, bibleSuggestionFailedMessage, bibleSuggestionsEnabled, draft.audience, draft.language, draft.title, draft.type, durationMinutes, talk.id]);
+  }, [activeSection, aiEnabled, bibleSuggestionFailedMessage, bibleSuggestionsEnabled, draft.audience, draft.language, draft.targetDurationMinutes, draft.title, draft.type, talk.id]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -473,6 +475,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
       heading: section.heading || editor.untitled,
       body: section.body,
       position: draft.sections.length + index,
+      targetDurationSec: section.targetDurationSec ?? null,
       pending: true
     }));
 
@@ -493,9 +496,10 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             id: created.id,
             talkId: talk.id,
             heading: section.heading,
-            body: section.body
+            body: section.body,
+            targetDurationSec: section.targetDurationSec ?? null
           });
-          createdSections.push({ ...created, heading: section.heading, body: section.body });
+          createdSections.push({ ...created, heading: section.heading, body: section.body, targetDurationSec: section.targetDurationSec ?? null });
         }
 
         setDraft((current) => {
@@ -646,7 +650,8 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
             audience={draft.audience}
             className="border-0 bg-transparent p-0 shadow-none"
-            durationMinutes={talk.durationMinutes}
+            durationMinutes={draft.targetDurationMinutes}
+            onDurationChange={(minutes) => setDraft((current) => ({ ...current, targetDurationMinutes: minutes }))}
             language={draft.language}
             onResult={setAssistantResult}
             talkId={talk.id}
@@ -792,7 +797,10 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                 </span>
                 <span className="flex items-center justify-between gap-2 font-mono text-[10px] text-faint">
                   <span>{sectionWordCount} {editor.words}</span>
-                  <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
+                  <span>
+                    {formatDuration(sectionSeconds(section.heading, section.body))}
+                    {section.targetDurationSec ? ` / ${formatDuration(section.targetDurationSec)}` : ""}
+                  </span>
                   <span className={`size-1.5 rounded-full ${sectionReady ? "bg-ok" : "bg-line"}`} />
                 </span>
               </a>
@@ -831,7 +839,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                   value={draft.title}
                 />
                 {showMetadataBar ? <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                  <EditorStat label={editor.estimatedDuration} value={formatDuration(totalSeconds)} />
+                  <EditorStat label={editor.estimatedDuration} value={`${formatDuration(totalSeconds)} / ${editor.targetShort} ${draft.targetDurationMinutes} min`} />
                   <EditorStat label={editor.volume} value={`${totalWords} ${editor.words}`} />
                   <EditorStat label={editor.readySections} value={`${preparedSections}/${draft.sections.length}`} />
                   <EditorStat label={editor.activeSection} value={activeSectionIndex >= 0 ? `${activeSectionIndex + 1} · ${activeSectionWords} ${editor.words} · ${formatDuration(activeSectionDuration)}` : "-"} />
@@ -1108,7 +1116,8 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                   <AssistantPanel
                     activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}
                     audience={draft.audience}
-                    durationMinutes={talk.durationMinutes}
+                    durationMinutes={draft.targetDurationMinutes}
+                    onDurationChange={(minutes) => setDraft((current) => ({ ...current, targetDurationMinutes: minutes }))}
                     language={draft.language}
                     onResult={setAssistantResult}
                     talkId={talk.id}

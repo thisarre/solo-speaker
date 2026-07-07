@@ -18,9 +18,10 @@ export function buildTalkOutlinePrompt(talk: AssistantTalkContext) {
     `Audience: ${talk.audience || "Non précisée"}.`,
     `Objectif: ${talk.objective || "Clarifier et rendre le message utile pour l'audience"}.`,
     `Durée cible: ${talk.targetDurationMin} minutes.`,
-    `Adapte le nombre de sections à la durée (environ 1 section par 5 à 10 minutes, soit entre ${Math.max(1, Math.floor(talk.targetDurationMin / 10))} et ${Math.ceil(talk.targetDurationMin / 5)} sections).`,
-    "Indique la durée cible de chaque section dans son titre, sous la forme « Titre — X min ».",
-    "La somme des durées des sections doit être égale à la durée totale à ±10 %.",
+    `Adapte le nombre de sections à la durée (environ 1 section par 5 à 10 minutes, soit entre ${Math.max(1, Math.floor(talk.targetDurationMin / 10))} et ${Math.max(2, Math.ceil(talk.targetDurationMin / 5))} sections).`,
+    "Renseigne pour chaque section le champ targetDurationMin : sa durée cible en minutes (nombre entier ≥ 1).",
+    "La somme des targetDurationMin doit être égale à la durée cible totale à ±10 %.",
+    "N'écris jamais la durée dans le titre d'une section.",
     "Retourne uniquement des sections courtes, prêtes à être modifiées dans un éditeur.",
     "Chaque section doit contenir un titre et un brouillon oral de 2 à 5 phrases.",
     "N'ajoute pas de markdown décoratif."

@@ -148,9 +148,10 @@ function schemaFor(action: AssistantAction) {
             additionalProperties: false,
             properties: {
               heading: { type: "string" },
-              body: { type: "string" }
+              body: { type: "string" },
+              targetDurationMin: { type: "number" }
             },
-            required: ["heading", "body"]
+            required: ["heading", "body", "targetDurationMin"]
           }
         }
       },
@@ -233,7 +234,10 @@ function parseModelResult(action: AssistantAction, text: string): AssistantGener
         if (!sectionRecord) return null;
         const heading = cleanString(sectionRecord.heading);
         const body = cleanString(sectionRecord.body);
-        return heading || body ? { heading: heading || "Sans titre", body } : null;
+        if (!heading && !body) return null;
+        const targetMin = Number(sectionRecord.targetDurationMin);
+        const targetDurationSec = Number.isFinite(targetMin) && targetMin > 0 ? Math.round(Math.min(120, targetMin) * 60) : undefined;
+        return { heading: heading || "Sans titre", body, targetDurationSec };
       })
       .filter((section): section is AssistantOutlineSection => Boolean(section));
 
