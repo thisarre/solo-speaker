@@ -25,7 +25,7 @@ import {
   Text,
   Trash2,
   Volume2,
-  Wand2, MoreHorizontal, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+  Wand2, MoreHorizontal, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { deleteTalk, createTalkSection, deleteTalkSection, reorderTalkSections, updateTalk, updateTalkSection } from "@/modules/talks/actions";
 import { formatDuration, sectionSeconds, wordCount } from "@/lib/utils";
 import { Alert } from "@/components/ui/Alert";
@@ -162,6 +162,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
   const [sectionToDelete, setSectionToDelete] = useState<EditableSection | null>(null);
   const [aiEnabled, setAiEnabled] = useStoredBoolean(aiEnabledStorageKey, true);
   const [sectionRailCollapsed, setSectionRailCollapsed] = useStoredBoolean("editor-section-rail-collapsed", false);
+  const [assistantRailCollapsed, setAssistantRailCollapsed] = useStoredBoolean("editor-assistant-rail-collapsed", false);
   const [predictiveWritingEnabled, setPredictiveWritingEnabled] = useStoredBoolean(predictiveWritingStorageKey, false);
   const [prediction, setPrediction] = useState("");
   const [predictionContextKey, setPredictionContextKey] = useState("");
@@ -830,7 +831,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             <span className="font-mono text-[10px] text-faint">{draft.sections.length}</span>
           </aside>
         ) : null}
-        {showSectionRail && !sectionRailCollapsed ? <aside className="hidden w-[236px] shrink-0 border-r border-border bg-background px-3 py-5 lg:block">
+        {showSectionRail && !sectionRailCollapsed ? <aside className="hidden w-[236px] shrink-0 overflow-y-auto border-r border-border bg-background px-3 py-5 lg:block">
           <div className="mb-2 flex items-center justify-between px-2.5">
             <p className="m-0 font-mono text-[10px] uppercase tracking-[.12em] text-faint">{editor.plan}</p>
             <span className="flex items-center gap-1 font-mono text-[10px] text-faint">
@@ -1183,7 +1184,19 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             </div> : null}
             </article>
 
-            {showAssistantPanel ? <aside className="hidden w-[286px] shrink-0 self-start xl:sticky xl:top-6 xl:block" data-tour="editor-assistant">
+            {showAssistantPanel && assistantRailCollapsed ? (
+              <aside className="hidden shrink-0 self-start xl:sticky xl:top-6 xl:block">
+                <Button aria-label={editor.expandAssistant} onClick={() => setAssistantRailCollapsed(false)} size="icon" title={editor.expandAssistant} type="button" variant="quiet">
+                  <PanelRightOpen className="size-4" />
+                </Button>
+              </aside>
+            ) : null}
+            {showAssistantPanel && !assistantRailCollapsed ? <aside className="hidden w-[286px] shrink-0 self-start xl:sticky xl:top-6 xl:block" data-tour="editor-assistant">
+                <div className="mb-2 flex justify-end">
+                  <button aria-label={editor.collapseAssistant} className="flex size-6 items-center justify-center rounded-[6px] text-faint transition hover:bg-panel hover:text-foreground" onClick={() => setAssistantRailCollapsed(true)} title={editor.collapseAssistant} type="button">
+                    <PanelRightClose className="size-3.5" />
+                  </button>
+                </div>
                 {aiEnabled ? (
                   <AssistantPanel
                     activeSection={activeSection ? { heading: activeSection.heading, body: activeSection.body } : undefined}

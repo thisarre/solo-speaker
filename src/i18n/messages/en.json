@@ -407,6 +407,8 @@
     "estimatedDuration": "Estimated duration",
     "moreActions": "More actions",
     "collapseRail": "Collapse the plan",
+    "collapseAssistant": "Collapse the assistant",
+    "expandAssistant": "Expand the assistant",
     "expandRail": "Expand the plan",
     "targetShort": "target",
     "volume": "Volume",

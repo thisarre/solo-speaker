@@ -405,6 +405,8 @@
     "estimatedDuration": "Durée estimée",
     "moreActions": "Plus d’actions",
     "collapseRail": "Replier le plan",
+    "collapseAssistant": "Replier l’assistant",
+    "expandAssistant": "Déplier l’assistant",
     "expandRail": "Déplier le plan",
     "targetShort": "cible",
     "volume": "Volume",
