@@ -184,11 +184,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
 
   const totalSeconds = useMemo(() => estimateTotalSeconds(draft.sections), [draft.sections]);
   const totalWords = useMemo(() => draft.sections.reduce((total, section) => total + wordCount(`${section.heading} ${section.body}`), 0), [draft.sections]);
-  const durationMinutes = Math.max(1, Math.ceil(totalSeconds / 60));
   const activeSection = draft.sections.find((section) => section.id === activeSectionId) ?? draft.sections[0];
-  const activeSectionIndex = activeSection ? draft.sections.findIndex((section) => section.id === activeSection.id) : -1;
-  const activeSectionWords = activeSection ? wordCount(activeSection.body) : 0;
-  const activeSectionDuration = activeSection ? sectionSeconds(activeSection.heading, activeSection.body) : 0;
   const preparedSections = draft.sections.filter((section) => section.heading.trim() && wordCount(section.body) >= 25).length;
   const preparationPercent = draft.sections.length ? Math.round((preparedSections / draft.sections.length) * 100) : 0;
   const focusModeEnabled = editorLayout.focusModeEnabled;
@@ -727,7 +723,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
   return (
     <div className={`flex h-screen min-w-0 flex-col bg-background text-foreground ${focusModeEnabled ? "fixed inset-0 z-40" : ""}`}>
       {showTalkHeader ? (
-      <header className={`flex min-w-0 shrink-0 items-center gap-3 overflow-hidden border-b border-border bg-background px-4 ${focusModeEnabled ? "h-[56px]" : "h-[52px]"}`}>
+      <header className={`flex min-w-0 shrink-0 items-center gap-3 border-b border-border bg-background px-4 ${focusModeEnabled ? "h-[56px]" : "h-[52px]"}`}>
         <Link href={localizedPath("/talks", locale)}>
           <Button aria-label={editor.back} size="icon" variant="quiet">
             <ArrowLeft className="size-4" />
@@ -883,7 +879,7 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             </div>
             <div className="flex justify-between gap-2">
               <span>{editor.target}</span>
-              <span>{durationMinutes} min</span>
+              <span>{draft.targetDurationMinutes} min</span>
             </div>
           </div>
         </aside> : null}
@@ -904,11 +900,13 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                   placeholder={editor.talkTitlePlaceholder}
                   value={draft.title}
                 />
-                {showMetadataBar ? <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                  <EditorStat label={editor.estimatedDuration} value={`${formatDuration(totalSeconds)} / ${editor.targetShort} ${draft.targetDurationMinutes} min`} />
-                  <EditorStat label={editor.volume} value={`${totalWords} ${editor.words}`} />
-                  <EditorStat label={editor.readySections} value={`${preparedSections}/${draft.sections.length}`} />
-                  <EditorStat label={editor.activeSection} value={activeSectionIndex >= 0 ? `${activeSectionIndex + 1} · ${activeSectionWords} ${editor.words} · ${formatDuration(activeSectionDuration)}` : "-"} />
+                {showMetadataBar ? <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] text-faint">
+                  <Clock3 className="size-3.5" />
+                  <span className="text-foreground">{formatDuration(totalSeconds)} / {draft.targetDurationMinutes} min</span>
+                  <span className="h-3 w-px bg-line" />
+                  <span>{totalWords} {editor.words}</span>
+                  <span className="h-3 w-px bg-line" />
+                  <span>{preparedSections}/{draft.sections.length} {editor.readySections.toLowerCase()}</span>
                 </div> : null}
                 {showMetadataBar ? <div className="grid gap-2.5 md:grid-cols-[minmax(0,2fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,0.9fr)]">
                   <input
@@ -1084,11 +1082,6 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                           ¶
                         </Button>
                       </div>
-                      <div className="flex items-center gap-2 border-t border-line2 pt-1.5 font-mono text-[10.5px] text-faint sm:border-t-0 sm:pt-0">
-                        <span>{wordCount(section.body)} {editor.words}</span>
-                        <span className="h-3 w-px bg-line" />
-                        <span>{formatDuration(sectionSeconds(section.heading, section.body))}</span>
-                      </div>
                     </div> : null}
                     <textarea
                       className={`studio-textarea w-full resize-y rounded-[10px] border border-border bg-background px-4 py-3 text-foreground outline-none placeholder:text-faint focus:border-accent focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_16%,transparent)] ${focusModeEnabled ? "min-h-64 leading-8" : "min-h-48 leading-7"}`}
@@ -1170,7 +1163,6 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
             {showStatusBar ? <div className="sticky bottom-4 mt-6 flex justify-end">
               <div className="flex items-center gap-2 rounded-[10px] border border-border bg-surface px-3 py-2 shadow-studio">
                 <Save className="size-4 text-faint" />
-                <span className="font-mono text-[10.5px] text-faint">{durationMinutes} min</span>
                 <AutosaveStatus state={status} />
                 {focusModeEnabled ? <Button onClick={() => setFocusMode(false)} size="sm" type="button" variant="ghost">{editor.quitFocus}</Button> : null}
               </div>
@@ -1271,11 +1263,3 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
   );
 }
 
-function EditorStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-[10px] border border-line2 bg-background px-3 py-2">
-      <p className="m-0 font-mono text-[10px] uppercase tracking-[.1em] text-faint">{label}</p>
-      <p className="m-0 mt-1 truncate text-[13px] font-semibold text-foreground">{value}</p>
-    </div>
-  );
-}
