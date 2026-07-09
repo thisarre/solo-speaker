@@ -924,7 +924,7 @@
     "generic": "Something went wrong. Try again in a moment.",
     "googleLoginFailed": "Google login failed.",
     "emailPasswordRequired": "Email and password are required.",
-    "signupPending": "Request received for {email}. If the account was just created, confirm the email you received. If no email arrives, check Supabase Auth/SMTP configuration or use forgot password.",
+    "signupPending": "Account created! Check your inbox ({email}) and click the confirmation link.",
     "forgotEmailRequired": "Enter the email for the account to recover.",
     "forgotEmailSent": "If an account exists for this email, a reset link has just been sent.",
     "passwordConfirmationRequired": "Enter and confirm the new password.",

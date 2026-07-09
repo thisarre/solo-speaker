@@ -922,7 +922,7 @@
     "generic": "Une erreur est survenue. Réessaie dans un instant.",
     "googleLoginFailed": "Connexion Google impossible.",
     "emailPasswordRequired": "Email et mot de passe requis.",
-    "signupPending": "Demande reçue pour {email}. Si le compte vient d’être créé, confirme l’email reçu. Si aucun email n’arrive, vérifie la configuration Auth/Smtp Supabase ou utilise mot de passe oublié.",
+    "signupPending": "Compte créé ! Vérifie ta boîte mail ({email}) et clique sur le lien de confirmation.",
     "forgotEmailRequired": "Renseigne l’email du compte à récupérer.",
     "forgotEmailSent": "Si un compte existe pour cet email, un lien de réinitialisation vient d’être envoyé.",
     "passwordConfirmationRequired": "Renseigne et confirme le nouveau mot de passe.",
