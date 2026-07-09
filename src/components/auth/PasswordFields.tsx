@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { PasswordToggleInput } from "@/components/auth/PasswordToggleInput";
 import { getMessages } from "@/i18n/messages";
 import type { Locale } from "@/i18n/routing";
 import { getPasswordPolicyError, PASSWORD_MIN_LENGTH, scorePassword, type PasswordStrength } from "@/modules/auth/password-strength";
@@ -48,7 +48,7 @@ export function PasswordFields({ locale, submitIdleLabel, submitPendingLabel, pa
   return (
     <>
       <div className="grid gap-1.5">
-        <Input
+        <PasswordToggleInput
           autoComplete="new-password"
           id="password"
           label={passwordLabel ?? auth.password}
@@ -57,7 +57,6 @@ export function PasswordFields({ locale, submitIdleLabel, submitPendingLabel, pa
           onChange={(event) => setPassword(event.target.value)}
           placeholder="••••••••"
           required
-          type="password"
           value={password}
         />
         {password.length > 0 ? (
@@ -75,7 +74,7 @@ export function PasswordFields({ locale, submitIdleLabel, submitPendingLabel, pa
 
       {withConfirm ? (
         <div className="grid gap-1.5">
-          <Input
+          <PasswordToggleInput
             autoComplete="new-password"
             id="confirmPassword"
             label={auth.confirmPassword}
@@ -84,7 +83,6 @@ export function PasswordFields({ locale, submitIdleLabel, submitPendingLabel, pa
             onChange={(event) => setConfirm(event.target.value)}
             placeholder="••••••••"
             required
-            type="password"
             value={confirm}
           />
           {confirmTouched ? (
