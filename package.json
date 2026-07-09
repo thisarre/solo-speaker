@@ -10,7 +10,8 @@
     "lint": "eslint . --max-warnings=0",
     "test": "tsx --test src/components/**/*.test.ts src/i18n/*.test.ts src/lib/**/*.test.ts src/modules/assistant/*.test.ts src/modules/assistant/prompts/*.test.ts src/modules/auth/*.test.ts src/modules/billing/*.test.ts src/modules/help/*.test.ts src/modules/landing/*.test.ts src/modules/onboarding/*.test.ts src/modules/pricing/*.test.ts src/modules/settings/*.test.ts src/modules/speaking-mode/voice/*.test.ts src/modules/speaking-mode/voice/providers/*.test.ts src/modules/speaking-mode/lib/*.test.ts src/modules/progression/utils/*.test.ts src/modules/studio-layout/*.test.ts src/modules/monitoring/*.test.ts src/modules/telegram/*.test.ts src/modules/slack/*.test.ts",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "apply-email-templates": "tsx scripts/apply-email-templates.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
