@@ -3,6 +3,7 @@ import { Alert } from "@/components/ui/Alert";
 import { AuthSubmitButton } from "@/components/auth/AuthSubmitButton";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { PasswordFields } from "@/components/auth/PasswordFields";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { Input } from "@/components/ui/Input";
 import { Logo } from "@/components/ui/Logo";
 import { getMessages } from "@/i18n/messages";
@@ -49,7 +50,7 @@ export function LoginFormPage({ locale, next, params }: { locale: Locale; next?:
         <form action={login} className="grid gap-3.5">
           <input name="next" type="hidden" value={safeNext} />
           <Input id="email" label={auth.email} name="email" placeholder={auth.emailPlaceholder} required type="email" />
-          <Input id="password" label={auth.password} minLength={8} name="password" placeholder="••••••••" required type="password" />
+          <PasswordInput id="password" label={auth.password} minLength={8} name="password" placeholder="••••••••" required />
           <div className="-mt-1 flex justify-end">
             <Link className="text-[12px] font-medium text-mute hover:text-ink" href={localizedPath("/forgot-password", locale)}>
               {auth.forgotPassword}
