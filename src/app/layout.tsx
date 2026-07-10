@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { AuthTracker } from "@/components/analytics/AuthTracker";
 import { defaultOgImages, siteUrl } from "@/modules/landing/seo";
 import { defaultLocale, isLocale } from "@/i18n/routing";
 import "./globals.css";
@@ -47,7 +48,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AuthTracker />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
