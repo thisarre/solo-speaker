@@ -2,7 +2,18 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { buildAuthCallbackRedirect } from "@/modules/auth/security";
+import { getPostHogClient } from "@/lib/posthog-server";
 import type { Database } from "@/lib/supabase/database.types";
+
+const INTERNAL_EMAILS = new Set(["thi.sarre@gmail.com"]);
+const INTERNAL_DOMAINS = new Set(["solospeaker.fr"]);
+
+function isInternalEmail(email: string | undefined): boolean {
+  if (!email) return false;
+  if (INTERNAL_EMAILS.has(email)) return true;
+  const domain = email.split("@")[1];
+  return Boolean(domain && INTERNAL_DOMAINS.has(domain));
+}
 
 type CapturedCookie = { name: string; value: string; options?: Record<string, unknown> };
 
@@ -66,6 +77,16 @@ export async function GET(request: Request) {
         [...captured.keys()].some((k) => k.includes("auth-token") && !k.includes("code-verifier"));
       for (let i = 0; i < 80 && !hasAuthCookie(); i++) {
         await new Promise((resolve) => setTimeout(resolve, 25));
+      }
+
+      const { user } = data;
+      if (user && user.created_at && user.last_sign_in_at && !isInternalEmail(user.email)) {
+        const diffMs = Math.abs(new Date(user.last_sign_in_at).getTime() - new Date(user.created_at).getTime());
+        if (diffMs < 2 * 60 * 1000) {
+          const providers = user.app_metadata?.providers;
+          const method = Array.isArray(providers) && providers.includes("google") ? "google" : "email";
+          getPostHogClient().capture({ distinctId: user.id, event: "user_signed_up_server", properties: { method } });
+        }
       }
 
       const response = NextResponse.redirect(buildAuthCallbackRedirect(base, next));

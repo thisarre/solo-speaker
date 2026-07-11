@@ -9,6 +9,9 @@ export function getPostHogClient(): PostHog {
       flushAt: 1,
       flushInterval: 0
     });
+    if (process.env.NODE_ENV === "development") {
+      void posthogClient.disable();
+    }
   }
   return posthogClient;
 }
