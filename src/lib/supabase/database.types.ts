@@ -240,6 +240,7 @@ export type Database = {
           started_at: string;
           duration_seconds: number;
           estimated_seconds: number | null;
+          ai_summary: string | null;
           created_at: string;
         };
         Insert: {
@@ -250,6 +251,7 @@ export type Database = {
           started_at: string;
           duration_seconds: number;
           estimated_seconds?: number | null;
+          ai_summary?: string | null;
           created_at?: string;
         };
         Update: {
@@ -260,6 +262,7 @@ export type Database = {
           started_at?: string;
           duration_seconds?: number;
           estimated_seconds?: number | null;
+          ai_summary?: string | null;
           created_at?: string;
         };
         Relationships: [];

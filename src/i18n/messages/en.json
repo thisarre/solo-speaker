@@ -1248,5 +1248,19 @@
     "cancelModalConfirm": "Yes, cancel",
     "cancelModalAbort": "Keep my subscription",
     "canceling": "Cancelling…"
+  },
+  "rehearsalReport": {
+    "title": "Rehearsal report",
+    "duration": "Duration",
+    "durationTarget": "target",
+    "pace": "Pace",
+    "paceUnit": "words/min",
+    "coverage": "Script covered",
+    "aiSummary": "AI analysis",
+    "aiLoading": "Generating analysis…",
+    "aiError": "Analysis could not be generated.",
+    "retry": "Try again",
+    "history": "View history",
+    "na": "N/A"
   }
 }

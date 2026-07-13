@@ -64,29 +64,54 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
   const readingAnchorRatio = readingPositionRatios[readingPosition];
   const classicAutoScrollEnabled = isPlaying && !voiceFollowActive;
 
+  const buildSessionPayload = useCallback(
+    (elapsed: number) =>
+      JSON.stringify({
+        talkId: talk.id,
+        durationSeconds: elapsed,
+        estimatedSeconds: totalSeconds > 0 ? totalSeconds : null,
+        startedAt: new Date(Date.now() - elapsed * 1000).toISOString()
+      }),
+    [talk.id, totalSeconds]
+  );
+
   const sendSession = useCallback(() => {
     if (sessionSentRef.current) return;
     const elapsed = elapsedSecondsRef.current;
     if (elapsed < 30) return;
     sessionSentRef.current = true;
-    const payload = JSON.stringify({
-      talkId: talk.id,
-      durationSeconds: elapsed,
-      estimatedSeconds: totalSeconds > 0 ? totalSeconds : null,
-      startedAt: new Date(Date.now() - elapsed * 1000).toISOString()
-    });
+    const payload = buildSessionPayload(elapsed);
     const url = "/api/analytics/rehearsal/sessions";
     if (navigator.sendBeacon) {
       navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
     } else {
       fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
     }
-  }, [talk.id, totalSeconds]);
+  }, [buildSessionPayload]);
 
-  const handleExit = useCallback(() => {
-    sendSession();
-    router.push(localizedPath(`/talks/${talk.id}`, locale));
-  }, [router, talk.id, locale, sendSession]);
+  const handleExit = useCallback(async () => {
+    let dest = localizedPath(`/talks/${talk.id}`, locale);
+    if (!sessionSentRef.current) {
+      const elapsed = elapsedSecondsRef.current;
+      if (elapsed >= 30) {
+        sessionSentRef.current = true;
+        try {
+          const res = await fetch("/api/analytics/rehearsal/sessions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: buildSessionPayload(elapsed)
+          });
+          const data = (await res.json()) as { ok?: boolean; sessionId?: string };
+          if (data.sessionId) {
+            dest = localizedPath(`/talks/${talk.id}/speak/report?session=${data.sessionId}`, locale);
+          }
+        } catch {
+          // fall through to regular exit
+        }
+      }
+    }
+    router.push(dest);
+  }, [router, talk.id, locale, buildSessionPayload]);
 
   useEffect(() => {
     const onVisibilityChange = () => { if (document.visibilityState === "hidden") sendSession(); };

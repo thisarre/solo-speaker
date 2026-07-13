@@ -60,18 +60,22 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient();
-  const { error: insertError } = await admin.from("rehearsal_sessions").insert({
-    user_id: user.id,
-    talk_id: talkId,
-    talk_title: talkTitle,
-    started_at: startedAt,
-    duration_seconds: durationSeconds,
-    estimated_seconds: estimatedSeconds
-  });
+  const { data: insertData, error: insertError } = await admin
+    .from("rehearsal_sessions")
+    .insert({
+      user_id: user.id,
+      talk_id: talkId,
+      talk_title: talkTitle,
+      started_at: startedAt,
+      duration_seconds: durationSeconds,
+      estimated_seconds: estimatedSeconds
+    })
+    .select("id")
+    .single();
   if (insertError) {
     console.error("[rehearsal/sessions] insert failed:", insertError.message);
     return NextResponse.json({ error: "Failed to record session." }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, sessionId: insertData.id });
 }

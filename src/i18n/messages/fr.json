@@ -1246,5 +1246,19 @@
     "cancelModalConfirm": "Oui, annuler",
     "cancelModalAbort": "Garder mon abonnement",
     "canceling": "Annulation…"
+  },
+  "rehearsalReport": {
+    "title": "Rapport de répétition",
+    "duration": "Durée",
+    "durationTarget": "cible",
+    "pace": "Rythme",
+    "paceUnit": "mots/min",
+    "coverage": "Script couvert",
+    "aiSummary": "Analyse",
+    "aiLoading": "Génération de l'analyse…",
+    "aiError": "L'analyse n'a pas pu être générée.",
+    "retry": "Réessayer",
+    "history": "Voir l'historique",
+    "na": "N/A"
   }
 }
