@@ -914,6 +914,20 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                   </select>
                 </div> : null}
                 {showEditorToolbar ? <div className="flex flex-wrap items-center gap-2 border-t border-line2 pt-3">
+                  {focusModeEnabled ? (
+                    /* Audit 2026-07-18, reco UX-4 : en mode focus, le panneau qui
+                       porte la durée disparaissait — on garde un signal compact
+                       estimation / cible, en alerte en cas de dépassement. */
+                    <span
+                      className={`inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-border bg-background px-2.5 font-mono text-[11px] ${
+                        totalSeconds > draft.targetDurationMinutes * 60 ? "text-danger" : "text-muted"
+                      }`}
+                      title={editor.estimatedDuration}
+                    >
+                      <Clock3 className="size-3.5" />
+                      {formatDuration(totalSeconds)} / {draft.targetDurationMinutes} min
+                    </span>
+                  ) : null}
                   {!showAssistantPanel && !focusModeEnabled ? (
                     <Button leftIcon={<Wand2 />} onClick={() => setPreset("ai")} size="sm" type="button" variant="ghost">{editor.aiMode}</Button>
                   ) : null}

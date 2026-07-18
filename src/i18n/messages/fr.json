@@ -513,7 +513,8 @@
     "backToTalks": "Retour aux prises de parole",
     "audienceMissing": "Audience à préciser",
     "open": "Ouvrir",
-    "sectionCount": "{count} section{plural}"
+    "sectionCount": "{count} section{plural}",
+    "durationLabel": "Durée cible (minutes)"
   },
   "editor": {
     "title": "Éditeur",

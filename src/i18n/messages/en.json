@@ -513,7 +513,8 @@
     "backToTalks": "Back to talks",
     "audienceMissing": "Audience to define",
     "open": "Open",
-    "sectionCount": "{count} section{plural}"
+    "sectionCount": "{count} section{plural}",
+    "durationLabel": "Target duration (minutes)"
   },
   "editor": {
     "title": "Editor",

@@ -116,6 +116,7 @@ export function NewTalkForm({ error, guide }: NewTalkFormProps) {
         placeholder={guide?.briefPlaceholder ?? talks.briefPlaceholder}
         value={brief}
       />
+      <Input defaultValue="10" id="durationMinutes" label={talks.durationLabel} max={600} min={1} name="durationMinutes" type="number" />
       <VoiceMemoRecorder
         language={voiceMemoLanguageForLocale(locale)}
         onInsert={(text) => {

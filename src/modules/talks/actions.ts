@@ -10,6 +10,7 @@ import { can } from "@/modules/billing/capabilities";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { getMessages } from "@/i18n/messages";
 import { localizedPath } from "@/i18n/routing";
+import { parseTalkDurationMinutes } from "@/lib/talk-duration";
 import { resolveServerLocale } from "@/i18n/server";
 import type { TalkLanguage, TalkStatus, TalkType } from "@/types/talk";
 
@@ -58,6 +59,8 @@ export async function createTalk(formData: FormData) {
   const typeValue = getString(formData, "type") as TalkType;
   const audience = getString(formData, "audience");
   const brief = getString(formData, "brief");
+  // Audit 2026-07-18, reco UX-4 : la durée cible se fixe DÈS la création.
+  const durationMinutes = parseTalkDurationMinutes(getString(formData, "durationMinutes"));
 
   if (!title || !talkTypes.has(typeValue)) {
     redirect(localizedPath(`/talks/new?error=${encodeURIComponent(copy.errors.titleAndTypeRequired)}`, locale));
@@ -85,7 +88,7 @@ export async function createTalk(formData: FormData) {
       title,
       type: typeValue,
       audience,
-      duration_minutes: 10,
+      duration_minutes: durationMinutes,
       // Même classe que l'audit UX-1 (mémo vocal) : la langue du talk suivait
       // un "FR" codé en dur côté serveur, quel que soit le locale de session.
       language: locale === "en" ? "EN" : "FR"
