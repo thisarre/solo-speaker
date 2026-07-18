@@ -86,3 +86,40 @@ test("buildRateLimitHeaders includes retry metadata when blocked", () => {
   assert.equal(headers["RateLimit-Reset"], "1782554460");
   assert.equal(headers["Retry-After"], "30");
 });
+
+test("translate route is rate-limited with a tight default (audit 2026-07-18, Technique-1)", () => {
+  const previousLimit = process.env.AI_RATE_LIMIT_TRANSLATE;
+  const previousWindow = process.env.AI_RATE_LIMIT_WINDOW_SECONDS;
+  delete process.env.AI_RATE_LIMIT_TRANSLATE;
+  delete process.env.AI_RATE_LIMIT_WINDOW_SECONDS;
+
+  try {
+    // Défaut serré (traduction complète d'un talk = payload volumineux).
+    assert.deepEqual(getAiRateLimitRule("translate"), { limit: 4, windowSeconds: 60 });
+
+    // Surchargable par env, comme les autres routes.
+    process.env.AI_RATE_LIMIT_TRANSLATE = "2";
+    assert.equal(getAiRateLimitRule("translate").limit, 2);
+  } finally {
+    if (previousLimit === undefined) delete process.env.AI_RATE_LIMIT_TRANSLATE;
+    else process.env.AI_RATE_LIMIT_TRANSLATE = previousLimit;
+    if (previousWindow === undefined) delete process.env.AI_RATE_LIMIT_WINDOW_SECONDS;
+    else process.env.AI_RATE_LIMIT_WINDOW_SECONDS = previousWindow;
+  }
+});
+
+test("translate API route wires consumeAiRateLimit before calling OpenAI (regression guard, Technique-1)", async () => {
+  // Garde de régression : l'oubli d'origine venait de l'absence de garde-fou
+  // centralisé (audit, reco Technique-4). Tant qu'un wrapper unique n'existe
+  // pas, ce test vérifie le CÂBLAGE réel de la route dans les sources.
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(
+    new URL("../app/api/talks/[talkId]/translate/route.ts", import.meta.url),
+    "utf-8"
+  );
+  assert.match(source, /consumeAiRateLimit/);
+  assert.match(source, /route:\s*"translate"/);
+  const rateLimitIndex = source.indexOf("consumeAiRateLimit(");
+  const fetchIndex = source.indexOf("fetch(openAiUrl");
+  assert.ok(rateLimitIndex > 0 && fetchIndex > 0 && rateLimitIndex < fetchIndex, "le rate-limit doit précéder l'appel OpenAI");
+});

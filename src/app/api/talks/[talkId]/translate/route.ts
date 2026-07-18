@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
 import { can } from "@/modules/billing/capabilities";
 import { consumeAssistantAiCredit } from "@/modules/billing/ai-credits";
 import type { BillingPlan } from "@/modules/billing/entitlements";
@@ -98,6 +99,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   const { user, supabase } = await getUser(request);
   if (!user) return errorResponse("Session requise.", 401);
+
+  // Audit 2026-07-18, reco Technique-1 : cette route appelait OpenAI sans aucun
+  // rate-limit (seule route IA du repo dans ce cas). Même garde que generate.
+  try {
+    const rateLimit = await consumeAiRateLimit({
+      identity: {
+        ip: getRequestIp(request.headers),
+        userId: user.id
+      },
+      route: "translate"
+    });
+    if (!rateLimit.allowed) {
+      return errorResponse("Trop de requêtes IA. Réessaie dans un instant.", 429);
+    }
+  } catch {
+    return errorResponse("Protection anti-abus indisponible. Réessaie dans un instant.", 503);
+  }
 
   let body: unknown;
   try {

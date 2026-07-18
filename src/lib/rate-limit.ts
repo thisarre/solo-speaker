@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type AiRateLimitRoute = "generate" | "speak" | "transcribe" | "help_chat" | "deepgram_token";
+export type AiRateLimitRoute = "generate" | "speak" | "transcribe" | "help_chat" | "deepgram_token" | "translate";
 
 export type RateLimitRule = {
   limit: number;
@@ -39,7 +39,8 @@ const routeEnvKeys: Record<AiRateLimitRoute, string> = {
   generate: "AI_RATE_LIMIT_GENERATE",
   help_chat: "AI_RATE_LIMIT_HELP_CHAT",
   speak: "AI_RATE_LIMIT_SPEAK",
-  transcribe: "AI_RATE_LIMIT_TRANSCRIBE"
+  transcribe: "AI_RATE_LIMIT_TRANSCRIBE",
+  translate: "AI_RATE_LIMIT_TRANSLATE"
 };
 
 const defaultRouteLimits: Record<AiRateLimitRoute, number> = {
@@ -47,7 +48,10 @@ const defaultRouteLimits: Record<AiRateLimitRoute, number> = {
   generate: 12,
   help_chat: 20,
   speak: 8,
-  transcribe: 6
+  transcribe: 6,
+  // Traduction complète d'un talk (payload volumineux, feature Pro) : quota
+  // serré — audit 2026-07-18, reco Technique-1 (route sans aucun rate-limit).
+  translate: 4
 };
 
 const memoryBuckets = new Map<string, MemoryBucket>();
