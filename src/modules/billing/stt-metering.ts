@@ -6,6 +6,13 @@ export function decideCloudAllowed(input: { capSeconds: number; expectedSeconds:
   return input.cloudReserved + input.cloudConfirmed + input.expectedSeconds <= input.capSeconds;
 }
 
+/**
+ * SPÉCIFICATION EXÉCUTABLE de la confirmation (testée dans stt-metering.test).
+ * Depuis l'audit 2026-07-18 (reco Technique-2), le calcul RÉEL vit dans la
+ * fonction Postgres transactionnelle confirm_stt_session (migration
+ * 20260718190000) — cette fonction pure en reste la référence de sémantique :
+ * toute évolution doit être portée DES DEUX côtés.
+ */
 export function applyConfirmation(
   counter: CounterState,
   session: { reservedSeconds: number; confirmedSeconds: number }

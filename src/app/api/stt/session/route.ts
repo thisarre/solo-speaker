@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { applyConfirmation } from "@/modules/billing/stt-metering";
 
 export const runtime = "nodejs";
 
@@ -17,42 +16,25 @@ export async function POST(request: NextRequest) {
   const confirmedSeconds = Math.max(0, Math.floor(Number(body.confirmedSeconds) || 0));
   if (!sessionId) return NextResponse.json({ error: "sessionId required." }, { status: 400 });
 
+  // Audit 2026-07-18, reco Technique-2 : la confirmation est TRANSACTIONNELLE
+  // côté Postgres (confirm_stt_session : SELECT … FOR UPDATE + upsert dans la
+  // même transaction). Fini le TOCTOU du garde applicatif et le double
+  // comptage sur confirmations concurrentes. La sémantique du compteur est
+  // spécifiée (et testée) par applyConfirmation (stt-metering.ts).
   const admin = createAdminClient();
-  const { data: session } = await admin
-    .from("stt_sessions")
-    .select("user_id, period_key, reserved_seconds, status")
-    .eq("id", sessionId)
-    .maybeSingle();
+  // (idiome maison : Functions non générées dans database.types — même cast
+  //  que consume_ai_rate_limit dans lib/rate-limit.ts)
+  const { error } = await admin.rpc("confirm_stt_session" as never, {
+    p_session_id: sessionId,
+    p_user_id: user.id,
+    p_confirmed_seconds: confirmedSeconds
+  } as never);
 
-  if (!session || session.user_id !== user.id) return NextResponse.json({ ok: true });
-  if (session.status === "confirmed") return NextResponse.json({ ok: true });
-
-  const { data: counter } = await admin
-    .from("usage_counters")
-    .select("cloud_reserved_seconds, cloud_confirmed_seconds")
-    .eq("user_id", session.user_id)
-    .eq("period_key", session.period_key)
-    .maybeSingle();
-
-  const next = applyConfirmation(
-    { cloudReserved: counter?.cloud_reserved_seconds ?? 0, cloudConfirmed: counter?.cloud_confirmed_seconds ?? 0 },
-    { reservedSeconds: session.reserved_seconds, confirmedSeconds }
-  );
-
-  await admin
-    .from("stt_sessions")
-    .update({ confirmed_seconds: confirmedSeconds, status: "confirmed", updated_at: new Date().toISOString() })
-    .eq("id", sessionId);
-  await admin.from("usage_counters").upsert(
-    {
-      user_id: session.user_id,
-      period_key: session.period_key,
-      cloud_reserved_seconds: next.cloudReserved,
-      cloud_confirmed_seconds: next.cloudConfirmed,
-      updated_at: new Date().toISOString()
-    },
-    { onConflict: "user_id,period_key" }
-  );
+  if (error) {
+    // Avant l'audit, un échec d'écriture était silencieux (« drift silencieux »).
+    console.error("[stt/session] confirmation échouée:", error.message);
+    return NextResponse.json({ error: "Confirmation indisponible. Réessaie." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
