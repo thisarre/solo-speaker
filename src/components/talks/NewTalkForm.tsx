@@ -13,6 +13,7 @@ import { useAssistantFeatureSettings } from "@/modules/assistant/feature-setting
 import { getOnboardingAssistantFeatureSettings, type GuidedTalkSuggestion } from "@/modules/onboarding/personalization";
 import { createTalk } from "@/modules/talks/actions";
 import { VoiceMemoRecorder } from "@/modules/voice-memo/components/voice-memo-recorder";
+import { voiceMemoLanguageForLocale } from "@/modules/voice-memo/language";
 import { useI18n } from "@/i18n/client";
 import { localizedPath } from "@/i18n/routing";
 import type { TalkType } from "@/types/talk";
@@ -116,7 +117,7 @@ export function NewTalkForm({ error, guide }: NewTalkFormProps) {
         value={brief}
       />
       <VoiceMemoRecorder
-        language="FR"
+        language={voiceMemoLanguageForLocale(locale)}
         onInsert={(text) => {
           setBrief((current) => {
             const separator = current.trim() ? "\n\n" : "";
