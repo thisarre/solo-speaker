@@ -54,8 +54,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <Link href={localizedPath("/login", locale)}>
                 <span className="inline-flex h-8 items-center rounded-[7px] px-3 text-[13px] font-[550] text-muted transition hover:text-foreground">{navigation.login}</span>
               </Link>
-              <TrackedLinkButton event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ location: "header", cta: "create_talk" }} variant="primary">
-                {common.createTalk}
+              <TrackedLinkButton event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ location: "header", cta: "start_free_trial" }} variant="primary">
+                {common.startFreeTrial}
               </TrackedLinkButton>
             </div>
             <MobileNavDetails className="relative md:hidden">
@@ -69,8 +69,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <a className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href="#pricing-preview">{navigation.pricing}</a>
                 <div aria-hidden="true" className="my-1 h-px bg-line" />
                 <Link className="rounded-[8px] px-3 py-2 text-[13px] font-[550] text-muted transition hover:bg-surface hover:text-foreground" href={localizedPath("/login", locale)}>{navigation.login}</Link>
-                <TrackedLinkButton className="mt-1 w-full justify-center" event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ cta: "create_talk", location: "header_mobile" }} variant="primary">
-                  {common.createTalk}
+                <TrackedLinkButton className="mt-1 w-full justify-center" event="landing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} properties={{ cta: "start_free_trial", location: "header_mobile" }} variant="primary">
+                  {common.startFreeTrial}
                 </TrackedLinkButton>
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <ThemeToggle className="w-[92px]" />
@@ -125,7 +125,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
             </div>
             <div className="mt-5 flex flex-wrap gap-3" data-landing-reveal>
               <TrackedLinkButton className="h-10 rounded-[8px] px-4" event="pricing_cta_clicked" href={localizedPath("/signup?plan=trial", locale)} leftIcon={<PanelsTopLeft />} properties={{ location: "hero_secondary" }}>
-                {landing.heroSecondaryCta}
+                {common.startFreeTrial}
               </TrackedLinkButton>
             </div>
             {/* TODO: real customer testimonials */}
