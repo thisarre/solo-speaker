@@ -213,7 +213,9 @@ function formatVoiceFollowStatus(state: VoiceFollowState, copy: ReturnType<typeo
   if (state.status === "requesting") return copy.requesting;
   if (state.status === "listening") return copy.listening;
   if (state.status === "following") return copy.followingStatus.replace("{confidence}", String(Math.round(state.confidence * 100)));
-  if (state.status === "uncertain") return copy.uncertain.replace("{confidence}", String(Math.round(state.confidence * 100)));
+  // Audit 2026-07-18, reco UX-3 : statut ACTIONNABLE, pas un % de confidence
+  // (le détail technique reste dans le panneau Réglages/debug).
+  if (state.status === "uncertain") return copy.uncertain;
   if (state.status === "lost") return copy.lost;
   if (state.status === "error") return `${copy.error}${state.error ? ` · ${state.error}` : ""}`;
   if (state.status === "paused") return copy.paused;

@@ -693,8 +693,8 @@
     "requesting": "microphone permission",
     "listening": "listening",
     "followingStatus": "following {confidence}%",
-    "uncertain": "uncertain {confidence}%",
-    "lost": "lost",
+    "uncertain": "Weak signal — speak a bit louder or move closer to the mic",
+    "lost": "Tracking lost — resume from the highlighted line, the prompter will catch up",
     "error": "error",
     "paused": "paused",
     "disabled": "disabled"

@@ -693,8 +693,8 @@
     "requesting": "autorisation micro",
     "listening": "écoute",
     "followingStatus": "suit {confidence}%",
-    "uncertain": "incertain {confidence}%",
-    "lost": "perdu",
+    "uncertain": "Signal faible — parlez un peu plus fort ou rapprochez-vous du micro",
+    "lost": "Suivi perdu — reprenez à la ligne surlignée, le prompteur va raccrocher",
     "error": "erreur",
     "paused": "pause",
     "disabled": "désactivé"
