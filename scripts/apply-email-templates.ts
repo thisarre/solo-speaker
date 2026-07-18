@@ -102,3 +102,5 @@ console.log("");
 console.log(
   "Note: SMTP must be configured in Authentication → SMTP Settings for the sender address to take effect."
 );
+
+export {};
