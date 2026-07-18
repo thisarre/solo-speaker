@@ -94,3 +94,10 @@ revoke all on function public.confirm_stt_session(text, uuid, integer) from anon
 grant execute on function public.confirm_stt_session(text, uuid, integer) to service_role;
 
 notify pgrst, 'reload schema';
+
+-- Annotations du vérificateur de grants (audit Technique-3) : colonnes écrites
+-- UNIQUEMENT côté service_role (vérifié dans le code au 2026-07-18) —
+-- ai_credits_used : createAdminClient() seul écrivain (ai-credits.ts) ;
+-- trial_reminders_sent : aucun écrivain applicatif dans le repo (process externe).
+-- grants-check: service-only profiles.ai_credits_used
+-- grants-check: service-only profiles.trial_reminders_sent
