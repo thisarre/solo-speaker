@@ -10,6 +10,7 @@ import { AssistantActionButton } from "@/modules/assistant/components/assistant-
 import { generateAssistantContent } from "@/modules/assistant/actions";
 import { getEnabledAssistantFeatures } from "@/modules/assistant/feature-registry";
 import { useAssistantFeatureSettings } from "@/modules/assistant/feature-settings";
+import { useAiCredits } from "@/modules/billing/use-ai-credits";
 import type {
   AssistantAction,
   AssistantGenerateResult,
@@ -60,6 +61,8 @@ export function AssistantPanel({
   const [error, setError] = useState("");
   const { settings } = useAssistantFeatureSettings();
   const enabledFeatures = getEnabledAssistantFeatures(type, settings);
+  // Audit 2026-07-18, reco UX-2 : visibilité des crédits AVANT le mur.
+  const { gauge, refresh: refreshCredits } = useAiCredits();
 
   const parsedDuration = Math.max(1, Math.round(Number(targetMinutes) || durationMinutes || 10));
   const isSectionActionDisabled = !activeSection || loadingAction !== null;
@@ -96,6 +99,7 @@ export function AssistantPanel({
       setError(assistantError instanceof Error ? assistantError.message : copy.generationError);
     } finally {
       setLoadingAction(null);
+      refreshCredits();
     }
   }
 
@@ -110,6 +114,19 @@ export function AssistantPanel({
           <p className="mt-1 text-[12.5px] leading-5 text-muted">{copy.panelDescription}</p>
         </div>
       </div>
+
+      {gauge.visible ? (
+        <div aria-live="polite" className="mb-3 rounded-[9px] border border-border bg-background px-3 py-2">
+          <p className={cn("m-0 text-[12px] font-[550]", gauge.low ? "text-danger" : "text-muted")}>
+            {(gauge.low ? copy.creditsGaugeLow : copy.creditsGauge)
+              .replace("{remaining}", String(gauge.remaining))
+              .replace("{total}", String(gauge.total))}
+          </p>
+          <div aria-hidden="true" className="mt-1.5 h-1 overflow-hidden rounded-full bg-line">
+            <div className={cn("h-full rounded-full", gauge.low ? "bg-danger" : "bg-accent")} style={{ width: `${Math.round(gauge.ratio * 100)}%` }} />
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-3">
         <label className="grid gap-1.5 text-xs font-[550] text-muted">

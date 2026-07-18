@@ -781,7 +781,9 @@
         "Suggérer un passage biblique pertinent pour l’idée en cours.",
         "Suggestions bibliques"
       ]
-    }
+    },
+    "creditsGauge": "Crédits IA de l’essai : {remaining} sur {total}",
+    "creditsGaugeLow": "Plus que {remaining} crédit(s) — passez à Studio pour un assistant illimité."
   },
   "settings": {
     "title": "Réglages",

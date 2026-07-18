@@ -781,7 +781,9 @@
         "Suggest a biblical passage relevant to the current idea.",
         "Bible suggestions"
       ]
-    }
+    },
+    "creditsGauge": "Trial AI credits: {remaining} of {total}",
+    "creditsGaugeLow": "Only {remaining} credit(s) left — upgrade to Studio for unlimited assistance."
   },
   "settings": {
     "title": "Settings",
