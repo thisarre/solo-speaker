@@ -86,7 +86,9 @@ export async function createTalk(formData: FormData) {
       type: typeValue,
       audience,
       duration_minutes: 10,
-      language: "FR"
+      // Même classe que l'audit UX-1 (mémo vocal) : la langue du talk suivait
+      // un "FR" codé en dur côté serveur, quel que soit le locale de session.
+      language: locale === "en" ? "EN" : "FR"
     })
     .select("id")
     .single();
