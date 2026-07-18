@@ -57,7 +57,7 @@ export function PricingPage({ locale = "en", returnHref = "/" }: { locale?: Loca
           </div>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8" id="plans">
           <PricingCards
             cards={cards}
             labels={{
@@ -82,13 +82,11 @@ export function PricingPage({ locale = "en", returnHref = "/" }: { locale?: Loca
                 {pricing.productionBody}
               </p>
             </div>
-            <form action="/api/billing/checkout" method="post">
-              <input name="plan" type="hidden" value="studio_yearly" />
-              <input name="locale" type="hidden" value={locale} />
-              <button className={buttonClassName({ variant: "primary" })} type="submit">
-                {pricing.prepareStudio}
-              </button>
-            </form>
+            {/* Audit 2026-07-18, reco Copy-1 : plus de 3e CTA de paiement déconnecté
+                des cartes — le bloc devient une réassurance qui renvoie à la grille. */}
+            <a className={buttonClassName({ variant: "primary" })} href="#plans">
+              {pricing.productionCta}
+            </a>
           </div>
         </section>
       </section>

@@ -35,25 +35,53 @@
     "heroSubtitle": "Transformez une idée, un mémo vocal ou un brouillon en une intervention structurée et minutée — puis répétez avec un prompteur qui suit votre voix.",
     "heroDefinition": "Fini la page blanche et le stress de la veille : vous arrivez préparé et sûr de votre minutage.",
     "timeProofs": [
-      ["Notes → plan", "Plus besoin de trier vos notes à la main."],
-      ["Plan → sections", "Chaque partie se développe sans défaire les autres."],
-      ["Sections → prompteur", "La répétition démarre sans export ni remise en forme."]
+      [
+        "Notes → plan",
+        "Plus besoin de trier vos notes à la main."
+      ],
+      [
+        "Plan → sections",
+        "Chaque partie se développe sans défaire les autres."
+      ],
+      [
+        "Sections → prompteur",
+        "La répétition démarre sans export ni remise en forme."
+      ]
     ],
     "trialEyebrow": "Essai gratuit · 5 prises de parole",
     "trialTitle": "Vos 5 prochaines prises de parole, prêtes plus vite que jamais.",
     "trialDescription": "Sur vos 5 premières prises de parole, vivez le flux complet : capturez une idée, générez un plan, peaufinez vos sections avec l’IA, puis répétez, le tout au même endroit, sans limite de temps et sans carte bancaire.",
-    "trialHighlights": ["5 prises de parole gratuites", "Sans carte bancaire", "Plan, assistant IA, prompteur et mémos vocaux"],
+    "trialHighlights": [
+      "5 prises de parole gratuites",
+      "Sans carte bancaire",
+      "Plan, assistant IA, prompteur et mémos vocaux"
+    ],
     "videoDemoEyebrow": "En action",
     "videoDemoTitle": "Regardez le studio transformer des notes en discours prêt.",
     "videoDemoBody": "Deux démos courtes montrent comment Solo Speaker clarifie vos notes, structure vos sections et vous fait répéter, sans jamais changer d’outil.",
     "videoDemos": [
-      ["Du désordre au plan", "Les notes dispersées deviennent des sections exploitables, prêtes à travailler."],
-      ["Du plan au prompteur", "La préparation reste dans le même flux jusqu’à la répétition, sans copier-coller entre plusieurs outils."]
+      [
+        "Du désordre au plan",
+        "Les notes dispersées deviennent des sections exploitables, prêtes à travailler."
+      ],
+      [
+        "Du plan au prompteur",
+        "La préparation reste dans le même flux jusqu’à la répétition, sans copier-coller entre plusieurs outils."
+      ]
     ],
     "heroStats": [
-      ["Plan", "Sections structurées"],
-      ["IA", "Texte plus oral"],
-      ["Direct", "Prompteur épuré"]
+      [
+        "Plan",
+        "Sections structurées"
+      ],
+      [
+        "IA",
+        "Texte plus oral"
+      ],
+      [
+        "Direct",
+        "Prompteur épuré"
+      ]
     ],
     "problemEyebrow": "Le vrai défi",
     "problemTitle": "Préparer une prise de parole, c’est épuisant, bien avant de monter sur scène.",
@@ -67,16 +95,39 @@
     "solutionTitle": "Un seul studio pour toute votre préparation.",
     "solutionBody": "Notes, plan, réécriture par IA, répétition et présentation : tout est relié. Vous avancez section par section et restez concentré sur l’essentiel : votre message et votre public.",
     "workflowFeatures": [
-      ["Plan exploitable dès le départ", "Partez d’une idée, d’une audience ou d’un mémo vocal, puis obtenez des sections déjà prêtes à travailler."],
-      ["Réécriture sans repartir de zéro", "Développez, raccourcissez ou rendez une section plus naturelle à l’oral sans casser le reste de la prise de parole."],
-      ["Répétition dans le même outil", "Passez au prompteur avec la durée estimée, le défilement automatique et le suivi vocal déjà prêts."]
+      [
+        "Plan exploitable dès le départ",
+        "Partez d’une idée, d’une audience ou d’un mémo vocal, puis obtenez des sections déjà prêtes à travailler."
+      ],
+      [
+        "Réécriture sans repartir de zéro",
+        "Développez, raccourcissez ou rendez une section plus naturelle à l’oral sans casser le reste de la prise de parole."
+      ],
+      [
+        "Répétition dans le même outil",
+        "Passez au prompteur avec la durée estimée, le défilement automatique et le suivi vocal déjà prêts."
+      ]
     ],
     "featuresEyebrow": "Mode prompteur",
     "featuresTitle": "Un prompteur qui suit votre voix, pas l’inverse.",
     "featuresBody": "Vos sections deviennent directement votre prompteur : minuteur, défilement automatique et suivi vocal en temps réel. Vous répétez et présentez avec assurance, sans rien réimporter.",
-    "featureList": ["Génération de plan IA", "Éditeur par sections", "Réécriture pour l’oral", "Durée estimée", "Mode prompteur", "Défilement automatique", "Mémos vocaux", "Export PDF"],
+    "featureList": [
+      "Génération de plan IA",
+      "Éditeur par sections",
+      "Réécriture pour l’oral",
+      "Durée estimée",
+      "Mode prompteur",
+      "Défilement automatique",
+      "Mémos vocaux",
+      "Export PDF"
+    ],
     "previewPlan": "Plan",
-    "previewPlanItems": ["Ouverture", "Idée", "Preuve", "Appel"],
+    "previewPlanItems": [
+      "Ouverture",
+      "Idée",
+      "Preuve",
+      "Appel"
+    ],
     "previewScriptLines": [
       "Bonjour à tous, merci d’être là.",
       "Aujourd’hui, une seule idée à retenir.",
@@ -84,23 +135,55 @@
       "Tout commence par une vraie préparation.",
       "On s’y met ensemble ?"
     ],
-    "previewSteps": ["Vous parlez", "Le texte se synchronise", "L’écran suit"],
+    "previewSteps": [
+      "Vous parlez",
+      "Le texte se synchronise",
+      "L’écran suit"
+    ],
     "useCasesEyebrow": "Cas d’usage",
     "useCasesTitle": "Pensé pour celles et ceux qui montent régulièrement sur scène.",
     "useCasesBody": "Sermons, conférences, formations, argumentaires de fondateurs ou discours : le même espace s’adapte à chaque prise de parole.",
     "useCases": [
-      ["Pasteurs et préparation de sermons", "Transformez une idée biblique en plan de sermon, développez les sections, estimez la durée et répétez avant dimanche.", "/use-cases/sermon-preparation"],
-      ["Conférenciers et conférences", "Préparez discours d’ouverture, interventions et prises de parole publiques avec une structure facile à suivre en direct.", "/use-cases/public-speaking"],
-      ["Formateurs et ateliers", "Construisez des formations et ateliers clairs, chronométrés et actionnables pour le public.", "/use-cases/training-presentations"],
-      ["Fondateurs et argumentaires", "Transformez notes produit, idées investisseurs et récits fondateurs en argumentaires plus nets et plus oraux.", "/features/ai-speech-writer"]
+      [
+        "Pasteurs et préparation de sermons",
+        "Transformez une idée biblique en plan de sermon, développez les sections, estimez la durée et répétez avant dimanche.",
+        "/use-cases/sermon-preparation"
+      ],
+      [
+        "Conférenciers et conférences",
+        "Préparez discours d’ouverture, interventions et prises de parole publiques avec une structure facile à suivre en direct.",
+        "/use-cases/public-speaking"
+      ],
+      [
+        "Formateurs et ateliers",
+        "Construisez des formations et ateliers clairs, chronométrés et actionnables pour le public.",
+        "/use-cases/training-presentations"
+      ],
+      [
+        "Fondateurs et argumentaires",
+        "Transformez notes produit, idées investisseurs et récits fondateurs en argumentaires plus nets et plus oraux.",
+        "/features/ai-speech-writer"
+      ]
     ],
     "comparisonEyebrow": "Comparaison",
     "comparisonTitle": "Plus qu’un éditeur de texte, plus qu’un prompteur.",
     "comparisonBody": "Solo Speaker ne remplace pas tous vos outils : il comble le vrai manque, tout ce qui se passe entre « j’ai une idée » et « je suis prêt à la présenter ».",
     "comparisonRows": [
-      ["Google Docs", "Très utile pour écrire du texte", "Pas de structure de prise de parole, de répétition, de mémo vocal ou de prompteur intégré."],
-      ["Notion", "Très utile pour organiser des notes", "Pas pensé pour le minutage, le passage à l’oral, la scène ou la lecture en direct."],
-      ["Prompteurs classiques", "Très utiles pour lire un script final", "Souvent séparés de la préparation, de l’IA, de l’édition et de l’export."]
+      [
+        "Google Docs",
+        "Très utile pour écrire du texte",
+        "Pas de structure de prise de parole, de répétition, de mémo vocal ou de prompteur intégré."
+      ],
+      [
+        "Notion",
+        "Très utile pour organiser des notes",
+        "Pas pensé pour le minutage, le passage à l’oral, la scène ou la lecture en direct."
+      ],
+      [
+        "Prompteurs classiques",
+        "Très utiles pour lire un script final",
+        "Souvent séparés de la préparation, de l’IA, de l’édition et de l’export."
+      ]
     ],
     "pricingEyebrow": "Tarifs",
     "pricingTitle": "Essayez gratuitement. Adoptez-le quand il vous convainc.",
@@ -121,7 +204,12 @@
     "faqEyebrow": "FAQ",
     "faqTitle": "Tout ce que vous voulez savoir avant de vous lancer.",
     "heroSecondaryCta": "Démarrer gratuitement",
-    "trustStrip": ["5 prises de parole gratuites", "Sans carte bancaire", "Annulable en 1 clic", "Vos données restent privées"]
+    "trustStrip": [
+      "5 prises de parole gratuites",
+      "Sans carte bancaire",
+      "Annulable en 1 clic",
+      "Vos données restent privées"
+    ]
   },
   "auth": {
     "loginTitle": "Retour au studio",
@@ -156,8 +244,7 @@
     "confirmPassword": "Confirmer le mot de passe",
     "updatePassword": "Mettre à jour",
     "updatingPassword": "Mise à jour...",
-    "redirecting": "Redirection..."
-    ,
+    "redirecting": "Redirection...",
     "emailPlaceholder": "vous@example.com",
     "signupEmailPlaceholder": "mail@speaker.com",
     "namePlaceholder": "Thierno",
@@ -200,10 +287,8 @@
     "eyebrow": "Tarifs",
     "title": "Un studio simple à lancer, sérieux à garder.",
     "description": "Commencez par 5 prises de parole d’essai, sans limite de temps et sans carte bancaire, pour mesurer la vraie valeur. Ensuite, Studio prend le relais.",
-    "productionTitle": "Paiement production",
-    "productionBody": "L’essai est basé sur l’usage : 5 prises de parole, sans limite de temps et sans carte bancaire. Au moment de continuer, Stripe Checkout applique l’abonnement mensuel ou annuel.",
-    "prepareStudio": "Préparer ma prochaine prise de parole"
-    ,
+    "productionTitle": "Passez à Studio quand vous êtes prêt",
+    "productionBody": "Aucune carte bancaire pendant l’essai. Le passage à l’abonnement se fait en un clic, mensuel ou annuel, sans interrompre vos prises de parole en cours.",
     "perMonthEquivalent": "soit ~{amount} €/mois",
     "riskReversal": "Sans carte bancaire · annulable en 1 clic · 5 prises de parole d’essai sans limite de temps",
     "recommended": "Recommandé",
@@ -229,7 +314,14 @@
           "cadence": "par mois",
           "price": "12 EUR"
         },
-        "features": ["Prises de parole illimitées", "Assistant IA complet", "Prompteur vocal", "Mémos vocaux", "Progression globale", "Assistance prioritaire"]
+        "features": [
+          "Prises de parole illimitées",
+          "Assistant IA complet",
+          "Prompteur vocal",
+          "Mémos vocaux",
+          "Progression globale",
+          "Assistance prioritaire"
+        ]
       },
       {
         "id": "pro",
@@ -244,7 +336,13 @@
           "cadence": "par mois",
           "price": "19 EUR"
         },
-        "features": ["Analytics de répétition", "Versions multiples d’une prise de parole", "Déclinaison multilingue", "Export branded sans watermark", "Partage & feedback"]
+        "features": [
+          "Analytics de répétition",
+          "Versions multiples d’une prise de parole",
+          "Déclinaison multilingue",
+          "Export branded sans watermark",
+          "Partage & feedback"
+        ]
       },
       {
         "id": "team",
@@ -255,10 +353,21 @@
         "groupFraming": "Offre groupe — tarif par siège (min. 5 sièges)",
         "description": "Un cadre pour plusieurs intervenants, avec onboarding et accompagnement.",
         "ctaLabel": "Démarrer avec mon équipe",
-        "secondaryPrice": { "badge": "économisez 36 €/siège", "cadence": "par siège / mois", "price": "9 EUR" },
-        "features": ["Studio pour chaque siège", "Invitations par lien ou email", "Facturation centralisée", "Accueil guidé", "Aide à la configuration"]
+        "secondaryPrice": {
+          "badge": "économisez 36 €/siège",
+          "cadence": "par siège / mois",
+          "price": "9 EUR"
+        },
+        "features": [
+          "Studio pour chaque siège",
+          "Invitations par lien ou email",
+          "Facturation centralisée",
+          "Accueil guidé",
+          "Aide à la configuration"
+        ]
       }
-    ]
+    ],
+    "productionCta": "Voir les formules"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -306,12 +415,28 @@
     "ready": "Prêts",
     "time": "Temps",
     "statuses": "Statuts",
-    "types": "Types"
-    ,
+    "types": "Types",
     "focusPlan": {
-      "start": ["Démarrage", "Créer la première prise de parole", "Lancez un brouillon guidé pour transformer l’idée en plan présentable.", "À lancer"],
-      "focus": ["Focus", "Finaliser {title}", "Complétez l’audience, la durée et les sections avant de passer en répétition.", "À clarifier", "la prise de parole en cours"],
-      "rehearse": ["Répétition", "Répéter {title}", "Passez en mode prompteur pour vérifier le rythme, les transitions et le temps réel.", "Prêt", "la prochaine prise de parole"]
+      "start": [
+        "Démarrage",
+        "Créer la première prise de parole",
+        "Lancez un brouillon guidé pour transformer l’idée en plan présentable.",
+        "À lancer"
+      ],
+      "focus": [
+        "Focus",
+        "Finaliser {title}",
+        "Complétez l’audience, la durée et les sections avant de passer en répétition.",
+        "À clarifier",
+        "la prise de parole en cours"
+      ],
+      "rehearse": [
+        "Répétition",
+        "Répéter {title}",
+        "Passez en mode prompteur pour vérifier le rythme, les transitions et le temps réel.",
+        "Prêt",
+        "la prochaine prise de parole"
+      ]
     },
     "widgetLabels": {
       "resume-talk": "Prise de parole à reprendre",
@@ -352,9 +477,18 @@
     "welcomeTitle": "Votre studio est prêt pour un premier brouillon.",
     "welcomeBody": "On a adapté les modules à votre profil {role}. Commencez petit : créez un brouillon, puis l’application vous guidera vers l’éditeur, la répétition et les réglages.",
     "welcomeSteps": [
-      ["Décrivez l’idée", "Un titre, une audience et quelques notes suffisent."],
-      ["Ajoutez votre voix", "Le mémo vocal peut transformer une idée parlée en brief."],
-      ["Répétez ensuite", "Après le brouillon, ouvrez le prompteur et testez le rythme."]
+      [
+        "Décrivez l’idée",
+        "Un titre, une audience et quelques notes suffisent."
+      ],
+      [
+        "Ajoutez votre voix",
+        "Le mémo vocal peut transformer une idée parlée en brief."
+      ],
+      [
+        "Répétez ensuite",
+        "Après le brouillon, ouvrez le prompteur et testez le rythme."
+      ]
     ],
     "titleLabel": "Titre",
     "titlePlaceholder": "Ex. L’art de capter une salle en 90 secondes",
@@ -453,8 +587,7 @@
     "deleteTalkBody": "Cette action supprimera la prise de parole et toutes ses sections. Elle ne peut pas être annulée.",
     "deleteSectionTitle": "Supprimer cette section ?",
     "deleteSectionBody": "La section \"{title}\" sera retirée de la prise de parole.",
-    "reorderError": "Impossible de réordonner les sections."
-    ,
+    "reorderError": "Impossible de réordonner les sections.",
     "autosave": {
       "idle": "À jour",
       "dirty": "Modifié",
@@ -510,10 +643,22 @@
     "playbackError": "Impossible de lire. Réessaie.",
     "close": "Fermer la simulation",
     "tones": {
-      "confiant": { "label": "Confiant", "description": "Posé, maîtrisé, autoritaire" },
-      "chaleureux": { "label": "Chaleureux", "description": "Proche, humain, sincère" },
-      "dynamique": { "label": "Dynamique", "description": "Énergique, rythmé, engagé" },
-      "serein": { "label": "Serein", "description": "Calme, posé, contemplatif" }
+      "confiant": {
+        "label": "Confiant",
+        "description": "Posé, maîtrisé, autoritaire"
+      },
+      "chaleureux": {
+        "label": "Chaleureux",
+        "description": "Proche, humain, sincère"
+      },
+      "dynamique": {
+        "label": "Dynamique",
+        "description": "Énergique, rythmé, engagé"
+      },
+      "serein": {
+        "label": "Serein",
+        "description": "Calme, posé, contemplatif"
+      }
     }
   },
   "speakingMode": {
@@ -609,16 +754,34 @@
     "suggestBibleDescription": "Propose un passage biblique lié à l’idée en cours.",
     "activeSection": "Section active : {title}",
     "noSection": "Sélectionne une section pour utiliser les actions ciblées.",
-    "untitled": "Sans titre"
-    ,
+    "untitled": "Sans titre",
     "generating": "Génération...",
     "features": {
-      "outline": ["Générer un plan de départ", "Créer une structure calibrée sur la durée cible, à développer ensuite."],
-      "expand-section": ["Développer la section", "Transformer une idée courte en section exploitable."],
-      "oralize-section": ["Rendre plus oral", "Rendre le texte plus naturel à dire à voix haute."],
-      "shorten-section": ["Raccourcir la section", "Créer une version plus courte sans perdre l’idée principale."],
-      "predict-next": ["Prédiction pendant l’écriture", "Proposer une suite pendant la rédaction."],
-      "suggest-bible": ["Proposer un verset", "Suggérer un passage biblique pertinent pour l’idée en cours.", "Suggestions bibliques"]
+      "outline": [
+        "Générer un plan de départ",
+        "Créer une structure calibrée sur la durée cible, à développer ensuite."
+      ],
+      "expand-section": [
+        "Développer la section",
+        "Transformer une idée courte en section exploitable."
+      ],
+      "oralize-section": [
+        "Rendre plus oral",
+        "Rendre le texte plus naturel à dire à voix haute."
+      ],
+      "shorten-section": [
+        "Raccourcir la section",
+        "Créer une version plus courte sans perdre l’idée principale."
+      ],
+      "predict-next": [
+        "Prédiction pendant l’écriture",
+        "Proposer une suite pendant la rédaction."
+      ],
+      "suggest-bible": [
+        "Proposer un verset",
+        "Suggérer un passage biblique pertinent pour l’idée en cours.",
+        "Suggestions bibliques"
+      ]
     }
   },
   "settings": {
@@ -690,11 +853,26 @@
       "suggest-bible": "Bible"
     },
     "editorLayoutPresets": {
-      "complete": ["Complet", "Édition, plan, IA, export et présentation."],
-      "focus": ["Concentration", "Écriture centrée avec le minimum nécessaire."],
-      "ai": ["IA", "Plan, contenu et assistant mis en avant."],
-      "rehearsal": ["Répétition", "Structure, durée et passage vers le mode prompteur."],
-      "minimal": ["Minimal", "Lecture et correction presque sans panneaux."]
+      "complete": [
+        "Complet",
+        "Édition, plan, IA, export et présentation."
+      ],
+      "focus": [
+        "Concentration",
+        "Écriture centrée avec le minimum nécessaire."
+      ],
+      "ai": [
+        "IA",
+        "Plan, contenu et assistant mis en avant."
+      ],
+      "rehearsal": [
+        "Répétition",
+        "Structure, durée et passage vers le mode prompteur."
+      ],
+      "minimal": [
+        "Minimal",
+        "Lecture et correction presque sans panneaux."
+      ]
     }
   },
   "onboarding": {
@@ -756,18 +934,58 @@
       }
     ],
     "roles": [
-      ["pastor", "Pasteur", "Messages, enseignements, sermons."],
-      ["conference_speaker", "Conférencier", "Interventions, discours d’ouverture, conférences."],
-      ["trainer", "Formateur", "Sessions pédagogiques et ateliers."],
-      ["founder", "Fondateur", "Argumentaires, visions, annonces."],
-      ["speaker", "Orateur", "Plusieurs formats selon le moment."]
+      [
+        "pastor",
+        "Pasteur",
+        "Messages, enseignements, sermons."
+      ],
+      [
+        "conference_speaker",
+        "Conférencier",
+        "Interventions, discours d’ouverture, conférences."
+      ],
+      [
+        "trainer",
+        "Formateur",
+        "Sessions pédagogiques et ateliers."
+      ],
+      [
+        "founder",
+        "Fondateur",
+        "Argumentaires, visions, annonces."
+      ],
+      [
+        "speaker",
+        "Orateur",
+        "Plusieurs formats selon le moment."
+      ]
     ],
     "talkTypes": [
-      ["sermon", "Sermon", "Avec suggestions bibliques par défaut."],
-      ["conference", "Conférence", "Idéal pour une intervention structurée."],
-      ["training", "Formation", "Pour guider un groupe étape par étape."],
-      ["pitch", "Argumentaire", "Court, clair, orienté impact."],
-      ["speech", "Discours", "Discours, cérémonie ou prise de parole."]
+      [
+        "sermon",
+        "Sermon",
+        "Avec suggestions bibliques par défaut."
+      ],
+      [
+        "conference",
+        "Conférence",
+        "Idéal pour une intervention structurée."
+      ],
+      [
+        "training",
+        "Formation",
+        "Pour guider un groupe étape par étape."
+      ],
+      [
+        "pitch",
+        "Argumentaire",
+        "Court, clair, orienté impact."
+      ],
+      [
+        "speech",
+        "Discours",
+        "Discours, cérémonie ou prise de parole."
+      ]
     ],
     "roleLabels": {
       "pastor": "pasteur",
@@ -777,18 +995,45 @@
       "speaker": "orateur"
     },
     "guidedTalkByRole": {
-      "pastor": ["Ex. Retrouver le courage quand la foi fatigue", "Note le passage biblique, l’idée centrale, la tension vécue par l’audience et l’appel final."],
-      "conference_speaker": ["Ex. Ce que personne ne voit avant une décision importante", "Décris l’angle, le problème, l’idée forte, deux preuves et la conclusion que la salle doit retenir."],
-      "trainer": ["Ex. Installer une méthode que l’équipe peut répéter", "Liste l’objectif pédagogique, les étapes, l’exercice, les erreurs fréquentes et la consigne finale."],
-      "founder": ["Ex. La vision qui transforme ce problème en mouvement", "Résume le problème, la promesse, le produit, la preuve, l’appel à agir et le risque à lever."],
-      "speaker": ["Ex. Une idée claire à transmettre en dix minutes", "Décris l’objectif, l’audience, le contexte, le ton et le message principal."]
+      "pastor": [
+        "Ex. Retrouver le courage quand la foi fatigue",
+        "Note le passage biblique, l’idée centrale, la tension vécue par l’audience et l’appel final."
+      ],
+      "conference_speaker": [
+        "Ex. Ce que personne ne voit avant une décision importante",
+        "Décris l’angle, le problème, l’idée forte, deux preuves et la conclusion que la salle doit retenir."
+      ],
+      "trainer": [
+        "Ex. Installer une méthode que l’équipe peut répéter",
+        "Liste l’objectif pédagogique, les étapes, l’exercice, les erreurs fréquentes et la consigne finale."
+      ],
+      "founder": [
+        "Ex. La vision qui transforme ce problème en mouvement",
+        "Résume le problème, la promesse, le produit, la preuve, l’appel à agir et le risque à lever."
+      ],
+      "speaker": [
+        "Ex. Une idée claire à transmettre en dix minutes",
+        "Décris l’objectif, l’audience, le contexte, le ton et le message principal."
+      ]
     },
     "guidedTalkMessage": "Un premier brouillon guidé pour votre profil {role}.",
     "dashboardRecommendations": {
-      "guidedFirstTalk": ["Première prise de parole guidée", "Démarrez avec un format {type} adapté à votre profil {role}.", "Créer cette prise de parole"],
-      "onboardingHelp": ["Vous avez demandé de l’aide pour configurer votre studio", "Utilisez ce raccourci si vous voulez être guidé sur les réglages, les modules IA ou la préparation de la première prise de parole.", "Demander de l’aide"],
+      "guidedFirstTalk": [
+        "Première prise de parole guidée",
+        "Démarrez avec un format {type} adapté à votre profil {role}.",
+        "Créer cette prise de parole"
+      ],
+      "onboardingHelp": [
+        "Vous avez demandé de l’aide pour configurer votre studio",
+        "Utilisez ce raccourci si vous voulez être guidé sur les réglages, les modules IA ou la préparation de la première prise de parole.",
+        "Demander de l’aide"
+      ],
       "onboardingHelpNote": "On garde votre note pour vous orienter: {note}",
-      "pastorBibleModule": ["Module biblique prêt", "Les suggestions bibliques restent disponibles même si vous préparez un autre format.", "Voir les réglages"]
+      "pastorBibleModule": [
+        "Module biblique prêt",
+        "Les suggestions bibliques restent disponibles même si vous préparez un autre format.",
+        "Voir les réglages"
+      ]
     }
   },
   "progression": {
@@ -808,8 +1053,7 @@
     "recommendations": "Recommandations",
     "globalPreparation": "Préparation globale",
     "typeDistribution": "Répartition par type",
-    "statusDistribution": "Répartition par statut"
-    ,
+    "statusDistribution": "Répartition par statut",
     "scoreLabels": {
       "structure": "À structurer",
       "preparing": "En préparation",
@@ -827,12 +1071,30 @@
       "activeTalks": "Dans les prises de parole actives"
     },
     "recommendationCopy": {
-      "missingAudience": ["Ajoute une audience aux prises de parole qui n’en ont pas.", "Voir les prises de parole"],
-      "missingSections": ["Finalise les prises de parole avec moins de 3 sections.", "Structurer"],
-      "practiceReady": ["Passe en mode prompteur sur les prises de parole prêtes.", "Présenter"],
-      "reviewArchives": ["Garde les prises de parole terminées archivées pour clarifier ta préparation active.", "Voir"],
-      "shortenLongTalks": ["Raccourcis les prises de parole qui dépassent fortement leur durée cible.", "Éditer"],
-      "createTalk": ["Crée une nouvelle prise de parole pour commencer une préparation.", "Nouvelle prise de parole"]
+      "missingAudience": [
+        "Ajoute une audience aux prises de parole qui n’en ont pas.",
+        "Voir les prises de parole"
+      ],
+      "missingSections": [
+        "Finalise les prises de parole avec moins de 3 sections.",
+        "Structurer"
+      ],
+      "practiceReady": [
+        "Passe en mode prompteur sur les prises de parole prêtes.",
+        "Présenter"
+      ],
+      "reviewArchives": [
+        "Garde les prises de parole terminées archivées pour clarifier ta préparation active.",
+        "Voir"
+      ],
+      "shortenLongTalks": [
+        "Raccourcis les prises de parole qui dépassent fortement leur durée cible.",
+        "Éditer"
+      ],
+      "createTalk": [
+        "Crée une nouvelle prise de parole pour commencer une préparation.",
+        "Nouvelle prise de parole"
+      ]
     },
     "missing": {
       "title": "Titre manquant",
@@ -959,7 +1221,11 @@
       "audience": "les pasteurs et équipes de prédication",
       "description": "Préparez des sermons avec une structure assistée par IA, le développement des sections, la réécriture orale, la durée estimée et un mode prompteur concentré pour répéter.",
       "eyebrow": "Cas d’usage",
-      "highlights": ["Génération de plan de sermon", "Préparation par sections", "Répétition avant de prêcher"],
+      "highlights": [
+        "Génération de plan de sermon",
+        "Préparation par sections",
+        "Répétition avant de prêcher"
+      ],
       "title": "Logiciel de préparation de sermons",
       "body": [
         "La préparation d’un sermon est l’une des disciplines hebdomadaires les plus exigeantes pour un pasteur. Entre l’étude du texte, la recherche d’illustrations, les choix de structure et la répétition, le chemin d’un passage à un message bien présenté peut prendre des dizaines d’heures. La pression de la page blanche est réelle — chaque semaine, quelle que soit votre charge par ailleurs. Solo Speaker Studio vous offre un espace de travail dédié pour traverser ce processus section par section, à un rythme régulier, sans perdre le fil de ce que vous voulez dire.",
@@ -997,7 +1263,11 @@
       "audience": "les conférenciers et intervenants",
       "description": "Transformez idées de discours d’ouverture et notes de conférence en prises de parole structurées, plus faciles à répéter, chronométrer et présenter avec confiance.",
       "eyebrow": "Cas d’usage",
-      "highlights": ["Structure de conférence", "Amélioration du flux oral", "Répétition avec prompteur"],
+      "highlights": [
+        "Structure de conférence",
+        "Amélioration du flux oral",
+        "Répétition avec prompteur"
+      ],
       "title": "Préparation IA prise de parole",
       "body": [
         "Les conférences, discours d’ouverture et tables rondes partagent un défi commun : l’écart entre ce que vous voulez dire et ce que le public retient vraiment. La plupart des orateurs préparent trop tard, s’appuient sur leurs diapositives comme filet de sécurité et laissent peu de temps pour une vraie répétition. Solo Speaker Studio aide les orateurs à combler cet écart grâce à un flux de préparation structuré, conçu pour ceux qui prennent la parole régulièrement et ont besoin d’une méthode fiable.",
@@ -1035,7 +1305,11 @@
       "audience": "les formateurs, enseignants et animateurs d’ateliers",
       "description": "Construisez formations et ateliers avec des sections claires, un minutage pratique et un flux de présentation pensé pour l’enseignement en direct.",
       "eyebrow": "Cas d’usage",
-      "highlights": ["Cours et ateliers", "Sections chronométrées", "Export PDF pour notes de présentation"],
+      "highlights": [
+        "Cours et ateliers",
+        "Sections chronométrées",
+        "Export PDF pour notes de présentation"
+      ],
       "title": "Logiciel de formation IA",
       "body": [
         "Les formations et présentations d’ateliers ont un objectif différent des conférences ou des sermons. Elles doivent transférer des compétences, pas seulement inspirer. Les participants repartent soit avec une méthode qu’ils peuvent appliquer immédiatement, soit avec un manque qu’ils peuvent maintenant nommer et travailler. Solo Speaker Studio aide les formateurs à construire des présentations qui tiennent cette structure délibérément — avec des sections claires, des étapes minutées et un flux de présentation conçu pour l’enseignement en direct.",
@@ -1073,7 +1347,11 @@
       "audience": "les orateurs qui veulent structurer leurs premiers brouillons",
       "description": "Utilisez l’IA pour générer des plans, développer des sections et réécrire un texte dans un style plus oral sans transformer la prise de parole en script générique.",
       "eyebrow": "Fonctionnalité",
-      "highlights": ["Génération de plan IA", "Réécriture orale", "Développement de sections"],
+      "highlights": [
+        "Génération de plan IA",
+        "Réécriture orale",
+        "Développement de sections"
+      ],
       "title": "Rédacteur de discours IA",
       "body": [
         "Écrire un discours est plus difficile que la plupart des gens ne le pensent. Les mêmes compétences qui produisent des emails ou des rapports clairs ne se traduisent pas automatiquement en langage parlé. Les phrases qui se lisent bien sur papier semblent souvent rigides ou précipitées quand elles sont prononcées à voix haute — le rythme est faux, les points de respiration manquent et le vocabulaire est trop formel pour la salle. Le rédacteur de discours IA de Solo Speaker Studio vous aide à passer d’idées brutes à une prise de parole structurée et naturellement orale, sans transformer votre voix en quelque chose de générique ou automatisé.",
@@ -1111,7 +1389,11 @@
       "audience": "les orateurs qui répètent et présentent en direct",
       "description": "Répétez et présentez avec un mode prompteur concentré, le défilement automatique, un minuteur et des options de suivi vocal pour une présentation plus fluide.",
       "eyebrow": "Fonctionnalité",
-      "highlights": ["Mode de lecture concentré", "Défilement automatique", "Options de suivi vocal"],
+      "highlights": [
+        "Mode de lecture concentré",
+        "Défilement automatique",
+        "Options de suivi vocal"
+      ],
       "title": "Prompteur pour discours",
       "body": [
         "La plupart des orateurs répètent trop peu et trop tard. Parcourir des notes dans sa tête n’est pas la même chose que prononcer des phrases complètes à voix haute au rythme réel, et cet écart se voit sur scène. Les hésitations, la perte de contact visuel, les sections qui semblaient claires sur papier mais qui se dissolvent à mi-phrase — ce sont les problèmes qui n’émergent que lorsqu’on parle vraiment. Le mode prompteur de Solo Speaker Studio vous offre un environnement concentré et sans distraction pour répéter et présenter des prises de parole comme l’exige la performance réelle.",
@@ -1194,7 +1476,15 @@
     "barChartActual": "Réelle",
     "barChartEstimated": "Estimée",
     "heatmapTitle": "Régularité hebdomadaire",
-    "heatmapDays": ["L", "M", "M", "J", "V", "S", "D"],
+    "heatmapDays": [
+      "L",
+      "M",
+      "M",
+      "J",
+      "V",
+      "S",
+      "D"
+    ],
     "trendTitle": "Précision au fil du temps",
     "emptyTitle": "Aucune répétition enregistrée",
     "emptyBody": "Ouvrez une prise de parole en mode prompteur et répétez au moins 30 secondes. Chaque session est enregistrée automatiquement.",

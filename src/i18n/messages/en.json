@@ -35,25 +35,53 @@
     "heroSubtitle": "Turn an idea, voice memo or rough draft into a structured, well-timed talk — then rehearse with a teleprompter that follows your voice.",
     "heroDefinition": "No more blank page or night-before stress: you walk on stage prepared and sure of your timing.",
     "timeProofs": [
-      ["Notes → outline", "No need to sort your notes by hand."],
-      ["Outline → sections", "Each part can grow without unpicking the others."],
-      ["Sections → teleprompter", "Rehearsal starts without export or reformatting."]
+      [
+        "Notes → outline",
+        "No need to sort your notes by hand."
+      ],
+      [
+        "Outline → sections",
+        "Each part can grow without unpicking the others."
+      ],
+      [
+        "Sections → teleprompter",
+        "Rehearsal starts without export or reformatting."
+      ]
     ],
     "trialEyebrow": "Free trial · 5 talks",
     "trialTitle": "Your next 5 talks, ready faster than ever.",
     "trialDescription": "Across your first 5 talks, live the full flow: capture an idea, generate an outline, polish your sections with AI, then rehearse, all in one place, with no time limit and no credit card.",
-    "trialHighlights": ["5 free talks", "No credit card", "Outline, AI assistant, teleprompter and voice notes"],
+    "trialHighlights": [
+      "5 free talks",
+      "No credit card",
+      "Outline, AI assistant, teleprompter and voice notes"
+    ],
     "videoDemoEyebrow": "In action",
     "videoDemoTitle": "Watch the studio turn notes into a ready-to-deliver talk.",
     "videoDemoBody": "Two short demos show how Solo Speaker clarifies your notes, structures your sections and gets you rehearsing, without ever switching tools.",
     "videoDemos": [
-      ["From scattered notes to outline", "Loose notes become usable sections, ready to refine."],
-      ["From outline to teleprompter", "Preparation stays in one flow through rehearsal, without copy-pasting across tools."]
+      [
+        "From scattered notes to outline",
+        "Loose notes become usable sections, ready to refine."
+      ],
+      [
+        "From outline to teleprompter",
+        "Preparation stays in one flow through rehearsal, without copy-pasting across tools."
+      ]
     ],
     "heroStats": [
-      ["Plan", "Structured sections"],
-      ["AI", "More natural speech"],
-      ["Live", "Distraction-free teleprompter"]
+      [
+        "Plan",
+        "Structured sections"
+      ],
+      [
+        "AI",
+        "More natural speech"
+      ],
+      [
+        "Live",
+        "Distraction-free teleprompter"
+      ]
     ],
     "problemEyebrow": "The real challenge",
     "problemTitle": "Preparing a talk is exhausting, long before you reach the stage.",
@@ -67,16 +95,39 @@
     "solutionTitle": "One studio for your whole preparation.",
     "solutionBody": "Notes, outline, AI rewriting, rehearsal and delivery: everything is connected. You move section by section and stay focused on what matters: your message and your audience.",
     "workflowFeatures": [
-      ["Usable outline from the start", "Start from an idea, audience note or voice memo and get sections that are ready to refine."],
-      ["Rewrite without starting over", "Develop, shorten or make one section sound more natural out loud without breaking the rest of the talk."],
-      ["Rehearse in the same tool", "Move into teleprompter mode with estimated duration, auto-scroll and voice follow already ready."]
+      [
+        "Usable outline from the start",
+        "Start from an idea, audience note or voice memo and get sections that are ready to refine."
+      ],
+      [
+        "Rewrite without starting over",
+        "Develop, shorten or make one section sound more natural out loud without breaking the rest of the talk."
+      ],
+      [
+        "Rehearse in the same tool",
+        "Move into teleprompter mode with estimated duration, auto-scroll and voice follow already ready."
+      ]
     ],
     "featuresEyebrow": "Speaking mode",
     "featuresTitle": "A teleprompter that follows your voice, not the other way around.",
     "featuresBody": "Your sections become your teleprompter: timer, auto-scroll and real-time voice follow. You rehearse and present with confidence, with nothing to re-import.",
-    "featureList": ["AI outline generation", "Section-based editor", "Rewriting for the spoken word", "Estimated duration", "Teleprompter mode", "Auto-scroll", "Voice notes", "PDF export"],
+    "featureList": [
+      "AI outline generation",
+      "Section-based editor",
+      "Rewriting for the spoken word",
+      "Estimated duration",
+      "Teleprompter mode",
+      "Auto-scroll",
+      "Voice notes",
+      "PDF export"
+    ],
     "previewPlan": "Plan",
-    "previewPlanItems": ["Opening", "Idea", "Proof", "Call"],
+    "previewPlanItems": [
+      "Opening",
+      "Idea",
+      "Proof",
+      "Call"
+    ],
     "previewScriptLines": [
       "Hello everyone, thanks for being here.",
       "Today, just one idea to remember.",
@@ -84,23 +135,55 @@
       "It all starts with real preparation.",
       "Shall we get started?"
     ],
-    "previewSteps": ["You speak", "The text syncs", "Screen follows"],
+    "previewSteps": [
+      "You speak",
+      "The text syncs",
+      "Screen follows"
+    ],
     "useCasesEyebrow": "Use cases",
     "useCasesTitle": "Built for people who take the stage regularly.",
     "useCasesBody": "Sermons, conferences, training sessions, founder pitches or speeches: the same workspace adapts to every talk.",
     "useCases": [
-      ["Pastors and sermon preparation", "Shape a biblical idea into a sermon outline, develop sections, estimate duration and rehearse before Sunday.", "/use-cases/sermon-preparation"],
-      ["Speakers and conferences", "Prepare keynote talks, conference sessions and public speeches with a structure that is easy to follow live.", "/use-cases/public-speaking"],
-      ["Trainers and workshops", "Build courses, lessons and workshop talks that stay clear, timed and actionable for the audience.", "/use-cases/training-presentations"],
-      ["Founders and pitches", "Turn product ideas, investor notes and founder stories into tighter pitches with stronger oral flow.", "/features/ai-speech-writer"]
+      [
+        "Pastors and sermon preparation",
+        "Shape a biblical idea into a sermon outline, develop sections, estimate duration and rehearse before Sunday.",
+        "/use-cases/sermon-preparation"
+      ],
+      [
+        "Speakers and conferences",
+        "Prepare keynote talks, conference sessions and public speeches with a structure that is easy to follow live.",
+        "/use-cases/public-speaking"
+      ],
+      [
+        "Trainers and workshops",
+        "Build courses, lessons and workshop talks that stay clear, timed and actionable for the audience.",
+        "/use-cases/training-presentations"
+      ],
+      [
+        "Founders and pitches",
+        "Turn product ideas, investor notes and founder stories into tighter pitches with stronger oral flow.",
+        "/features/ai-speech-writer"
+      ]
     ],
     "comparisonEyebrow": "Comparison",
     "comparisonTitle": "More than a text editor, more than a teleprompter.",
     "comparisonBody": "Solo Speaker doesn’t replace all your tools, it fills the real gap: everything between “I have an idea” and “I’m ready to deliver it.”",
     "comparisonRows": [
-      ["Google Docs", "Good for writing text", "No talk structure, rehearsal flow, voice notes or teleprompter workflow."],
-      ["Notion", "Good for organizing notes", "Not designed for timing, adapting text for the spoken word, stage delivery or live reading."],
-      ["Classic teleprompter apps", "Good for reading a final script", "Usually separate from planning, editing, AI improvement and export."]
+      [
+        "Google Docs",
+        "Good for writing text",
+        "No talk structure, rehearsal flow, voice notes or teleprompter workflow."
+      ],
+      [
+        "Notion",
+        "Good for organizing notes",
+        "Not designed for timing, adapting text for the spoken word, stage delivery or live reading."
+      ],
+      [
+        "Classic teleprompter apps",
+        "Good for reading a final script",
+        "Usually separate from planning, editing, AI improvement and export."
+      ]
     ],
     "pricingEyebrow": "Pricing",
     "pricingTitle": "Try it free. Keep it once it wins you over.",
@@ -121,7 +204,12 @@
     "faqEyebrow": "FAQ",
     "faqTitle": "Everything you want to know before you start.",
     "heroSecondaryCta": "Start for free",
-    "trustStrip": ["5 free talks", "No credit card", "Cancel in one click", "Your data stays private"]
+    "trustStrip": [
+      "5 free talks",
+      "No credit card",
+      "Cancel in one click",
+      "Your data stays private"
+    ]
   },
   "auth": {
     "loginTitle": "Back to the studio",
@@ -142,8 +230,7 @@
     "createMyAccount": "Create my account",
     "creating": "Creating...",
     "alreadyRegistered": "Already registered?",
-    "loginLink": "Log in"
-    ,
+    "loginLink": "Log in",
     "forgotTitle": "Reset your password",
     "forgotSubtitle": "Enter the account email. A secure link will let you choose a new password.",
     "sendResetLink": "Send reset link",
@@ -157,8 +244,7 @@
     "confirmPassword": "Confirm password",
     "updatePassword": "Update password",
     "updatingPassword": "Updating...",
-    "redirecting": "Redirecting..."
-    ,
+    "redirecting": "Redirecting...",
     "emailPlaceholder": "you@example.com",
     "signupEmailPlaceholder": "mail@speaker.com",
     "namePlaceholder": "Thierno",
@@ -201,16 +287,13 @@
     "eyebrow": "Pricing",
     "title": "A simple studio to start, a serious one to keep.",
     "description": "Start with 5 trial talks, no time limit and no credit card, to test the real value. Then Studio takes over.",
-    "productionTitle": "Production payment",
-    "productionBody": "The trial is usage-based: 5 talks, no time limit and no credit card. When you choose to continue, Stripe Checkout applies the monthly or yearly subscription.",
-    "prepareStudio": "Prepare my next talk"
-    ,
+    "productionTitle": "Move to Studio when you're ready",
+    "productionBody": "No credit card during the trial. Switching to a subscription takes one click, monthly or yearly, without interrupting your talks in progress.",
     "perMonthEquivalent": "i.e. ~€{amount}/mo",
     "riskReversal": "No credit card · cancel in one click · 5 trial talks with no time limit",
     "recommended": "Recommended",
     "cycleYearly": "Yearly",
-    "cycleMonthly": "Monthly"
-    ,
+    "cycleMonthly": "Monthly",
     "trialCta": "Start the free trial · 5 talks · no time limit · no credit card",
     "perSeatTotalYearly": "i.e. €{total}/year for {seats} seats",
     "perSeatTotalMonthly": "i.e. €{total}/month for {seats} seats",
@@ -231,7 +314,14 @@
           "cadence": "per month",
           "price": "12 EUR"
         },
-        "features": ["Unlimited talks", "Full AI assistant", "Voice-aware teleprompter", "Voice notes", "Global progress", "Priority support"]
+        "features": [
+          "Unlimited talks",
+          "Full AI assistant",
+          "Voice-aware teleprompter",
+          "Voice notes",
+          "Global progress",
+          "Priority support"
+        ]
       },
       {
         "id": "pro",
@@ -246,7 +336,13 @@
           "cadence": "per month",
           "price": "19 EUR"
         },
-        "features": ["Rehearsal analytics", "Multiple versions of a talk", "Multilingual variants", "Branded export without watermark", "Sharing & feedback"]
+        "features": [
+          "Rehearsal analytics",
+          "Multiple versions of a talk",
+          "Multilingual variants",
+          "Branded export without watermark",
+          "Sharing & feedback"
+        ]
       },
       {
         "id": "team",
@@ -257,10 +353,21 @@
         "groupFraming": "Group offer — per-seat pricing (min. 5 seats)",
         "description": "A workspace for multiple speakers, with onboarding and support.",
         "ctaLabel": "Get started with my team",
-        "secondaryPrice": { "badge": "Save €36/seat", "cadence": "per seat / month", "price": "9 EUR" },
-        "features": ["Studio for every seat", "Invite by link or email", "Centralized billing", "Guided onboarding", "Setup help"]
+        "secondaryPrice": {
+          "badge": "Save €36/seat",
+          "cadence": "per seat / month",
+          "price": "9 EUR"
+        },
+        "features": [
+          "Studio for every seat",
+          "Invite by link or email",
+          "Centralized billing",
+          "Guided onboarding",
+          "Setup help"
+        ]
       }
-    ]
+    ],
+    "productionCta": "See the plans"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -308,12 +415,28 @@
     "ready": "Ready",
     "time": "Time",
     "statuses": "Statuses",
-    "types": "Types"
-    ,
+    "types": "Types",
     "focusPlan": {
-      "start": ["Start", "Create the first talk", "Launch a guided draft to turn the idea into a presentable outline.", "To start"],
-      "focus": ["Focus", "Finish {title}", "Complete the audience, duration and sections before moving to rehearsal.", "To clarify", "the current talk"],
-      "rehearse": ["Rehearsal", "Rehearse {title}", "Switch to speaking mode to check rhythm, transitions and real timing.", "Ready", "the next talk"]
+      "start": [
+        "Start",
+        "Create the first talk",
+        "Launch a guided draft to turn the idea into a presentable outline.",
+        "To start"
+      ],
+      "focus": [
+        "Focus",
+        "Finish {title}",
+        "Complete the audience, duration and sections before moving to rehearsal.",
+        "To clarify",
+        "the current talk"
+      ],
+      "rehearse": [
+        "Rehearsal",
+        "Rehearse {title}",
+        "Switch to speaking mode to check rhythm, transitions and real timing.",
+        "Ready",
+        "the next talk"
+      ]
     },
     "widgetLabels": {
       "resume-talk": "Talk to resume",
@@ -354,9 +477,18 @@
     "welcomeTitle": "Your studio is ready for a first draft.",
     "welcomeBody": "We adapted the modules to your {role} profile. Start small: create a draft, then the app will guide you toward the editor, rehearsal and settings.",
     "welcomeSteps": [
-      ["Describe the idea", "A title, an audience and a few notes are enough."],
-      ["Add your voice", "The voice memo can turn a spoken idea into a brief."],
-      ["Rehearse next", "After the draft, open the teleprompter and test the rhythm."]
+      [
+        "Describe the idea",
+        "A title, an audience and a few notes are enough."
+      ],
+      [
+        "Add your voice",
+        "The voice memo can turn a spoken idea into a brief."
+      ],
+      [
+        "Rehearse next",
+        "After the draft, open the teleprompter and test the rhythm."
+      ]
     ],
     "titleLabel": "Title",
     "titlePlaceholder": "Ex. How to hold a room in 90 seconds",
@@ -455,8 +587,7 @@
     "deleteTalkBody": "This action will delete the talk and all its sections. It cannot be undone.",
     "deleteSectionTitle": "Delete this section?",
     "deleteSectionBody": "The section \"{title}\" will be removed from the talk.",
-    "reorderError": "Unable to reorder sections."
-    ,
+    "reorderError": "Unable to reorder sections.",
     "autosave": {
       "idle": "Up to date",
       "dirty": "Edited",
@@ -512,10 +643,22 @@
     "playbackError": "Playback failed. Please retry.",
     "close": "Close simulation",
     "tones": {
-      "confiant": { "label": "Confident", "description": "Poised, controlled, authoritative" },
-      "chaleureux": { "label": "Warm", "description": "Close, human, sincere" },
-      "dynamique": { "label": "Dynamic", "description": "Energetic, rhythmic, engaging" },
-      "serein": { "label": "Serene", "description": "Calm, composed, contemplative" }
+      "confiant": {
+        "label": "Confident",
+        "description": "Poised, controlled, authoritative"
+      },
+      "chaleureux": {
+        "label": "Warm",
+        "description": "Close, human, sincere"
+      },
+      "dynamique": {
+        "label": "Dynamic",
+        "description": "Energetic, rhythmic, engaging"
+      },
+      "serein": {
+        "label": "Serene",
+        "description": "Calm, composed, contemplative"
+      }
     }
   },
   "speakingMode": {
@@ -611,16 +754,34 @@
     "suggestBibleDescription": "Suggest a biblical passage linked to the current idea.",
     "activeSection": "Active section: {title}",
     "noSection": "Select a section to use targeted actions.",
-    "untitled": "Untitled"
-    ,
+    "untitled": "Untitled",
     "generating": "Generating...",
     "features": {
-      "outline": ["Generate a starting plan", "Create a structure calibrated to the target duration, to develop next."],
-      "expand-section": ["Develop section", "Turn a short idea into a usable section."],
-      "oralize-section": ["Make more oral", "Make the text sound more natural out loud."],
-      "shorten-section": ["Shorten section", "Create a shorter version without losing the main idea."],
-      "predict-next": ["Prediction while writing", "Suggest a continuation while drafting."],
-      "suggest-bible": ["Suggest a verse", "Suggest a biblical passage relevant to the current idea.", "Bible suggestions"]
+      "outline": [
+        "Generate a starting plan",
+        "Create a structure calibrated to the target duration, to develop next."
+      ],
+      "expand-section": [
+        "Develop section",
+        "Turn a short idea into a usable section."
+      ],
+      "oralize-section": [
+        "Make more oral",
+        "Make the text sound more natural out loud."
+      ],
+      "shorten-section": [
+        "Shorten section",
+        "Create a shorter version without losing the main idea."
+      ],
+      "predict-next": [
+        "Prediction while writing",
+        "Suggest a continuation while drafting."
+      ],
+      "suggest-bible": [
+        "Suggest a verse",
+        "Suggest a biblical passage relevant to the current idea.",
+        "Bible suggestions"
+      ]
     }
   },
   "settings": {
@@ -692,11 +853,26 @@
       "suggest-bible": "Bible"
     },
     "editorLayoutPresets": {
-      "complete": ["Complete", "Editing, outline, AI, export and presentation."],
-      "focus": ["Focus", "Centered writing with only what is needed."],
-      "ai": ["AI", "Outline, content and assistant in focus."],
-      "rehearsal": ["Rehearsal", "Structure, duration and handoff to Speaking Mode."],
-      "minimal": ["Minimal", "Reading and correction with almost no panels."]
+      "complete": [
+        "Complete",
+        "Editing, outline, AI, export and presentation."
+      ],
+      "focus": [
+        "Focus",
+        "Centered writing with only what is needed."
+      ],
+      "ai": [
+        "AI",
+        "Outline, content and assistant in focus."
+      ],
+      "rehearsal": [
+        "Rehearsal",
+        "Structure, duration and handoff to Speaking Mode."
+      ],
+      "minimal": [
+        "Minimal",
+        "Reading and correction with almost no panels."
+      ]
     }
   },
   "onboarding": {
@@ -758,18 +934,58 @@
       }
     ],
     "roles": [
-      ["pastor", "Pastor", "Messages, teaching, sermons."],
-      ["conference_speaker", "Conference speaker", "Talks, keynotes, sessions."],
-      ["trainer", "Trainer", "Learning sessions and workshops."],
-      ["founder", "Founder", "Pitches, visions, announcements."],
-      ["speaker", "Speaker", "Several formats depending on the moment."]
+      [
+        "pastor",
+        "Pastor",
+        "Messages, teaching, sermons."
+      ],
+      [
+        "conference_speaker",
+        "Conference speaker",
+        "Talks, keynotes, sessions."
+      ],
+      [
+        "trainer",
+        "Trainer",
+        "Learning sessions and workshops."
+      ],
+      [
+        "founder",
+        "Founder",
+        "Pitches, visions, announcements."
+      ],
+      [
+        "speaker",
+        "Speaker",
+        "Several formats depending on the moment."
+      ]
     ],
     "talkTypes": [
-      ["sermon", "Sermon", "With bible suggestions by default."],
-      ["conference", "Conference", "Ideal for a structured session."],
-      ["training", "Training", "To guide a group step by step."],
-      ["pitch", "Pitch", "Short, clear and impact-oriented."],
-      ["speech", "Speech", "Speech, ceremony or prepared talk."]
+      [
+        "sermon",
+        "Sermon",
+        "With bible suggestions by default."
+      ],
+      [
+        "conference",
+        "Conference",
+        "Ideal for a structured session."
+      ],
+      [
+        "training",
+        "Training",
+        "To guide a group step by step."
+      ],
+      [
+        "pitch",
+        "Pitch",
+        "Short, clear and impact-oriented."
+      ],
+      [
+        "speech",
+        "Speech",
+        "Speech, ceremony or prepared talk."
+      ]
     ],
     "roleLabels": {
       "pastor": "pastor",
@@ -779,18 +995,45 @@
       "speaker": "speaker"
     },
     "guidedTalkByRole": {
-      "pastor": ["Ex. Finding courage when faith feels tired", "Note the biblical passage, central idea, audience tension and final call."],
-      "conference_speaker": ["Ex. What nobody sees before an important decision", "Describe the angle, problem, strong idea, two proofs and the conclusion the room should remember."],
-      "trainer": ["Ex. Installing a method the team can repeat", "List the learning objective, steps, exercise, frequent mistakes and final instruction."],
-      "founder": ["Ex. The vision that turns this problem into a movement", "Summarize the problem, promise, product, proof, call to act and risk to address."],
-      "speaker": ["Ex. One clear idea to share in ten minutes", "Describe the objective, audience, context, tone and main message."]
+      "pastor": [
+        "Ex. Finding courage when faith feels tired",
+        "Note the biblical passage, central idea, audience tension and final call."
+      ],
+      "conference_speaker": [
+        "Ex. What nobody sees before an important decision",
+        "Describe the angle, problem, strong idea, two proofs and the conclusion the room should remember."
+      ],
+      "trainer": [
+        "Ex. Installing a method the team can repeat",
+        "List the learning objective, steps, exercise, frequent mistakes and final instruction."
+      ],
+      "founder": [
+        "Ex. The vision that turns this problem into a movement",
+        "Summarize the problem, promise, product, proof, call to act and risk to address."
+      ],
+      "speaker": [
+        "Ex. One clear idea to share in ten minutes",
+        "Describe the objective, audience, context, tone and main message."
+      ]
     },
     "guidedTalkMessage": "A first guided draft for your {role} profile.",
     "dashboardRecommendations": {
-      "guidedFirstTalk": ["Guided first talk", "Start with a {type} format adapted to your {role} profile.", "Create this talk"],
-      "onboardingHelp": ["You asked for help configuring your studio", "Use this shortcut if you want guidance on settings, AI modules or first-talk preparation.", "Request help"],
+      "guidedFirstTalk": [
+        "Guided first talk",
+        "Start with a {type} format adapted to your {role} profile.",
+        "Create this talk"
+      ],
+      "onboardingHelp": [
+        "You asked for help configuring your studio",
+        "Use this shortcut if you want guidance on settings, AI modules or first-talk preparation.",
+        "Request help"
+      ],
       "onboardingHelpNote": "We keep your note to guide you: {note}",
-      "pastorBibleModule": ["Bible module ready", "Bible suggestions stay available even if you prepare another format.", "View settings"]
+      "pastorBibleModule": [
+        "Bible module ready",
+        "Bible suggestions stay available even if you prepare another format.",
+        "View settings"
+      ]
     }
   },
   "progression": {
@@ -810,8 +1053,7 @@
     "recommendations": "Recommendations",
     "globalPreparation": "Global preparation",
     "typeDistribution": "Type distribution",
-    "statusDistribution": "Status distribution"
-    ,
+    "statusDistribution": "Status distribution",
     "scoreLabels": {
       "structure": "Needs structure",
       "preparing": "Preparing",
@@ -829,12 +1071,30 @@
       "activeTalks": "In active talks"
     },
     "recommendationCopy": {
-      "missingAudience": ["Add an audience to talks that do not have one.", "View talks"],
-      "missingSections": ["Finish talks with fewer than 3 sections.", "Structure"],
-      "practiceReady": ["Open Speaking Mode on ready talks.", "Present"],
-      "reviewArchives": ["Keep finished talks archived to clarify your active preparation.", "View"],
-      "shortenLongTalks": ["Shorten talks that strongly exceed their target duration.", "Edit"],
-      "createTalk": ["Create a new talk to start preparing.", "New talk"]
+      "missingAudience": [
+        "Add an audience to talks that do not have one.",
+        "View talks"
+      ],
+      "missingSections": [
+        "Finish talks with fewer than 3 sections.",
+        "Structure"
+      ],
+      "practiceReady": [
+        "Open Speaking Mode on ready talks.",
+        "Present"
+      ],
+      "reviewArchives": [
+        "Keep finished talks archived to clarify your active preparation.",
+        "View"
+      ],
+      "shortenLongTalks": [
+        "Shorten talks that strongly exceed their target duration.",
+        "Edit"
+      ],
+      "createTalk": [
+        "Create a new talk to start preparing.",
+        "New talk"
+      ]
     },
     "missing": {
       "title": "Missing title",
@@ -961,7 +1221,11 @@
       "audience": "pastors and preaching teams",
       "description": "Prepare sermons with AI-assisted structure, section development, oral rewriting, estimated duration and a focused teleprompter mode for rehearsal.",
       "eyebrow": "Use case",
-      "highlights": ["Sermon outline generation", "Section-based preparation", "Rehearsal before preaching"],
+      "highlights": [
+        "Sermon outline generation",
+        "Section-based preparation",
+        "Rehearsal before preaching"
+      ],
       "title": "Sermon prep software for pastors",
       "body": [
         "Sermon preparation is one of the most demanding weekly disciplines a pastor faces. Between text study, illustration gathering, structural choices and rehearsal, the path from a passage to a well-delivered message can consume dozens of hours. The blank-page pressure is real — every week, regardless of what else is happening in your schedule. Solo Speaker Studio gives you a dedicated workspace to move through that process section by section, at a consistent pace, without losing the thread of what you are trying to say.",
@@ -999,7 +1263,11 @@
       "audience": "speakers and conference presenters",
       "description": "Turn keynote ideas and conference notes into structured talks that are easier to rehearse, time and deliver with confidence.",
       "eyebrow": "Use case",
-      "highlights": ["Conference talk structure", "Oral flow improvements", "Teleprompter rehearsal"],
+      "highlights": [
+        "Conference talk structure",
+        "Oral flow improvements",
+        "Teleprompter rehearsal"
+      ],
       "title": "AI public speaking preparation",
       "body": [
         "Conference talks, keynotes and panel presentations share a common challenge: the gap between what you want to say and what the audience actually takes away. Most speakers prepare too late, rely on slide decks as a safety net and leave little time for real rehearsal. Solo Speaker Studio helps public speakers close that gap with a structured preparation workflow built for people who speak regularly and need a repeatable method to move from idea to a polished, stage-ready talk.",
@@ -1037,7 +1305,11 @@
       "audience": "trainers, educators and workshop leaders",
       "description": "Build training presentations and workshop talks with clear sections, practical timing and a delivery workflow designed for live teaching.",
       "eyebrow": "Use case",
-      "highlights": ["Course and workshop talks", "Timed sections", "PDF export for delivery notes"],
+      "highlights": [
+        "Course and workshop talks",
+        "Timed sections",
+        "PDF export for delivery notes"
+      ],
       "title": "Training presentation builder",
       "body": [
         "Training and workshop presentations have a different job than keynotes or sermons. They need to transfer skills, not just inspire. Participants leave with either a method they can apply immediately or a gap they can now name and act on. Solo Speaker Studio helps trainers build presentations that hold that structure deliberately — with clear sections, timed steps and a delivery workflow designed for live instruction.",
@@ -1075,7 +1347,11 @@
       "audience": "speakers who want help shaping first drafts",
       "description": "Use AI to generate outlines, develop sections and rewrite text into a more natural spoken style without turning the talk into a generic script.",
       "eyebrow": "Feature",
-      "highlights": ["AI outline generation", "Oral style rewriting", "Section development"],
+      "highlights": [
+        "AI outline generation",
+        "Oral style rewriting",
+        "Section development"
+      ],
       "title": "AI speech writer for talks",
       "body": [
         "Writing a speech is harder than most people expect. The same skill that produces clear emails or reports does not automatically translate to spoken language. Sentences that read well on paper often feel stiff or rushed when delivered aloud — the rhythm is wrong, the breath points are missing and the vocabulary is too formal for the room. Solo Speaker Studio's AI speech writer helps you move from raw ideas to a structured, naturally spoken talk without turning your voice into something generic or automated.",
@@ -1113,7 +1389,11 @@
       "audience": "speakers who rehearse and present live",
       "description": "Practice and deliver talks with a focused teleprompter mode, auto-scroll, timer and voice-follow options for smoother delivery.",
       "eyebrow": "Feature",
-      "highlights": ["Focused reading mode", "Auto-scroll", "Voice-follow options"],
+      "highlights": [
+        "Focused reading mode",
+        "Auto-scroll",
+        "Voice-follow options"
+      ],
       "title": "Teleprompter for speeches",
       "body": [
         "Most speakers rehearse too little and too late. Reading through notes in your head is not the same as speaking full sentences out loud at pace, and that gap shows on stage. The hesitations, the dropped eye contact, the sections that felt clear on the page but dissolve mid-sentence — these are the problems that only emerge when you actually speak. Solo Speaker Studio's teleprompter mode gives you a focused, distraction-free environment to rehearse and deliver talks the way real performance requires.",
@@ -1196,7 +1476,15 @@
     "barChartActual": "Actual",
     "barChartEstimated": "Estimated",
     "heatmapTitle": "Weekly consistency",
-    "heatmapDays": ["M", "T", "W", "T", "F", "S", "S"],
+    "heatmapDays": [
+      "M",
+      "T",
+      "W",
+      "T",
+      "F",
+      "S",
+      "S"
+    ],
     "trendTitle": "Precision over time",
     "emptyTitle": "No rehearsals recorded yet",
     "emptyBody": "Open a talk in prompter mode and stay for at least 30 seconds. Sessions are recorded automatically.",
