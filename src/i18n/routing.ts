@@ -3,7 +3,7 @@ export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = "en";
 
-const unlocalizedPrefixes = ["/api", "/auth/callback", "/logout", "/ingest", "/_next", "/public"];
+const unlocalizedPrefixes = ["/api", "/auth/callback", "/auth/verify", "/auth/confirm", "/logout", "/ingest", "/_next", "/public"];
 
 export function isLocale(value: string | undefined): value is Locale {
   return locales.includes(value as Locale);
