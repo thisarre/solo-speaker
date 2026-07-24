@@ -330,30 +330,32 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
     () =>
       theme === "light"
         ? ({
-            "--speaking-bg": "#f7f4ec",
-            "--speaking-strong": "#111111",
-            "--speaking-muted": "#62646c",
-            "--speaking-soft": "#858078",
-            "--speaking-faint": "#c1bbb0",
-            "--speaking-line": "#ded8cc",
-            "--speaking-panel": "#fffcf5",
-            "--speaking-field": "#f1ece2",
-            "--speaking-shadow": "rgba(60, 50, 35, .16)",
-            "--speaking-button-hover": "#ebe5d8",
-            "--speaking-button-primary-bg": "#151515",
+            "--speaking-bg": "#fafafb",
+            "--speaking-strong": "#17171b",
+            "--speaking-muted": "#6f6f7a",
+            "--speaking-soft": "#85858f",
+            "--speaking-faint": "#a8a8b2",
+            "--speaking-line": "#e8e8ec",
+            "--speaking-panel": "#ffffff",
+            "--speaking-field": "#f4f4f6",
+            "--speaking-shadow": "rgba(20, 20, 25, .16)",
+            "--speaking-button-hover": "#eeeef2",
+            "--speaking-accent": "#6e6cf7",
+            "--speaking-button-primary-bg": "#17171b",
             "--speaking-button-primary-text": "#ffffff"
           } as CSSProperties)
         : ({
-            "--speaking-bg": "#0a0b0d",
+            "--speaking-bg": "#0e0f12",
             "--speaking-strong": "#ececf1",
-            "--speaking-muted": "#9092a0",
+            "--speaking-muted": "#90929e",
             "--speaking-soft": "#6f7180",
-            "--speaking-faint": "#3c3d46",
+            "--speaking-faint": "#5f606b",
             "--speaking-line": "#23242b",
-            "--speaking-panel": "#141519",
-            "--speaking-field": "#101115",
+            "--speaking-panel": "#16171c",
+            "--speaking-field": "#111216",
             "--speaking-shadow": "rgba(0, 0, 0, .5)",
             "--speaking-button-hover": "#1e1f25",
+            "--speaking-accent": "#7b79ff",
             "--speaking-button-primary-bg": "#ececf1",
             "--speaking-button-primary-text": "#101114"
           } as CSSProperties),
@@ -394,7 +396,7 @@ export function SpeakingMode({ talk }: SpeakingModeProps) {
         />
 
         <div className="h-[3px] bg-[var(--speaking-line)]">
-          <div className="h-full bg-[#7b79ff] transition-[width]" style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%` }} />
+          <div className="h-full bg-[var(--speaking-accent)] transition-[width]" style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%` }} />
         </div>
 
         <SpeakingControls

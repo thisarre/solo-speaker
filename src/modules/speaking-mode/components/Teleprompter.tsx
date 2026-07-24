@@ -42,7 +42,7 @@ export function Teleprompter({
         ref={containerRef}
       >
         <div
-          className={`pointer-events-none fixed left-7 z-10 h-0.5 w-6 rounded-full md:left-[70px] ${isLight ? "bg-[#6b5cff]" : "bg-[#7b79ff]"}`}
+          className="pointer-events-none fixed left-7 z-10 h-0.5 w-6 rounded-full bg-[var(--speaking-accent)] md:left-[70px]"
           style={{ top: `${readingAnchorRatio * 100}%` }}
         />
         <div
@@ -94,11 +94,11 @@ export function Teleprompter({
               {messages.speakingMode.noSection}
             </p>
           )}
-          <p className={`mt-[3em] text-center text-[.5em] ${isLight ? "text-[#b7b3aa]" : "text-[#3c3d46]"}`}>{messages.speakingMode.endOfTalk}</p>
+          <p className={`mt-[3em] text-center text-[.5em] ${isLight ? "text-[#a8a8b2]" : "text-[#3c3d46]"}`}>{messages.speakingMode.endOfTalk}</p>
         </div>
       </div>
-      <div className={`pointer-events-none fixed inset-x-0 top-[54px] h-24 bg-gradient-to-b to-transparent ${isLight ? "from-[#f7f4ec]" : "from-[#0a0b0d]"}`} />
-      <div className={`pointer-events-none fixed inset-x-0 bottom-[168px] h-28 bg-gradient-to-t to-transparent sm:bottom-[118px] ${isLight ? "from-[#f7f4ec]" : "from-[#0a0b0d]"}`} />
+      <div className={`pointer-events-none fixed inset-x-0 top-[54px] h-24 bg-gradient-to-b to-transparent from-[var(--speaking-bg)]`} />
+      <div className={`pointer-events-none fixed inset-x-0 bottom-[168px] h-28 bg-gradient-to-t to-transparent sm:bottom-[118px] from-[var(--speaking-bg)]`} />
     </main>
   );
 }
@@ -114,17 +114,17 @@ function getItemState(index: number, currentIndex: number) {
 function getHeadingClass(input: { isActive: boolean; isLight: boolean; itemState: string }) {
   if (input.isActive) return input.isLight ? "font-bold text-[#171717]" : "font-bold text-white";
   if (input.itemState === "next") return input.isLight ? "text-[#5f6068]" : "text-[#8f90a0]";
-  if (input.itemState === "previous") return input.isLight ? "text-[#9a958b]" : "text-[#5e606b]";
-  if (input.itemState === "upcoming") return input.isLight ? "text-[#747069]" : "text-[#767887]";
-  return input.isLight ? "text-[#c3beb3]" : "text-[#3f4049]";
+  if (input.itemState === "previous") return input.isLight ? "text-[#a3a3ad]" : "text-[#5e606b]";
+  if (input.itemState === "upcoming") return input.isLight ? "text-[#8a8a93]" : "text-[#767887]";
+  return input.isLight ? "text-[#c9c9d1]" : "text-[#3f4049]";
 }
 
 function getBodyClass(input: { currentIndex: number; distance: number; index: number; isActive: boolean; isLight: boolean; itemState: string }) {
   if (input.isActive) return input.isLight ? "font-bold text-[#111111]" : "font-bold text-white";
   if (input.distance === 1) {
     if (input.index > input.currentIndex) return input.isLight ? "text-[#4d4f57]" : "text-[#a7a8b4]";
-    return input.isLight ? "text-[#9a958b]" : "text-[#6a6c78]";
+    return input.isLight ? "text-[#a3a3ad]" : "text-[#6a6c78]";
   }
   if (input.itemState === "upcoming") return input.isLight ? "text-[#696b72]" : "text-[#858794]";
-  return input.isLight ? "text-[#bbb6aa]" : "text-[#4a4b55]";
+  return input.isLight ? "text-[#c4c4cc]" : "text-[#4a4b55]";
 }
