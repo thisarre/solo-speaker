@@ -3,7 +3,7 @@ import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getActivePlan } from "@/modules/billing/active-plan";
-import { decideCloudAllowed, GRANT_TTL_SECONDS } from "@/modules/billing/stt-metering";
+import { decideCloudAllowed, decideSessionReuse, GRANT_TTL_SECONDS } from "@/modules/billing/stt-metering";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
@@ -94,9 +94,16 @@ export async function POST(request: NextRequest) {
   // the grant can still fail (502), and a reservation written here would never be released.
   const { data: existingSession } = await admin
     .from("stt_sessions")
-    .select("id")
+    .select("id, user_id, status")
     .eq("id", sessionId)
     .maybeSingle();
+
+  // Anti-rejeu : le sessionId vient du client, il ne prouve rien. Règle pure et
+  // testée dans stt-metering (decideSessionReuse).
+  const reuse = decideSessionReuse(existingSession, user.id);
+  if (reuse.kind === "reject") {
+    return NextResponse.json({ error: reuse.error }, { status: reuse.status, headers: rateLimit.headers });
+  }
 
   const response = await fetch("https://api.deepgram.com/v1/auth/grant", {
     body: JSON.stringify({ ttl_seconds: GRANT_TTL_SECONDS }),
@@ -116,7 +123,7 @@ export async function POST(request: NextRequest) {
   // Grant succeeded — NOW reserve the FULL expected duration ONCE per session. On a re-mint of
   // the same sessionId the row already exists, so we leave the reservation and counter untouched
   // (the confirm step later releases reserved_seconds = expectedSeconds and books real seconds).
-  if (!existingSession) {
+  if (reuse.kind === "fresh") {
     await admin.from("stt_sessions").insert({
       id: sessionId,
       user_id: user.id,
