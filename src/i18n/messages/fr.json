@@ -740,7 +740,7 @@
     "targetDuration": "Durée cible de la prise de parole",
     "targetDurationAria": "Durée cible de la prise de parole en minutes",
     "outline": "Générer un plan de départ",
-    "outlineDescription": "Crée la structure calibrée sur la durée cible. Les sections sont des brouillons courts, à développer ensuite.",
+    "outlineDescription": "Génère un plan complet calibré sur la durée cible : chaque section reçoit un brouillon oral proportionnel à son temps de parole.",
     "developAll": "Développer tout le contenu",
     "developAllDescription": "Rédige chaque section à sa durée cible, l'une après l'autre.",
     "developAllProgress": "Section {current}/{total} en cours de rédaction…",
@@ -759,7 +759,7 @@
     "features": {
       "outline": [
         "Générer un plan de départ",
-        "Créer une structure calibrée sur la durée cible, à développer ensuite."
+        "Générer un plan complet calibré sur la durée cible, prêt à répéter."
       ],
       "expand-section": [
         "Développer la section",

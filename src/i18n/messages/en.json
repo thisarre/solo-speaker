@@ -740,7 +740,7 @@
     "targetDuration": "Target talk duration",
     "targetDurationAria": "Target talk duration in minutes",
     "outline": "Generate a starting plan",
-    "outlineDescription": "Creates the structure calibrated to the target duration. Sections are short drafts to develop next.",
+    "outlineDescription": "Generates a full plan calibrated to the target duration: each section gets a spoken draft sized to its speaking time.",
     "developAll": "Develop the full content",
     "developAllDescription": "Writes every section to its target duration, one after another.",
     "developAllProgress": "Writing section {current}/{total}…",
@@ -759,7 +759,7 @@
     "features": {
       "outline": [
         "Generate a starting plan",
-        "Create a structure calibrated to the target duration, to develop next."
+        "Generate a full plan calibrated to the target duration, ready to rehearse."
       ],
       "expand-section": [
         "Develop section",

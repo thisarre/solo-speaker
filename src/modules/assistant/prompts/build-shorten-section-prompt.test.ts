@@ -42,7 +42,8 @@ test("expand prompt sizes the rewrite to the section target duration", async () 
 
   const sized = buildSectionExpandPrompt(talk, { heading: "Ouverture", body: "Brouillon.", targetDurationMin: 6 });
   assert.match(sized, /Durée cible de cette section: 6 minutes/);
-  assert.match(sized, /environ 780 mots/);
+  // 6 min × 140 words/min (shared WORDS_PER_MINUTE, aligned with duration estimate).
+  assert.match(sized, /environ 840 mots/);
 
   const unsized = buildSectionExpandPrompt(talk, { heading: "Ouverture", body: "Brouillon." });
   assert.doesNotMatch(unsized, /Durée cible de cette section/);
