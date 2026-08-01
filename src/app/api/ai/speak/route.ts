@@ -1,12 +1,26 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { createClient } from "@/lib/supabase/server";
+import { buildTtsUsageCapture } from "@/lib/usage-telemetry";
 import { getTone, type ToneId } from "@/modules/voice-simulator/tones";
 
 export const runtime = "nodejs";
 
 const ELEVENLABS_MODEL = "eleven_multilingual_v2";
 const MAX_CHARS = 5000;
+
+/**
+ * Usage reporting must never break playback: a telemetry outage is not a reason
+ * to deny a user the audio they asked for.
+ */
+function reportTtsUsage(input: Parameters<typeof buildTtsUsageCapture>[0]) {
+  try {
+    getPostHogClient().capture(buildTtsUsageCapture(input));
+  } catch {
+    // Swallowed on purpose.
+  }
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -76,6 +90,13 @@ export async function POST(request: NextRequest) {
       })
     }
   );
+
+  reportTtsUsage({
+    characters: text.length,
+    distinctId: user.id,
+    status: elevenResponse.status,
+    toneId: tone.id
+  });
 
   if (!elevenResponse.ok) {
     const raw = await elevenResponse.text();

@@ -29,7 +29,6 @@ import {
 import { deleteTalk, createTalkSection, deleteTalkSection, reorderTalkSections, updateTalk, updateTalkSection } from "@/modules/talks/actions";
 import { formatDuration, sectionSeconds, wordCount } from "@/lib/utils";
 import { Alert } from "@/components/ui/Alert";
-import { SectionDictationButton } from "@/modules/voice-memo/components/section-dictation-button";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -122,9 +121,6 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
   const [aiResult, setAiResult] = useState<PendingAssistantResult | null>(null);
   const [deleteTalkRequested, setDeleteTalkRequested] = useState(false);
   const [sectionToDelete, setSectionToDelete] = useState<EditableSection | null>(null);
-  // Only one section may hold the mic at a time — two live MediaRecorders would
-  // capture the same voice twice and bill two transcriptions.
-  const [dictatingSectionId, setDictatingSectionId] = useState("");
   const [aiEnabled, setAiEnabled] = useStoredBoolean(aiEnabledStorageKey, true);
   const [sectionRailCollapsed, setSectionRailCollapsed] = useStoredBoolean("editor-section-rail-collapsed", false);
   const [assistantRailCollapsed, setAssistantRailCollapsed] = useStoredBoolean("editor-assistant-rail-collapsed", false);
@@ -361,20 +357,6 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
       textarea?.focus();
       textarea?.setSelectionRange(nextCursor, nextCursor);
     });
-  }
-
-  function insertDictation(section: EditableSection, text: string) {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    // Dictation lands at the cursor like any other insert, but a transcript butting
-    // straight against the previous word reads as a typo — pad it when needed.
-    const textarea = sectionTextareaRefs.current[section.id];
-    const body = section.body ?? "";
-    const start = textarea?.selectionStart ?? body.length;
-    const needsSpace = start > 0 && !/\s$/.test(body.slice(0, start));
-
-    insertIntoSection(section, `${needsSpace ? " " : ""}${trimmed}`);
-    posthog.capture("section_dictation_inserted", { talk_type: draft.type, characters: trimmed.length });
   }
 
   function formatSelectionInSection(section: EditableSection, before: string, after = before, placeholder = editor.selectionPlaceholder) {
@@ -1095,18 +1077,6 @@ export function TalkEditor({ canShare = false, canTranslate = false, talk }: { c
                         >
                           ¶
                         </Button>
-                        <span className="mx-1 h-4 w-px shrink-0 bg-line" />
-                        <SectionDictationButton
-                          disabled={Boolean(dictatingSectionId) && dictatingSectionId !== section.id}
-                          language={draft.language}
-                          onError={setError}
-                          onRecordingChange={(recording) =>
-                            setDictatingSectionId((current) =>
-                              recording ? section.id : current === section.id ? "" : current
-                            )
-                          }
-                          onTranscript={(text) => insertDictation(section, text)}
-                        />
                       </div>
                     </div> : null}
                     <textarea

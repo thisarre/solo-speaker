@@ -23,7 +23,7 @@ export async function AppShell({ children, locale }: { children: ReactNode; loca
 
   return (
     <div className="flex min-h-[100svh] bg-bg text-ink">
-      {user ? <PostHogIdentify email={user.email} name={profile?.full_name ?? undefined} userId={user.id} /> : null}
+      {user ? <PostHogIdentify billingPlan={billingPlan} email={user.email} name={profile?.full_name ?? undefined} userId={user.id} /> : null}
       <OnboardingPreferenceSync profile={profile} />
       <GuidedOnboardingTour enabled={Boolean(profile?.onboarding_completed_at)} latestTalkId={latestTalkId} />
       <Sidebar locale={activeLocale} talkCount={talkCount} trialReminder={trialReminder} userName={profile?.full_name ?? messages.common.brandShort} />

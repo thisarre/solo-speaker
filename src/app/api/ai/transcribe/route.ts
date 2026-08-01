@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
+import { getPostHogClient } from "@/lib/posthog-server";
+import { buildTranscriptionUsageCapture } from "@/lib/usage-telemetry";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -46,7 +48,10 @@ type TranscriptionAuth = {
 
 type OpenAITranscriptionBody = {
   text?: string;
+  /** Only returned by whisper-1 via verbose_json; absent on the gpt-4o-* models. */
+  duration?: number;
   error?: {
+    code?: string;
     message?: string;
   };
 };
@@ -125,6 +130,27 @@ function baseMimeType(type: string) {
   return type.split(";")[0]?.trim().toLowerCase() ?? "";
 }
 
+/**
+ * OpenAI bills transcription per minute but the `json` response format carries no
+ * duration, and the gpt-4o-*-transcribe models don't support `verbose_json`. So we
+ * approximate from the payload size: MediaRecorder's Opus output measured ~8 kB/s
+ * on a reference sample. Good enough to spot a runaway account; not an invoice.
+ */
+const APPROX_AUDIO_BYTES_PER_SECOND = 8000;
+
+function estimateAudioSeconds(bytes: number): number {
+  return Math.max(0, Math.round(bytes / APPROX_AUDIO_BYTES_PER_SECOND));
+}
+
+/** Telemetry must never break a transcription that otherwise succeeded. */
+function reportTranscriptionUsage(input: Parameters<typeof buildTranscriptionUsageCapture>[0]) {
+  try {
+    getPostHogClient().capture(buildTranscriptionUsageCapture(input));
+  } catch {
+    // Swallowed on purpose.
+  }
+}
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY;
 
@@ -194,9 +220,10 @@ export async function POST(request: NextRequest) {
   const audioFile = new File([audio], `voice-memo.${extension}`, {
     type: audioMimeType || "audio/webm"
   });
+  const model = process.env.OPENAI_TRANSCRIPTION_MODEL || "gpt-4o-mini-transcribe";
   const openAiFormData = new FormData();
   openAiFormData.append("file", audioFile);
-  openAiFormData.append("model", process.env.OPENAI_TRANSCRIPTION_MODEL || "gpt-4o-mini-transcribe");
+  openAiFormData.append("model", model);
   openAiFormData.append("language", language);
   openAiFormData.append("response_format", "json");
   // A French prompt on a Spanish memo biases the decoder; keep them aligned.
@@ -218,13 +245,31 @@ export async function POST(request: NextRequest) {
     return errorResponse("Réponse OpenAI illisible.", 502);
   }
 
+  reportTranscriptionUsage({
+    distinctId: auth.user.id,
+    model,
+    seconds: payload.duration ?? estimateAudioSeconds(audio.size),
+    status: response.status
+  });
+
   if (!response.ok) {
+    // OpenAI renvoie 429 aussi bien pour un pic de trafic que pour un solde épuisé.
+    // Inviter à réessayer dans le second cas envoie l'utilisateur dans le mur, et le
+    // message brut d'OpenAI contient un lien de facturation qui n'a rien à faire ici.
+    const isOutOfCredit = payload.error?.code === "insufficient_quota";
+
     const message =
       response.status === 401
         ? "Clé OpenAI absente ou invalide côté serveur."
-        : response.status === 429
-          ? "Limite OpenAI atteinte. Réessaie dans un instant."
-          : payload.error?.message || "Transcription impossible.";
+        : isOutOfCredit
+          ? "Transcription indisponible pour le moment. L'équipe est prévenue."
+          : response.status === 429
+            ? "Limite OpenAI atteinte. Réessaie dans un instant."
+            : payload.error?.message || "Transcription impossible.";
+
+    if (isOutOfCredit) {
+      console.error("[ai/transcribe] OpenAI credit balance exhausted — transcription is down until the account is topped up.");
+    }
 
     return errorResponse(message, response.status);
   }

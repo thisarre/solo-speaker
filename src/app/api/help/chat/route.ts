@@ -4,6 +4,8 @@ import { createClient as createSupabaseClient, type SupabaseClient, type User } 
 import { getMessages } from "@/i18n/messages";
 import { defaultLocale, isLocale, type Locale } from "@/i18n/routing";
 import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
+import { buildAiGenerationCapture } from "@/lib/posthog-ai";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { buildFallbackHelpAnswer, buildHelpAssistantPrompt, getRelevantHelpActions, parseHelpAssistantReply, type HelpChatMessage } from "@/modules/help/help-assistant";
 import type { Database } from "@/lib/supabase/database.types";
@@ -34,6 +36,7 @@ type OpenAIResponseBody = {
   };
   output?: OpenAIResponseOutput[];
   output_text?: string;
+  usage?: { input_tokens?: number; output_tokens?: number };
 };
 
 function createRouteSupabaseClient(request: NextRequest) {
@@ -227,6 +230,27 @@ export async function POST(request: NextRequest) {
     payload = (await response.json()) as OpenAIResponseBody;
   } catch {
     return jsonResponse({ ok: true, actions, answer: fallbackAnswer, followUp: "" }, 200, rateLimit.headers);
+  }
+
+  // The help widget always answers, falling back to canned copy on failure — which
+  // is exactly why its spend needs reporting: a silent fallback hides a paid call.
+  try {
+    getPostHogClient().capture(
+      buildAiGenerationCapture({
+        action: "help-chat",
+        distinctId: auth.user.id,
+        input: [{ role: "user", content: prompt }],
+        model,
+        provider: "openai",
+        status: response.status,
+        tokens: {
+          input: payload.usage?.input_tokens,
+          output: payload.usage?.output_tokens
+        }
+      })
+    );
+  } catch {
+    // Telemetry must never degrade the help answer.
   }
 
   if (!response.ok) {

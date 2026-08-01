@@ -4,6 +4,8 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
+import { buildAiGenerationCapture } from "@/lib/posthog-ai";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { can } from "@/modules/billing/capabilities";
 import { consumeAssistantAiCredit } from "@/modules/billing/ai-credits";
 import type { BillingPlan } from "@/modules/billing/entitlements";
@@ -206,13 +208,40 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     })
   });
 
-  type OpenAIBody = { output?: { type?: string; content?: { type: string; text: string }[] }[]; output_text?: string; error?: { message?: string } };
+  type OpenAIBody = {
+    output?: { type?: string; content?: { type: string; text: string }[] }[];
+    output_text?: string;
+    error?: { message?: string };
+    usage?: { input_tokens?: number; output_tokens?: number };
+  };
   let aiPayload: OpenAIBody;
 
   try {
     aiPayload = (await aiResponse.json()) as OpenAIBody;
   } catch {
     return errorResponse("Réponse OpenAI illisible.", 502);
+  }
+
+  // Reported before the success branch: a refused translation still burns tokens,
+  // and a cost that only shows up when things go right is a cost you under-count.
+  try {
+    getPostHogClient().capture(
+      buildAiGenerationCapture({
+        action: "translate",
+        distinctId: user.id,
+        input: [{ role: "user", content: prompt }],
+        model,
+        provider: "openai",
+        status: aiResponse.status,
+        talkLanguage: targetLanguage,
+        tokens: {
+          input: aiPayload.usage?.input_tokens,
+          output: aiPayload.usage?.output_tokens
+        }
+      })
+    );
+  } catch {
+    // Telemetry must never fail a translation.
   }
 
   if (!aiResponse.ok) {

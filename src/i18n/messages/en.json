@@ -718,8 +718,7 @@
     "unsupportedHelp": "Recording is unavailable in this browser. Use a recent Chrome, Edge or Safari with microphone access enabled.",
     "addToBrief": "Add to brief",
     "copied": "Copied",
-    "copy": "Copy",
-    "dictateSection": "Dictate into this block"
+    "copy": "Copy"
   },
   "assistant": {
     "title": "AI assistant",

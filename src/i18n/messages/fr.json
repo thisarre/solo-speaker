@@ -718,8 +718,7 @@
     "unsupportedHelp": "Enregistrement indisponible dans ce navigateur. Utilisez Chrome, Edge ou Safari récent avec un accès micro autorisé.",
     "addToBrief": "Ajouter au brief",
     "copied": "Copié",
-    "copy": "Copier",
-    "dictateSection": "Dicter dans ce bloc"
+    "copy": "Copier"
   },
   "assistant": {
     "title": "Assistant IA",
