@@ -641,6 +641,9 @@
     "reading": "Lecture en cours",
     "untitled": "Section sans titre",
     "playbackError": "Impossible de lire. Réessaie.",
+    "quotaError": "Quota de synthèse vocale atteint. Réessaie plus tard.",
+    "voiceUnavailableError": "Cette voix n'est pas disponible. Choisis un autre ton.",
+    "busyError": "Service vocal saturé. Réessaie dans un instant.",
     "close": "Fermer la simulation",
     "tones": {
       "confiant": {
@@ -715,7 +718,8 @@
     "unsupportedHelp": "Enregistrement indisponible dans ce navigateur. Utilisez Chrome, Edge ou Safari récent avec un accès micro autorisé.",
     "addToBrief": "Ajouter au brief",
     "copied": "Copié",
-    "copy": "Copier"
+    "copy": "Copier",
+    "dictateSection": "Dicter dans ce bloc"
   },
   "assistant": {
     "title": "Assistant IA",

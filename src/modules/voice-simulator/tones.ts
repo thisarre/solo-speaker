@@ -10,6 +10,9 @@ export type Tone = {
 };
 
 // ElevenLabs multilingual v2 voices — all support French natively.
+// Only `premade` voices are usable here: library (shared) voices return 402
+// `paid_plan_required` on the free tier. Check with GET /v1/voices before
+// swapping an id — a voice absent from that list will fail at playback.
 // Labels and descriptions live in i18n (voiceSimulator.tones).
 export const tones: Tone[] = [
   {
@@ -22,7 +25,7 @@ export const tones: Tone[] = [
   },
   {
     id: "chaleureux",
-    voiceId: "XB0fDUnXU5powFXDhCwa", // Charlotte
+    voiceId: "hpp4J3VqNfWAUOO0d1Us", // Bella
     stability: 0.65,
     similarityBoost: 0.80,
     style: 0.5,

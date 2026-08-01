@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play, Square, Volume2, X } from "lucide-react";
 import { tones, getTone, type ToneId } from "@/modules/voice-simulator/tones";
+import { getAudio, prefetchAudio, SpeakError } from "@/modules/voice-simulator/audio-cache";
 import { useI18n } from "@/i18n/client";
 
 type Section = {
@@ -29,6 +30,7 @@ function buildSpeakText(section: Section): string {
   return parts.join(". ");
 }
 
+
 export function VoiceSimulatorPanel({ sections, activeSectionId, onSectionChange, onClose }: Props) {
   const { messages } = useI18n();
   const vs = messages.voiceSimulator;
@@ -36,7 +38,9 @@ export function VoiceSimulatorPanel({ sections, activeSectionId, onSectionChange
   const [playState, setPlayState] = useState<PlayState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  // Bumped on every stop/new playback: an in-flight synthesis whose token is stale
+  // resolves into the cache but never reaches the audio element.
+  const playTokenRef = useRef(0);
 
   const currentIndex = sections.findIndex((s) => s.id === activeSectionId);
   const safeIndex = currentIndex >= 0 ? currentIndex : 0;
@@ -50,8 +54,7 @@ export function VoiceSimulatorPanel({ sections, activeSectionId, onSectionChange
   const isActive = isPlaying || isPaused || isLoading;
 
   const stopAudio = useCallback(() => {
-    abortRef.current?.abort();
-    abortRef.current = null;
+    playTokenRef.current += 1;
     const audio = audioRef.current;
     if (audio) {
       audio.onplay = null;
@@ -68,7 +71,21 @@ export function VoiceSimulatorPanel({ sections, activeSectionId, onSectionChange
 
   useEffect(() => () => { stopAudio(); }, [stopAudio]);
 
-  const playSection = useCallback(async (section: Section, toneId: ToneId, onEnded?: () => void) => {
+  const messageForError = useCallback((err: unknown) => {
+    const byCode: Record<string, string> = {
+      quota_exceeded: vs.quotaError,
+      voice_unavailable: vs.voiceUnavailableError,
+      provider_busy: vs.busyError
+    };
+    return (err instanceof SpeakError && byCode[err.code]) || vs.playbackError;
+  }, [vs.playbackError, vs.quotaError, vs.voiceUnavailableError, vs.busyError]);
+
+  const playSection = useCallback(async (
+    section: Section,
+    toneId: ToneId,
+    onEnded?: () => void,
+    nextSection?: Section
+  ) => {
     stopAudio();
     setPlayState("loading");
     setErrorMsg("");
@@ -76,26 +93,12 @@ export function VoiceSimulatorPanel({ sections, activeSectionId, onSectionChange
     const text = buildSpeakText(section);
     if (!text) { setPlayState("idle"); onEnded?.(); return; }
 
-    const abort = new AbortController();
-    abortRef.current = abort;
+    const token = (playTokenRef.current += 1);
+    const isStale = () => playTokenRef.current !== token;
 
     try {
-      const response = await fetch("/api/ai/speak", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, toneId }),
-        signal: abort.signal
-      });
-
-      if (abort.signal.aborted) return;
-
-      if (!response.ok) {
-        const err = await response.json() as { error?: string };
-        throw new Error(err.error ?? vs.playbackError);
-      }
-
-      const blob = await response.blob();
-      if (abort.signal.aborted) return;
+      const blob = await getAudio(text, toneId);
+      if (isStale()) return;
 
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
@@ -107,12 +110,16 @@ export function VoiceSimulatorPanel({ sections, activeSectionId, onSectionChange
       audio.onerror = () => { URL.revokeObjectURL(url); setErrorMsg(vs.playbackError); setPlayState("error"); };
 
       await audio.play();
+
+      // Warm the next block only once this one is audible, so the two requests
+      // never compete — by the time playback ends, the next blob is in cache.
+      if (!isStale() && nextSection) prefetchAudio(buildSpeakText(nextSection), toneId);
     } catch (err) {
-      if ((err as Error).name === "AbortError") return;
-      setErrorMsg(err instanceof Error ? err.message : vs.playbackError);
+      if (isStale()) return;
+      setErrorMsg(messageForError(err));
       setPlayState("error");
     }
-  }, [stopAudio, vs.playbackError]);
+  }, [stopAudio, messageForError, vs.playbackError]);
 
   // Recurse through `playFromRef` (kept in sync below) so this memoized callback never references its
   // own binding before initialization (TDZ) — used to auto-advance to the next section on audio end.
@@ -122,13 +129,23 @@ export function VoiceSimulatorPanel({ sections, activeSectionId, onSectionChange
     const section = allSections[index];
     if (!section) return;
     onSectionChange(section.id);
-    const hasMore = index + 1 < allSections.length;
-    playSection(section, tone, hasMore ? () => playFromRef.current(index + 1, tone, allSections) : undefined);
+    const next = allSections[index + 1];
+    playSection(
+      section,
+      tone,
+      next ? () => playFromRef.current(index + 1, tone, allSections) : undefined,
+      next
+    );
   }, [onSectionChange, playSection]);
 
   useEffect(() => {
     playFromRef.current = playFrom;
   }, [playFrom]);
+
+  // No idle warm-up on the displayed block: measured on 2026-08-01, browsing
+  // sections and tone chips billed ~2.8k characters for three short blocks that
+  // were barely listened to. Synthesis now only happens for audio that plays —
+  // the current block on demand, the next one while the current is audible.
 
   const handlePlay = () => {
     if (!currentSection) return;

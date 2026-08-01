@@ -8,6 +8,22 @@ import type { Database } from "@/lib/supabase/database.types";
 export const runtime = "nodejs";
 
 const maxAudioSizeBytes = 25 * 1024 * 1024;
+const transcriptionLanguages: Record<string, string> = {
+  FR: "fr",
+  EN: "en",
+  ES: "es",
+  DE: "de",
+  IT: "it",
+  PT: "pt"
+};
+const transcriptionPrompts: Record<string, string> = {
+  fr: "Mémo vocal pour préparer une prise de parole. Conserve les idées, la ponctuation et les formulations naturelles.",
+  en: "Voice memo for preparing a talk. Keep the ideas, punctuation and natural phrasing.",
+  es: "Nota de voz para preparar una intervención. Conserva las ideas, la puntuación y las formulaciones naturales.",
+  de: "Sprachnotiz zur Vorbereitung eines Vortrags. Behalte Ideen, Zeichensetzung und natürliche Formulierungen bei.",
+  it: "Memo vocale per preparare un intervento. Conserva le idee, la punteggiatura e le formulazioni naturali.",
+  pt: "Memorando de voz para preparar uma intervenção. Preserva as ideias, a pontuação e as formulações naturais."
+};
 const supportedAudioTypes = new Set([
   "audio/flac",
   "audio/mp3",
@@ -152,7 +168,9 @@ export async function POST(request: NextRequest) {
 
   const audio = formData.get("audio");
   const languageValue = formData.get("language");
-  const language = languageValue === "EN" ? "en" : "fr";
+  // Talks exist in six languages; anything unmapped falls back to French rather
+  // than letting the model guess, which is what the FR/EN-only branch used to do.
+  const language = transcriptionLanguages[String(languageValue)] ?? "fr";
 
   if (!(audio instanceof File)) {
     return errorResponse("Ajoute un fichier audio à transcrire.");
@@ -181,7 +199,8 @@ export async function POST(request: NextRequest) {
   openAiFormData.append("model", process.env.OPENAI_TRANSCRIPTION_MODEL || "gpt-4o-mini-transcribe");
   openAiFormData.append("language", language);
   openAiFormData.append("response_format", "json");
-  openAiFormData.append("prompt", "Mémo vocal pour préparer une prise de parole. Conserve les idées, la ponctuation et les formulations naturelles.");
+  // A French prompt on a Spanish memo biases the decoder; keep them aligned.
+  openAiFormData.append("prompt", transcriptionPrompts[language] ?? transcriptionPrompts.fr);
 
   const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
     method: "POST",

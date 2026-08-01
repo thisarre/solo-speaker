@@ -641,6 +641,9 @@
     "reading": "Playing",
     "untitled": "Untitled section",
     "playbackError": "Playback failed. Please retry.",
+    "quotaError": "Voice synthesis quota reached. Try again later.",
+    "voiceUnavailableError": "This voice isn't available. Pick another tone.",
+    "busyError": "Voice service is busy. Try again in a moment.",
     "close": "Close simulation",
     "tones": {
       "confiant": {
@@ -715,7 +718,8 @@
     "unsupportedHelp": "Recording is unavailable in this browser. Use a recent Chrome, Edge or Safari with microphone access enabled.",
     "addToBrief": "Add to brief",
     "copied": "Copied",
-    "copy": "Copy"
+    "copy": "Copy",
+    "dictateSection": "Dictate into this block"
   },
   "assistant": {
     "title": "AI assistant",

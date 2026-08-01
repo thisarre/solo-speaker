@@ -3,6 +3,7 @@
 import posthog from "posthog-js";
 import { createClient } from "@/lib/supabase/browser";
 import { getMessages } from "@/i18n/messages";
+import type { TalkLanguage } from "@/types/talk";
 
 const errors = getMessages("fr").errors;
 
@@ -16,7 +17,7 @@ type TranscribeVoiceMemoResponse =
       error: string;
     };
 
-export async function transcribeVoiceMemo(input: { audio: Blob; language: "FR" | "EN" }) {
+export async function transcribeVoiceMemo(input: { audio: Blob; language: TalkLanguage }) {
   const supabase = createClient();
   const {
     data: { session }

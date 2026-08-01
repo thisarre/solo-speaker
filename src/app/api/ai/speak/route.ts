@@ -78,8 +78,30 @@ export async function POST(request: NextRequest) {
   );
 
   if (!elevenResponse.ok) {
-    const err = await elevenResponse.text();
-    return NextResponse.json({ error: err || "ElevenLabs error" }, { status: elevenResponse.status });
+    const raw = await elevenResponse.text();
+    // Never surface the provider payload to the client: it leaks account state
+    // (plan, quota, request ids). Map it to a stable code the UI can translate.
+    console.error(`[ai/speak] ElevenLabs ${elevenResponse.status} for voice ${tone.voiceId}: ${raw.slice(0, 500)}`);
+
+    let providerStatus = "";
+    try {
+      providerStatus = (JSON.parse(raw) as { detail?: { status?: string } }).detail?.status ?? "";
+    } catch {
+      providerStatus = "";
+    }
+
+    const code = providerStatus === "quota_exceeded"
+      ? "quota_exceeded"
+      : elevenResponse.status === 402 || providerStatus === "payment_required"
+        ? "voice_unavailable"
+        : elevenResponse.status === 429
+          ? "provider_busy"
+          : "provider_error";
+
+    return NextResponse.json(
+      { code, error: "Voice synthesis unavailable" },
+      { status: elevenResponse.status === 429 ? 429 : 502 }
+    );
   }
 
   return new NextResponse(elevenResponse.body, {
