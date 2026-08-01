@@ -7,8 +7,9 @@ import { getTone, type ToneId } from "@/modules/voice-simulator/tones";
 
 export const runtime = "nodejs";
 
-const ELEVENLABS_MODEL = "eleven_multilingual_v2";
-const MAX_CHARS = 5000;
+const OPENAI_TTS_MODEL = process.env.OPENAI_TTS_MODEL || "tts-1";
+const OPENAI_TTS_URL = "https://api.openai.com/v1/audio/speech";
+const MAX_CHARS = 4096; // tts-1 rejects anything longer.
 
 /**
  * Usage reporting must never break playback: a telemetry outage is not a reason
@@ -48,9 +49,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Too many voice requests. Try again shortly." }, { headers: rateLimit.headers, status: 429 });
   }
 
-  const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
-    return NextResponse.json({ error: "ElevenLabs not configured" }, { status: 503 });
+    return NextResponse.json({ error: "Text-to-speech not configured" }, { status: 503 });
   }
 
   let body: { text?: string; toneId?: string };
@@ -69,63 +70,57 @@ export async function POST(request: NextRequest) {
 
   const tone = getTone(toneId);
 
-  const elevenResponse = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${tone.voiceId}/stream`,
-    {
-      method: "POST",
-      headers: {
-        "xi-api-key": apiKey,
-        "Content-Type": "application/json",
-        Accept: "audio/mpeg"
-      },
-      body: JSON.stringify({
-        text,
-        model_id: ELEVENLABS_MODEL,
-        voice_settings: {
-          stability: tone.stability,
-          similarity_boost: tone.similarityBoost,
-          style: tone.style,
-          use_speaker_boost: tone.speakerBoost
-        }
-      })
-    }
-  );
+  const ttsResponse = await fetch(OPENAI_TTS_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      Accept: "audio/mpeg"
+    },
+    body: JSON.stringify({
+      model: OPENAI_TTS_MODEL,
+      voice: tone.voiceId,
+      input: text,
+      speed: tone.speed,
+      response_format: "mp3"
+    })
+  });
 
   reportTtsUsage({
     characters: text.length,
     distinctId: user.id,
-    status: elevenResponse.status,
+    status: ttsResponse.status,
     toneId: tone.id
   });
 
-  if (!elevenResponse.ok) {
-    const raw = await elevenResponse.text();
+  if (!ttsResponse.ok) {
+    const raw = await ttsResponse.text();
     // Never surface the provider payload to the client: it leaks account state
-    // (plan, quota, request ids). Map it to a stable code the UI can translate.
-    console.error(`[ai/speak] ElevenLabs ${elevenResponse.status} for voice ${tone.voiceId}: ${raw.slice(0, 500)}`);
+    // (quota, billing links, request ids). Map it to a stable code the UI can translate.
+    console.error(`[ai/speak] OpenAI ${ttsResponse.status} for voice ${tone.voiceId}: ${raw.slice(0, 500)}`);
 
-    let providerStatus = "";
+    let providerCode = "";
     try {
-      providerStatus = (JSON.parse(raw) as { detail?: { status?: string } }).detail?.status ?? "";
+      providerCode = (JSON.parse(raw) as { error?: { code?: string } }).error?.code ?? "";
     } catch {
-      providerStatus = "";
+      providerCode = "";
     }
 
-    const code = providerStatus === "quota_exceeded"
+    // insufficient_quota also arrives as 429; telling the user to retry shortly
+    // would send them into a wall, so it maps to the quota code instead.
+    const code = providerCode === "insufficient_quota"
       ? "quota_exceeded"
-      : elevenResponse.status === 402 || providerStatus === "payment_required"
-        ? "voice_unavailable"
-        : elevenResponse.status === 429
-          ? "provider_busy"
-          : "provider_error";
+      : ttsResponse.status === 429
+        ? "provider_busy"
+        : "provider_error";
 
     return NextResponse.json(
       { code, error: "Voice synthesis unavailable" },
-      { status: elevenResponse.status === 429 ? 429 : 502 }
+      { status: ttsResponse.status === 429 && providerCode !== "insufficient_quota" ? 429 : 502 }
     );
   }
 
-  return new NextResponse(elevenResponse.body, {
+  return new NextResponse(ttsResponse.body, {
     headers: {
       ...rateLimit.headers,
       "Content-Type": "audio/mpeg",

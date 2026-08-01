@@ -2,50 +2,44 @@ export type ToneId = "confiant" | "chaleureux" | "dynamique" | "serein";
 
 export type Tone = {
   id: ToneId;
+  /** OpenAI `tts-1` voice name. */
   voiceId: string;
-  stability: number;
-  similarityBoost: number;
-  style: number;
-  speakerBoost: boolean;
+  /** Playback speed accepted by tts-1, between 0.25 and 4.0. */
+  speed: number;
 };
 
-// ElevenLabs multilingual v2 voices — all support French natively.
-// Only `premade` voices are usable here: library (shared) voices return 402
-// `paid_plan_required` on the free tier. Check with GET /v1/voices before
-// swapping an id — a voice absent from that list will fail at playback.
-// Labels and descriptions live in i18n (voiceSimulator.tones).
+/**
+ * OpenAI tts-1 voices.
+ *
+ * Migrated off ElevenLabs on 2026-08-02: at $0.182 per 1000 characters, a single
+ * subscriber replaying a 10-minute talk six times a month already cost more than
+ * a Studio plan brings in. tts-1 is $0.015 per 1000 characters — twelve times
+ * cheaper — and reuses the OpenAI key the assistant already needs.
+ *
+ * Voices chosen for maximum contrast between tones (two male, two female).
+ * Swapping one is a single line; the full set is alloy, echo, fable, onyx, nova
+ * and shimmer. Labels and descriptions live in i18n (voiceSimulator.tones).
+ */
 export const tones: Tone[] = [
   {
     id: "confiant",
-    voiceId: "onwK4e9ZLuTAKqWW03F9", // Daniel
-    stability: 0.78,
-    similarityBoost: 0.85,
-    style: 0.2,
-    speakerBoost: true
+    voiceId: "onyx",
+    speed: 0.95
   },
   {
     id: "chaleureux",
-    voiceId: "hpp4J3VqNfWAUOO0d1Us", // Bella
-    stability: 0.65,
-    similarityBoost: 0.80,
-    style: 0.5,
-    speakerBoost: true
+    voiceId: "shimmer",
+    speed: 1
   },
   {
     id: "dynamique",
-    voiceId: "TX3LPaxmHKxFdv7VOQHJ", // Liam
-    stability: 0.48,
-    similarityBoost: 0.75,
-    style: 0.72,
-    speakerBoost: true
+    voiceId: "nova",
+    speed: 1.1
   },
   {
     id: "serein",
-    voiceId: "pFZP5JQG7iQjIQuC4Bku", // Lily
-    stability: 0.88,
-    similarityBoost: 0.82,
-    style: 0.08,
-    speakerBoost: false
+    voiceId: "alloy",
+    speed: 0.9
   }
 ];
 

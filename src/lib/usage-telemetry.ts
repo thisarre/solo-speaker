@@ -19,8 +19,12 @@
  * per-character price depends on the tier that gets chosen.
  */
 const RATES = {
-  /** Per 1000 characters sent to ElevenLabs. */
-  ttsPerThousandChars: Number(process.env.RATE_TTS_USD_PER_1K_CHARS ?? "0.22"),
+  /**
+   * Per 1000 characters of speech. Default = OpenAI tts-1 at $15 per 1M characters
+   * (developers.openai.com/api/docs/pricing, read 2026-08-02). Raise it to 0.030
+   * for tts-1-hd. The previous ElevenLabs setup was $0.182 — twelve times this.
+   */
+  ttsPerThousandChars: Number(process.env.RATE_TTS_USD_PER_1K_CHARS ?? "0.015"),
   /** Per minute of streamed Deepgram audio. */
   sttPerMinute: Number(process.env.RATE_STT_USD_PER_MINUTE ?? "0.0059"),
   /** Per minute of audio sent to OpenAI transcription. */
@@ -68,7 +72,7 @@ export function buildTtsUsageCapture(input: Common & {
       characters_billed: billed,
       estimated_cost_usd: estimateTtsCostUsd(billed),
       is_error: input.status >= 400,
-      provider: "elevenlabs",
+      provider: "openai",
       status: input.status,
       tone_id: input.toneId
     }

@@ -37,8 +37,8 @@ jobs:
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             OPENAI_MODEL=${{ vars.OPENAI_MODEL }}
             OPENAI_TRANSCRIPTION_MODEL=${{ vars.OPENAI_TRANSCRIPTION_MODEL }}
+            OPENAI_TTS_MODEL=${{ vars.OPENAI_TTS_MODEL }}
             DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
-            ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}
             STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
             STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
             STRIPE_PRICE_STUDIO_MONTHLY=${{ vars.STRIPE_PRICE_STUDIO_MONTHLY }}
