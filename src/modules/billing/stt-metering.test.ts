@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { GRANT_TTL_SECONDS, decideCloudAllowed, applyConfirmation } from "./stt-metering";
+import { GRANT_TTL_SECONDS, decideCloudAllowed, decideSessionReuse, applyConfirmation } from "./stt-metering";
 
 test("cloud is allowed only if the expected session fits the remaining budget", () => {
   const cap = 900;
@@ -23,4 +23,29 @@ test("confirmation never drives the reserved counter negative", () => {
 
 test("grant TTL is the per-mint reservation block", () => {
   assert.equal(GRANT_TTL_SECONDS, 60);
+});
+
+// Non-régression du contournement de quota trouvé le 26/07/2026 : rejouer un
+// sessionId déjà clos (ou celui d'un autre compte) frappait des tokens Deepgram
+// sans jamais faire avancer le cap.
+test("une session inconnue est fraîche : on frappe et on réserve", () => {
+  assert.deepEqual(decideSessionReuse(null, "user-a"), { kind: "fresh" });
+});
+
+test("un re-mint en cours de session ne re-réserve pas", () => {
+  assert.deepEqual(decideSessionReuse({ user_id: "user-a", status: "reserved" }, "user-a"), { kind: "remint" });
+});
+
+test("le sessionId d'un autre compte est refusé (403), même encore réservé", () => {
+  const decision = decideSessionReuse({ user_id: "user-b", status: "reserved" }, "user-a");
+  assert.equal(decision.kind, "reject");
+  assert.equal(decision.kind === "reject" && decision.status, 403);
+});
+
+test("rejouer une session close ne peut plus frapper de token gratuit (409)", () => {
+  for (const status of ["confirmed", "expired"] as const) {
+    const decision = decideSessionReuse({ user_id: "user-a", status }, "user-a");
+    assert.equal(decision.kind, "reject", `status ${status} devrait être refusé`);
+    assert.equal(decision.kind === "reject" && decision.status, 409);
+  }
 });

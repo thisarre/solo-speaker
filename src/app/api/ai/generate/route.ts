@@ -5,7 +5,7 @@ import { buildAiGenerationCapture } from "@/lib/posthog-ai";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { consumeAiRateLimit, getRequestIp } from "@/lib/rate-limit";
 import { createClient as createSupabaseClient, type SupabaseClient, type User } from "@supabase/supabase-js";
-import { buildTalkOutlinePrompt } from "@/modules/assistant/prompts/build-talk-outline-prompt";
+import { WORDS_PER_MINUTE, buildTalkOutlinePrompt } from "@/modules/assistant/prompts/build-talk-outline-prompt";
 import { buildSectionExpandPrompt } from "@/modules/assistant/prompts/build-section-expand-prompt";
 import { buildOralizeSectionPrompt } from "@/modules/assistant/prompts/build-oralize-section-prompt";
 import { buildShortenSectionPrompt } from "@/modules/assistant/prompts/build-shorten-section-prompt";
@@ -441,6 +441,12 @@ export async function POST(request: NextRequest) {
     body: JSON.stringify({
       model,
       input: aiInput,
+      // The outline now drafts content sized to the target duration (~140 words/min),
+      // so give it enough room to emit the full plan without truncation. Other actions
+      // keep the model default. Ceiling caps runaway cost on very long talks.
+      ...(action === "outline"
+        ? { max_output_tokens: Math.min(16000, Math.max(2000, talk.targetDurationMin * WORDS_PER_MINUTE * 3)) }
+        : {}),
       text: {
         format: {
           type: "json_schema",

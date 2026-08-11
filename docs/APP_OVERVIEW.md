@@ -193,6 +193,9 @@ Prompts bilingues, adaptés au type de talk. Instrumentation PostHog (`$ai_gener
 ---
 
 ## 11. Sécurité (points ouverts connus)
-- **Rate-limiting IA** configurable mais à durcir/activer sur toutes les routes IA.
+- ~~**Rate-limiting IA** à durcir/activer sur toutes les routes IA.~~ **Fait** : les 6 routes coûteuses
+  (`generate`, `speak`, `transcribe`, `help_chat`, `deepgram_token`, `translate`) passent par
+  `consumeAiRateLimit`, actif par défaut (`AI_RATE_LIMIT_ENABLED !== "false"`) et **fail-closed en
+  production**. Compteur persistant Postgres (`consume_ai_rate_limit`), repli mémoire hors prod.
 - Templates légaux à faire valider juridiquement.
 - Quelques migrations historiques posées à la main (léger décalage possible avec l'historique prod).
