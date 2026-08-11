@@ -2,7 +2,7 @@ import type { BillingPlan } from "./entitlements";
 
 export type PaidPlan = "studio" | "pro" | "team";
 export type Cadence = "monthly" | "yearly";
-export const MIN_TEAM_SEATS = 5;
+export const MIN_TEAM_SEATS = 3;
 
 export function lookupKeyFor(plan: PaidPlan, cadence: Cadence): string {
   return `${plan}_${cadence}`;
